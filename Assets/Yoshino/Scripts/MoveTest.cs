@@ -42,7 +42,6 @@ public class MoveTest : MonoBehaviour
     static int restState = Animator.StringToHash("Base Layer.Rest");
 
     HookShot hookShot;
-
     // 初期化
     void Start()
     {
@@ -75,10 +74,14 @@ public class MoveTest : MonoBehaviour
 
         // 以下、キャラクターの移動処理        // 上下のキー入力からZ軸方向の移動量を取得
         Vector3 Forward = Vector3.Scale(CameraTf.forward, new Vector3(1, 0, 1)).normalized;
-        m_moveVec = Forward * v + CameraTf.right * h;
-        if (!hookShot.GetisLoaded)
+        m_moveVec = (Forward * v + CameraTf.right * h).normalized;
+        if (FootCollider())
         {
-            anim.SetFloat("Speed", m_moveVec.normalized.magnitude);                              // Animator側で設定している"Speed"パラメタにvを渡す
+            anim.SetFloat("Speed", m_moveVec.magnitude);                              // Animator側で設定している"Speed"パラメタにvを渡す
+        }
+        else
+        {
+            anim.SetFloat("Speed", 0);
         }
 
         if (Input.GetButtonDown("Jump"))
@@ -205,5 +208,11 @@ public class MoveTest : MonoBehaviour
         col.height = orgColHight;
         col.center = orgVectColCenter;
     }
+    private bool FootCollider()
+    {
+        RaycastHit hit;
+        return (Physics.SphereCast(m_tf.position + col.center, col.radius, -Vector3.up, out hit, col.height / 2));
+    }
+    
 }
 
