@@ -1,0 +1,45 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: -340790334, guid: 67cc4cb7839cd3741b63733d5adf0442, type: 3}
+  m_Name: RadDoll_Exmenu
+  m_EditorClassIdentifier: 
+  controls:
+  - name: Wear_Custom
+    icon: {fileID: 0}
+    type: 103
+    parameter:
+      name: 
+    value: 1
+    style: 0
+    subMenu: {fileID: 11400000, guid: 0b1bca1641f9bcc2db58586a8267a9ab, type: 2}
+    subParameters: []
+    labels: []
+  - name: FacialSet_Change
+    icon: {fileID: 0}
+    type: 102
+    parameter:
+      name: ChangeFacial
+    value: 1
+    style: 0
+    subMenu: {fileID: 0}
+    subParameters: []
+    labels: []
+  - name: WearCustom_GogglesWearing
+    icon: {fileID: 0}
+    type: 102
+    parameter:
+      name: WearCustom_GogglesWearing
+    value: 1
+    style: 0
+    subMenu: {fileID: 0}
+    subParameters: []
+    labels: []

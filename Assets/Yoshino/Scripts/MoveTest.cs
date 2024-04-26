@@ -1,4 +1,5 @@
-﻿using System.Collections;
+﻿using Obi;
+using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -24,7 +25,8 @@ public class MoveTest : MonoBehaviour
     private Rigidbody rb;
     private Transform m_tf;
     private Transform CameraTf;
-
+    [SerializeField] private RopeCollisionDetector collisionDetector;
+    private ObiContactEventDispatcher contactEventDispatcher;
     // キャラクターコントローラ（カプセルコライダ）の移動量
     private Vector3 m_moveVec;
     // CapsuleColliderで設定されているコライダのHeiht、Centerの初期値を収める変数
@@ -58,6 +60,9 @@ public class MoveTest : MonoBehaviour
         m_tf = transform;
         CameraTf = Camera.main.transform;
         hookShot = GetComponentInChildren<HookShot>();
+        contactEventDispatcher = FindObjectOfType<ObiContactEventDispatcher>();
+
+       //contactEventDispatcher.onContactEnter
     }
 
 

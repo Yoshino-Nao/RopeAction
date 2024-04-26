@@ -202,11 +202,12 @@ public class HookShot : MonoBehaviour
 
         if (rope.isLoaded)
         {
-            //foreach (var a in batch1.offsets)
+            //Debug.Log()
+            //foreach (var a in batch1.pinBodies)
             //{
-            //    Debug.Log(transform.InverseTransformPoint(a));
+            //    Debug.Log(a.owner.name);
             //}
-            
+
             if (Input.GetKey(KeyCode.Space))
             {
                 cursor.ChangeLength(rope.restLength - hookExtendRetractSpeed * Time.deltaTime);

@@ -6,26 +6,34 @@ using UnityEngine;
 
 public class Rope : MonoBehaviour
 {
-    [SerializeField] ObiSolver solver;
     [SerializeField] private ObiRope obiRope;
     [SerializeField] ObiActorBlueprint blueprint;
     Transform obiRope_Tf;
     public RopeGrabInteractable LeftRopeGrabInteractable => this.LeftRopeGrabInteractable;
     public RopeGrabInteractable RightRopeGrabInteractable => this.RightRopeGrabInteractable;
 
-    Dictionary<RopeGrabInteractable, ObiParticleAttachment> 
+    Dictionary<RopeGrabInteractable, ObiParticleAttachment>
         attachimentDict = new Dictionary<RopeGrabInteractable, ObiParticleAttachment>();
     // Start is called before the first frame update
-    void Start()
+    void Awake()
     {
-        obiRope_Tf = obiRope.transform;
-        Debug.Log("パーティクルの数:" + blueprint.particleCount);
-        for (int i = 0; blueprint.particleCount >= i; i++)
+        if (obiRope != null)
         {
-            Debug.Log(blueprint.GetParticlePosition(i));
-            if (i > blueprint.particleCount)
+            obiRope.GetComponent<ObiRope>();
+        }
+
+
+        obiRope_Tf = obiRope.transform;
+        if (blueprint != null)
+        {
+            Debug.Log("パーティクルの数:" + blueprint.particleCount);
+            for (int i = 0; blueprint.particleCount >= i; i++)
             {
-                break;
+                Debug.Log(blueprint.GetParticlePosition(i));
+                if (i > blueprint.particleCount)
+                {
+                    break;
+                }
             }
         }
     }
@@ -44,7 +52,7 @@ public class Rope : MonoBehaviour
     }
     private void OnDrawGizmos()
     {
-        if (obiRope == null) return;
+        if (obiRope == null || blueprint == null) return;
         for (int i = 0; blueprint.particleCount >= i; i++)
         {
             obiRope_Tf = obiRope.transform;
