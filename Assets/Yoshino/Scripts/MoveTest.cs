@@ -41,6 +41,7 @@ public class MoveTest : MonoBehaviour
     static int jumpState = Animator.StringToHash("Base Layer.Jump");
     static int restState = Animator.StringToHash("Base Layer.Rest");
 
+    private CameraChanger m_cameraChanger;
     HookShot m_hookShot;
     // 初期化
     void Start()
@@ -60,6 +61,7 @@ public class MoveTest : MonoBehaviour
         contactEventDispatcher = FindObjectOfType<ObiContactEventDispatcher>();
 
         //contactEventDispatcher.onContactEnter
+        m_cameraChanger = GetComponent<CameraChanger>();
     }
 
     private void Update()
@@ -193,9 +195,17 @@ public class MoveTest : MonoBehaviour
     void FixedUpdate()
     {
 
+        if (m_cameraChanger.is2D)
+        {
 
-        //キャラクターを移動させる
-        m_rb.AddForce(m_moveVec * m_forwardSpeed, ForceMode.VelocityChange);
+
+        }
+        else
+        {
+
+            //キャラクターを移動させる
+            m_rb.AddForce(m_moveVec * m_forwardSpeed, ForceMode.VelocityChange);
+        }
 
 
 
