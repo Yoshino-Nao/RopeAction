@@ -3,6 +3,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using VInspector;
+using System.Linq;
 
 public class HookShot : MonoBehaviour
 {
@@ -27,7 +28,15 @@ public class HookShot : MonoBehaviour
     private ObiPinConstraintsBatch batch1;
 
     private RaycastHit hookAttachment;
+    private GameObject AttachmentObj = null;
     private ObiColliderBase hookAttachedColl;
+
+    //ãƒ­ãƒ¼ãƒ—ã‚’ã¤ã‘ã‚‰ã‚Œã‚‹ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã¾ã§ã®ä¸€ç•ªçŸ­ã„è·é›¢
+    private float MinLength = 999;
+    //ãƒ­ãƒ¼ãƒ—ã‚’ã¤ã‘ã‚‰ã‚Œã‚‹ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®æ¤œçŸ¥ãƒ•ãƒ©ã‚°
+    private bool Checkflag = false;
+    private GameObject obj;
+
     public bool GetisLoaded
     {
         get
@@ -74,18 +83,19 @@ public class HookShot : MonoBehaviour
     }
 
     /**
-	 * ƒV[ƒ“‚É‘Î‚µ‚ÄƒŒƒCƒLƒƒƒXƒg‚µ‚ÄAƒtƒbƒN‚ğ‰½‚©‚Éæ‚è•t‚¯‚ç‚ê‚é‚©‚Ç‚¤‚©‚ğŠm”F‚µ‚Ü‚·B
+	 * ã‚·ãƒ¼ãƒ³ã«å¯¾ã—ã¦ãƒ¬ã‚¤ã‚­ãƒ£ã‚¹ãƒˆã—ã¦ã€ãƒ•ãƒƒã‚¯ã‚’ä½•ã‹ã«å–ã‚Šä»˜ã‘ã‚‰ã‚Œã‚‹ã‹ã©ã†ã‹ã‚’ç¢ºèªã—ã¾ã™ã€‚
 	 */
     private void LaunchHook()
     {
 
-        //‚±‚ÌƒIƒuƒWƒFƒNƒg‚Æ“¯‚¶ XY •½–Ê“à‚ÌƒV[ƒ““à‚Ìƒ}ƒEƒX‚ÌˆÊ’u‚ğæ“¾‚µ‚Ü‚·B
-        Vector3 mouse = Input.mousePosition;
-        mouse.z = transform.position.z - Camera.main.transform.position.z;
-        Vector3 mouseInScene = Camera.main.ScreenToWorldPoint(mouse);
+        //ã“ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã¨åŒã˜ XY å¹³é¢å†…ã®ã‚·ãƒ¼ãƒ³å†…ã®ãƒã‚¦ã‚¹ã®ä½ç½®ã‚’å–å¾—ã—ã¾ã™ã€‚
+        //Vector3 mouse = Input.mousePosition;
+        //mouse.z = transform.position.z - Camera.main.transform.position.z;
+        //Vector3 mouseInScene = Camera.main.ScreenToWorldPoint(mouse);
 
-        //ƒLƒƒƒ‰ƒNƒ^[‚©‚çƒ}ƒEƒXÀ•W‚Ö‚ÌRay‚ğæ“¾‚µ‚Ü‚·B
-        Ray ray = new Ray(transform.position, mouseInScene - transform.position);
+        //ã‚­ãƒ£ãƒ©ã‚¯ã‚¿ãƒ¼ã‹ã‚‰ãƒã‚¦ã‚¹åº§æ¨™ã¸ã®Rayã‚’å–å¾—ã—ã¾ã™ã€‚
+        Ray ray = new Ray(transform.position,AttachmentObj.transform.position - transform.position);
+        //Vector3 vec = 
 
         // Raycast to see what we hit:
         if (Physics.Raycast(ray, out hookAttachment))
@@ -100,61 +110,61 @@ public class HookShot : MonoBehaviour
     {
         yield return null;
 
-        //Pin Constraints‚ğƒNƒŠƒA
+        //Pin Constraintsã‚’ã‚¯ãƒªã‚¢
         pinConstraints = Obirope.GetConstraintsByType(Oni.ConstraintType.Pin) as ObiConstraints<ObiPinConstraintsBatch>;
         pinConstraints.Clear();
-        //ƒqƒbƒg‚µ‚½’n“_‚ÌÀ•W‚ğƒ[ƒJƒ‹‚ÌÀ•W‚É•ÏŠ·
+        //ãƒ’ãƒƒãƒˆã—ãŸåœ°ç‚¹ã®åº§æ¨™ã‚’ãƒ­ãƒ¼ã‚«ãƒ«ã®åº§æ¨™ã«å¤‰æ›
         Vector3 localHit = Obirope.transform.InverseTransformPoint(hookAttachment.point);
-        //ƒ[ƒv ƒpƒX‚ğè‡‚É]‚Á‚Ä¶¬‚µ‚Ü‚· (ŠÔ‚ÌŒo‰ß‚Æ‚Æ‚à‚É‰„’·‚·‚é‚½‚ßA’Z‚¢ƒZƒOƒƒ“ƒg‚Ì‚İ)B
+        //ãƒ­ãƒ¼ãƒ— ãƒ‘ã‚¹ã‚’æ‰‹é †ã«å¾“ã£ã¦ç”Ÿæˆã—ã¾ã™ (æ™‚é–“ã®çµŒéã¨ã¨ã‚‚ã«å»¶é•·ã™ã‚‹ãŸã‚ã€çŸ­ã„ã‚»ã‚°ãƒ¡ãƒ³ãƒˆã®ã¿)ã€‚
         int filter = ObiUtils.MakeFilter(ObiUtils.CollideWithEverything, 0);
         blueprint.path.Clear();
         blueprint.path.AddControlPoint(Vector3.zero, Vector3.zero, Vector3.zero, Vector3.up, 0.1f, 0.1f, 1, filter, Color.white, "Hook start");
         blueprint.path.AddControlPoint(localHit.normalized * 0.5f, Vector3.zero, Vector3.zero, Vector3.up, 0.1f, 0.1f, 1, filter, Color.white, "Hook end");
         blueprint.path.FlushEvents();
 
-        //ƒ[ƒv‚Ìƒp[ƒeƒBƒNƒ‹•\Œ»‚ğ¶¬‚µ‚Ü‚· (Š®—¹‚·‚é‚Ü‚Å‘Ò‚¿‚Ü‚·)B
+        //ãƒ­ãƒ¼ãƒ—ã®ãƒ‘ãƒ¼ãƒ†ã‚£ã‚¯ãƒ«è¡¨ç¾ã‚’ç”Ÿæˆã—ã¾ã™ (å®Œäº†ã™ã‚‹ã¾ã§å¾…ã¡ã¾ã™)ã€‚
         yield return blueprint.Generate();
 
-        //ƒuƒ‹[ƒvƒŠƒ“ƒg‚ğİ’è‚µ‚Ü‚·(‚±‚ê‚É‚æ‚èAƒp[ƒeƒBƒNƒ‹/ƒRƒ“ƒXƒgƒŒƒCƒ“ƒg‚ªƒ\ƒ‹ƒo[‚É’Ç‰Á‚³‚êA‚»‚ê‚ç‚ÌƒVƒ~ƒ…ƒŒ[ƒVƒ‡ƒ“‚ªŠJn‚³‚ê‚Ü‚·)B
+        //ãƒ–ãƒ«ãƒ¼ãƒ—ãƒªãƒ³ãƒˆã‚’è¨­å®šã—ã¾ã™(ã“ã‚Œã«ã‚ˆã‚Šã€ãƒ‘ãƒ¼ãƒ†ã‚£ã‚¯ãƒ«/ã‚³ãƒ³ã‚¹ãƒˆãƒ¬ã‚¤ãƒ³ãƒˆãŒã‚½ãƒ«ãƒãƒ¼ã«è¿½åŠ ã•ã‚Œã€ãã‚Œã‚‰ã®ã‚·ãƒŸãƒ¥ãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³ãŒé–‹å§‹ã•ã‚Œã¾ã™)ã€‚
         Obirope.ropeBlueprint = blueprint;
 
-        //1ƒtƒŒ[ƒ€‘Ò‚¿‚Ü‚·
+        //1ãƒ•ãƒ¬ãƒ¼ãƒ å¾…ã¡ã¾ã™
         yield return null;
 
         Obirope.GetComponent<MeshRenderer>().enabled = true;
 
 
 
-        //ƒ[ƒv‚ğL‚Î‚·‚Æ‚«‚ÉˆÊ’u‚ğã‘‚«‚·‚é‚Ì‚ÅA¿—Ê‚ğƒ[ƒ‚Éİ’è‚µ‚Ü‚·B
+        //ãƒ­ãƒ¼ãƒ—ã‚’ä¼¸ã°ã™ã¨ãã«ä½ç½®ã‚’ä¸Šæ›¸ãã™ã‚‹ã®ã§ã€è³ªé‡ã‚’ã‚¼ãƒ­ã«è¨­å®šã—ã¾ã™ã€‚
         for (int i = 0; i < Obirope.activeParticleCount; ++i)
             solver.invMasses[Obirope.solverIndices[i]] = 0;
         float currentLength = 0;
 
-        //ÅŒã‚Ìƒp[ƒeƒBƒNƒ‹‚ªƒqƒbƒg‚µ‚½’n“_‚Ü‚Å“’B‚µ‚Ä‚¢‚È‚¢ŠÔAƒ[ƒv‚ğ‰„’·‚µ‚Ü‚·B
+        //æœ€å¾Œã®ãƒ‘ãƒ¼ãƒ†ã‚£ã‚¯ãƒ«ãŒãƒ’ãƒƒãƒˆã—ãŸåœ°ç‚¹ã¾ã§åˆ°é”ã—ã¦ã„ãªã„é–“ã€ãƒ­ãƒ¼ãƒ—ã‚’å»¶é•·ã—ã¾ã™ã€‚
         while (true)
         {
-            //solverspace‚Åƒ[ƒv‚Ì‹N“_‚ğŒvZ‚·‚é
+            //solverspaceã§ãƒ­ãƒ¼ãƒ—ã®èµ·ç‚¹ã‚’è¨ˆç®—ã™ã‚‹
             Vector3 origin = solver.transform.InverseTransformPoint(Obirope.transform.position);
 
-            //•ûŒü‚ÆƒtƒbƒNƒ|ƒCƒ“ƒg‚Ü‚Å‚Ì‹——£‚ğXV‚µ‚Ü‚·B
+            //æ–¹å‘ã¨ãƒ•ãƒƒã‚¯ãƒã‚¤ãƒ³ãƒˆã¾ã§ã®è·é›¢ã‚’æ›´æ–°ã—ã¾ã™ã€‚
             Vector3 direction = hookAttachment.point - origin;
             float distance = direction.magnitude;
             direction.Normalize();
 
-            //currentLength‚ğ’·‚­‚µ‚Ü‚·:
+            //currentLengthã‚’é•·ãã—ã¾ã™:
             currentLength += hookShootSpeed * Time.deltaTime;
 
-            //–Ú“I‚Ì’·‚³‚É’B‚µ‚½‚çAƒ‹[ƒv‚ğ’†’f‚µ‚Ü‚·B
+            //ç›®çš„ã®é•·ã•ã«é”ã—ãŸã‚‰ã€ãƒ«ãƒ¼ãƒ—ã‚’ä¸­æ–­ã—ã¾ã™ã€‚
             if (currentLength >= distance)
             {
                 cursor.ChangeLength(distance);
                 break;
             }
 
-            // ƒ[ƒv‚Ì’·‚³‚ğ•ÏX‚·‚éiƒI[ƒo[ƒVƒ…[ƒg‚ğ”ğ‚¯‚é‚½‚ß‚ÉAƒ[ƒv‚Ì‹N“_‚ÆƒtƒbƒN‚ÌŠÔ‚Ì‹——£‚É‡‚í‚¹‚ÄƒNƒ‰ƒ“ƒv‚µ‚Ü‚·j
+            // ãƒ­ãƒ¼ãƒ—ã®é•·ã•ã‚’å¤‰æ›´ã™ã‚‹ï¼ˆã‚ªãƒ¼ãƒãƒ¼ã‚·ãƒ¥ãƒ¼ãƒˆã‚’é¿ã‘ã‚‹ãŸã‚ã«ã€ãƒ­ãƒ¼ãƒ—ã®èµ·ç‚¹ã¨ãƒ•ãƒƒã‚¯ã®é–“ã®è·é›¢ã«åˆã‚ã›ã¦ã‚¯ãƒ©ãƒ³ãƒ—ã—ã¾ã™ï¼‰
             cursor.ChangeLength(Mathf.Min(distance, currentLength));
 
-            // ‚·‚×‚Ä‚Ìƒp[ƒeƒBƒNƒ‹‚ğ‡”Ô‚ÉŒJ‚è•Ô‚µA—v‘f‚Ì’·‚³‚ğl—¶‚µ‚Ä’¼ü‚É”z’u‚µ‚Ü‚·B
+            // ã™ã¹ã¦ã®ãƒ‘ãƒ¼ãƒ†ã‚£ã‚¯ãƒ«ã‚’é †ç•ªã«ç¹°ã‚Šè¿”ã—ã€è¦ç´ ã®é•·ã•ã‚’è€ƒæ…®ã—ã¦ç›´ç·šã«é…ç½®ã—ã¾ã™ã€‚
             float length = 0;
             for (int i = 0; i < Obirope.elements.Count; ++i)
             {
@@ -163,15 +173,15 @@ public class HookShot : MonoBehaviour
                 length += Obirope.elements[i].restLength;
             }
 
-            //1ƒtƒŒ[ƒ€‘Ò‚¿‚Ü‚·
+            //1ãƒ•ãƒ¬ãƒ¼ãƒ å¾…ã¡ã¾ã™
             yield return null;
         }
 
-        //ƒ[ƒv‚ª”z’u‚³‚ê‚½“_‚ÅƒVƒ~ƒ…ƒŒ[ƒVƒ‡ƒ“‚ªˆø‚«Œp‚ª‚ê‚é‚æ‚¤‚É¿—Ê‚ğ•œŒ³‚µ‚Ü‚·B
+        //ãƒ­ãƒ¼ãƒ—ãŒé…ç½®ã•ã‚ŒãŸæ™‚ç‚¹ã§ã‚·ãƒŸãƒ¥ãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³ãŒå¼•ãç¶™ãŒã‚Œã‚‹ã‚ˆã†ã«è³ªé‡ã‚’å¾©å…ƒã—ã¾ã™ã€‚
         for (int i = 0; i < Obirope.activeParticleCount; ++i)
             solver.invMasses[Obirope.solverIndices[i]] = 10; // 1/0.1 = 10
 
-        //ƒ[ƒv‚Ì—¼’[‚ğƒsƒ“‚ÅŒÅ’è‚µ‚Ü‚· (‚±‚ê‚É‚æ‚èAƒLƒƒƒ‰ƒNƒ^[‚Æƒ[ƒv‚ÌŠÔ‚Ì‘o•ûŒü‚ÌƒCƒ“ƒ^ƒ‰ƒNƒVƒ‡ƒ“‚ª‰Â”\‚É‚È‚è‚Ü‚·)B
+        //ãƒ­ãƒ¼ãƒ—ã®ä¸¡ç«¯ã‚’ãƒ”ãƒ³ã§å›ºå®šã—ã¾ã™ (ã“ã‚Œã«ã‚ˆã‚Šã€ã‚­ãƒ£ãƒ©ã‚¯ã‚¿ãƒ¼ã¨ãƒ­ãƒ¼ãƒ—ã®é–“ã®åŒæ–¹å‘ã®ã‚¤ãƒ³ã‚¿ãƒ©ã‚¯ã‚·ãƒ§ãƒ³ãŒå¯èƒ½ã«ãªã‚Šã¾ã™)ã€‚
         var batch = new ObiPinConstraintsBatch();
         batch.AddConstraint(Obirope.elements[0].particle1, character, transform.localPosition, Quaternion.identity, 0, 0, float.PositiveInfinity);
         batch.AddConstraint(Obirope.elements[Obirope.elements.Count - 1].particle2, hookAttachment.collider.GetComponent<ObiColliderBase>(),
@@ -193,8 +203,8 @@ public class HookShot : MonoBehaviour
 
     void Update()
     {
-
-        if (Input.GetMouseButtonDown(0))
+        AttachmentObj = Explosion();
+        if (Input.GetMouseButtonDown(0) && AttachmentObj)
         {
             if (!Obirope.isLoaded)
                 LaunchHook();
@@ -224,6 +234,49 @@ public class HookShot : MonoBehaviour
         {
 
         }
+    }
+
+    public GameObject Explosion()
+    {
+        var hits = Physics.SphereCastAll(
+            transform.position,     //ä¸­å¿ƒ
+            5.0f,                   //åŠå¾„
+            Vector3.forward).Select(h => h.transform.gameObject).ToList();    //æ–¹å‘
+
+        //Debug.Log($"æ¤œå‡ºã•ã‚ŒãŸã‚³ãƒ©ã‚¤ãƒ€ãƒ¼ã®æ•°{hits.Length}");
+
+        foreach (var hit in hits)
+        {
+            //ãƒ¬ã‚¤ã«æ¥è§¦ã—ãŸã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ã‚¿ã‚°ãŒRopeattachã®æ™‚
+            if (hit.tag == "Ropeattach")
+            {
+                //ã‚¨ãƒãƒŸãƒ¼æ¤œçŸ¥ãƒ•ãƒ©ã‚°
+                Checkflag = true;
+                //è·é›¢ã‚’æ±‚ã‚ã‚‹
+                float Length = Vector3.Distance(transform.position, hit.transform.position);
+                //è·é›¢ãŒçŸ­ã„ãªã‚‰
+                if (MinLength > Length)
+                {
+                    //æœ€çŸ­è·é›¢ã‚’æ›´æ–°
+                    MinLength = Length;
+                    //ã‚ªãƒ–ã‚¸ã‚§ã«ã‚¨ãƒãƒŸãƒ¼ã‚’è¿”ã™
+                    obj = hit;
+                }
+            }
+            //ã‚¨ãƒãƒŸãƒ¼ã‚’ä¸€åº¦ã‚‚æ¤œçŸ¥ã—ãªã‘ã‚Œã°
+            else if (!Checkflag)
+            {
+                //ã‚¨ãƒãƒŸãƒ¼ä»¥å¤–ã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’è¿”ã™
+                obj = hit;
+            }
+        }
+        //è·é›¢ãƒªã‚»ãƒƒãƒˆ
+        MinLength = 999;
+        //ãƒ•ãƒ©ã‚°ãƒªã‚»ãƒƒãƒˆ
+        Checkflag = false;
+
+        return obj;
+
     }
 
 }
