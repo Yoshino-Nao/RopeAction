@@ -52,8 +52,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   solver: {fileID: 0}
   character: {fileID: 7239771145696449547}
-  RightHand: {fileID: 0}
-  LeftHand: {fileID: 0}
+  m_rightGrab: {fileID: 0}
+  m_leftGrab: {fileID: 0}
   material: {fileID: 2100000, guid: 44ab0cc40b59345718856f6e1c1225f3, type: 2}
   section: {fileID: 11400000, guid: a0bc36a59515f413e90e10895929c938, type: 2}
   hookResolution: 0.5
@@ -202,6 +202,7 @@ GameObject:
   - component: {fileID: 7640724244135529038}
   - component: {fileID: 7239771145696449547}
   - component: {fileID: 7098942405659791141}
+  - component: {fileID: 6828508615260912144}
   m_Layer: 0
   m_Name: Player
   m_TagString: Player
@@ -326,3 +327,17 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   kinematicForParticles: 0
+--- !u!114 &6828508615260912144
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1378640060110036352}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d687f278a45eb5344a069837a317dbbf, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Camera2D: {fileID: 0}
+  Camera3D: {fileID: 0}
