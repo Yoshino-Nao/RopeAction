@@ -8,8 +8,8 @@ public class HookShot : MonoBehaviour
 {
     public ObiSolver solver;
     public ObiCollider character;
-    [SerializeField] private Transform RightHand;
-    [SerializeField] private Transform LeftHand;
+    [SerializeField] private RopeGrabInteractable m_rightGrab;
+    [SerializeField] private RopeGrabInteractable m_leftGrab;
     public Material material;
     public ObiRopeSection section;
 
@@ -19,7 +19,7 @@ public class HookShot : MonoBehaviour
     public float hookShootSpeed = 30;
     public int particlePoolSize = 100;
 
-    private ObiRope rope;
+    private ObiRope Obirope;
     private ObiRopeBlueprint blueprint;
 
     private ObiRopeCursor cursor;
@@ -32,9 +32,9 @@ public class HookShot : MonoBehaviour
     {
         get
         {
-            if (rope != null)
+            if (Obirope != null)
             {
-                return rope.isLoaded;
+                return Obirope.isLoaded;
             }
             return false;
         }
@@ -45,7 +45,7 @@ public class HookShot : MonoBehaviour
 
         // Create both the rope and the solver:	
         //rope = gameObject.AddComponent<ObiRope>();
-        rope = gameObject.GetComponent<ObiRope>();
+        Obirope = gameObject.GetComponent<ObiRope>();
         //ropeRenderer = gameObject.AddComponent<ObiRopeExtrudedRenderer>();
         //ropeRenderer.section = section;
         //ropeRenderer.uvScale = new Vector2(1, 4);
@@ -63,7 +63,7 @@ public class HookShot : MonoBehaviour
 
         // Add a cursor to be able to change rope length:
         //cursor = rope.gameObject.AddComponent<ObiRopeCursor>();
-        cursor = rope.gameObject.GetComponent<ObiRopeCursor>();
+        cursor = Obirope.gameObject.GetComponent<ObiRopeCursor>();
         //cursor.cursorMu = 0;
         //cursor.direction = true;
     }
@@ -101,10 +101,10 @@ public class HookShot : MonoBehaviour
         yield return null;
 
         //Pin Constraintsをクリア
-        pinConstraints = rope.GetConstraintsByType(Oni.ConstraintType.Pin) as ObiConstraints<ObiPinConstraintsBatch>;
+        pinConstraints = Obirope.GetConstraintsByType(Oni.ConstraintType.Pin) as ObiConstraints<ObiPinConstraintsBatch>;
         pinConstraints.Clear();
         //ヒットした地点の座標をローカルの座標に変換
-        Vector3 localHit = rope.transform.InverseTransformPoint(hookAttachment.point);
+        Vector3 localHit = Obirope.transform.InverseTransformPoint(hookAttachment.point);
         //ロープ パスを手順に従って生成します (時間の経過とともに延長するため、短いセグメントのみ)。
         int filter = ObiUtils.MakeFilter(ObiUtils.CollideWithEverything, 0);
         blueprint.path.Clear();
@@ -116,23 +116,25 @@ public class HookShot : MonoBehaviour
         yield return blueprint.Generate();
 
         //ブループリントを設定します(これにより、パーティクル/コンストレイントがソルバーに追加され、それらのシミュレーションが開始されます)。
-        rope.ropeBlueprint = blueprint;
+        Obirope.ropeBlueprint = blueprint;
 
         //1フレーム待ちます
         yield return null;
 
-        rope.GetComponent<MeshRenderer>().enabled = true;
+        Obirope.GetComponent<MeshRenderer>().enabled = true;
+
+
 
         //ロープを伸ばすときに位置を上書きするので、質量をゼロに設定します。
-        for (int i = 0; i < rope.activeParticleCount; ++i)
-            solver.invMasses[rope.solverIndices[i]] = 0;
+        for (int i = 0; i < Obirope.activeParticleCount; ++i)
+            solver.invMasses[Obirope.solverIndices[i]] = 0;
         float currentLength = 0;
 
         //最後のパーティクルがヒットした地点まで到達していない間、ロープを延長します。
         while (true)
         {
             //solverspaceでロープの起点を計算する
-            Vector3 origin = solver.transform.InverseTransformPoint(rope.transform.position);
+            Vector3 origin = solver.transform.InverseTransformPoint(Obirope.transform.position);
 
             //方向とフックポイントまでの距離を更新します。
             Vector3 direction = hookAttachment.point - origin;
@@ -154,11 +156,11 @@ public class HookShot : MonoBehaviour
 
             // すべてのパーティクルを順番に繰り返し、要素の長さを考慮して直線に配置します。
             float length = 0;
-            for (int i = 0; i < rope.elements.Count; ++i)
+            for (int i = 0; i < Obirope.elements.Count; ++i)
             {
-                solver.positions[rope.elements[i].particle1] = origin + direction * length;
-                solver.positions[rope.elements[i].particle2] = origin + direction * (length + rope.elements[i].restLength);
-                length += rope.elements[i].restLength;
+                solver.positions[Obirope.elements[i].particle1] = origin + direction * length;
+                solver.positions[Obirope.elements[i].particle2] = origin + direction * (length + Obirope.elements[i].restLength);
+                length += Obirope.elements[i].restLength;
             }
 
             //1フレーム待ちます
@@ -166,26 +168,26 @@ public class HookShot : MonoBehaviour
         }
 
         //ロープが配置された時点でシミュレーションが引き継がれるように質量を復元します。
-        for (int i = 0; i < rope.activeParticleCount; ++i)
-            solver.invMasses[rope.solverIndices[i]] = 10; // 1/0.1 = 10
+        for (int i = 0; i < Obirope.activeParticleCount; ++i)
+            solver.invMasses[Obirope.solverIndices[i]] = 10; // 1/0.1 = 10
 
         //ロープの両端をピンで固定します (これにより、キャラクターとロープの間の双方向のインタラクションが可能になります)。
         var batch = new ObiPinConstraintsBatch();
-        batch.AddConstraint(rope.elements[0].particle1, character, transform.localPosition, Quaternion.identity, 0, 0, float.PositiveInfinity);
-        batch.AddConstraint(rope.elements[rope.elements.Count - 1].particle2, hookAttachment.collider.GetComponent<ObiColliderBase>(),
+        batch.AddConstraint(Obirope.elements[0].particle1, character, transform.localPosition, Quaternion.identity, 0, 0, float.PositiveInfinity);
+        batch.AddConstraint(Obirope.elements[Obirope.elements.Count - 1].particle2, hookAttachment.collider.GetComponent<ObiColliderBase>(),
                                                           hookAttachment.collider.transform.InverseTransformPoint(hookAttachment.point), Quaternion.identity, 0, 0, float.PositiveInfinity);
-        hookAttachedColl = batch.pinBodies[0].owner;
-        batch1 = batch;
+
+
         batch.activeConstraintCount = 2;
         pinConstraints.AddBatch(batch);
-        rope.SetConstraintsDirty(Oni.ConstraintType.Pin);
+        Obirope.SetConstraintsDirty(Oni.ConstraintType.Pin);
     }
 
     private void DetachHook()
     {
         // Set the rope blueprint to null (automatically removes the previous blueprint from the solver, if any).
-        rope.ropeBlueprint = null;
-        rope.GetComponent<MeshRenderer>().enabled = false;
+        Obirope.ropeBlueprint = null;
+        Obirope.GetComponent<MeshRenderer>().enabled = false;
     }
 
 
@@ -194,28 +196,33 @@ public class HookShot : MonoBehaviour
 
         if (Input.GetMouseButtonDown(0))
         {
-            if (!rope.isLoaded)
+            if (!Obirope.isLoaded)
                 LaunchHook();
             else
                 DetachHook();
         }
 
-        if (rope.isLoaded)
+        if (Obirope.isLoaded)
         {
             //Debug.Log()
             //foreach (var a in batch1.pinBodies)
             //{
             //    Debug.Log(a.owner.name);
             //}
-
+            m_leftGrab.Grab();
+            m_rightGrab.Grab();
             if (Input.GetKey(KeyCode.Space))
             {
-                cursor.ChangeLength(rope.restLength - hookExtendRetractSpeed * Time.deltaTime);
+                cursor.ChangeLength(Obirope.restLength - hookExtendRetractSpeed * Time.deltaTime);
             }
             if (Input.GetKey(KeyCode.LeftShift))
             {
-                cursor.ChangeLength(rope.restLength + hookExtendRetractSpeed * Time.deltaTime);
+                cursor.ChangeLength(Obirope.restLength + hookExtendRetractSpeed * Time.deltaTime);
             }
+        }
+        else
+        {
+
         }
     }
 
