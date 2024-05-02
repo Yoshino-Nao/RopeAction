@@ -94,7 +94,7 @@ public class HookShot : MonoBehaviour
         //Vector3 mouseInScene = Camera.main.ScreenToWorldPoint(mouse);
 
         //キャラクターからマウス座標へのRayを取得します。
-        Ray ray = new Ray(transform.position,AttachmentObj.transform.position - transform.position);
+        Ray ray = new Ray(transform.position, AttachmentObj.transform.position - transform.position);
         //Vector3 vec = 
 
         // Raycast to see what we hit:
@@ -204,7 +204,8 @@ public class HookShot : MonoBehaviour
     void Update()
     {
         AttachmentObj = Explosion();
-        if (Input.GetMouseButtonDown(0) && AttachmentObj)
+        //右クリックで発射
+        if (Input.GetMouseButtonDown(1) && AttachmentObj)
         {
             if (!Obirope.isLoaded)
                 LaunchHook();
@@ -267,7 +268,7 @@ public class HookShot : MonoBehaviour
             else if (!Checkflag)
             {
                 //エネミー以外のオブジェクトを返す
-                obj = hit;
+                return null;
             }
         }
         //距離リセット

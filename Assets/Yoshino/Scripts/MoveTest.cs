@@ -18,6 +18,8 @@ public class MoveTest : MonoBehaviour
     [SerializeField] private float m_rotateSpeed = 2.0f;
     // ジャンプ威力
     [SerializeField] private float m_jumpPower = 3.0f;
+
+    [SerializeField] Vector3 m_playerForwardOn2d = Vector3.right;
     // キャラクターコントローラ（カプセルコライダ）の参照
     private CapsuleCollider m_col;
     private Rigidbody m_rb;
@@ -73,9 +75,21 @@ public class MoveTest : MonoBehaviour
         float v = Input.GetAxis("Vertical");                // 入力デバイスの垂直軸をvで定義
         m_isInputJump = Input.GetButtonDown("Jump");
 
+        if (m_cameraChanger.m_is3DCamera)
+        {
+            //3Dの場合はカメラに依存する
+            Vector3 Forward = Vector3.Scale(m_CameraTf.forward, new Vector3(1, 0, 1)).normalized;
+            m_moveVec = (Forward * v + m_CameraTf.right * h).normalized;
+            DebugPrint.Print(string.Format("3D"));
+        }
+        else
+        {
+            v = 0f;
+            //2Dの場合は左右の入力のみを移動に使用する
+            m_moveVec = (m_playerForwardOn2d * h).normalized;
+            DebugPrint.Print(string.Format("2D"));
+        }
 
-        Vector3 Forward = Vector3.Scale(m_CameraTf.forward, new Vector3(1, 0, 1)).normalized;
-        m_moveVec = (Forward * v + m_CameraTf.right * h).normalized;
         // 以下、キャラクターの移動処理
         //空中では歩行をしないようにする処理
         if (FootCollider())
@@ -87,11 +101,17 @@ public class MoveTest : MonoBehaviour
         {
             m_anim.SetFloat("Speed", 0);
         }
+        //移動中は移動方向へ向く
+        if (m_moveVec.magnitude >= 0.1)
+        {
+            m_tf.rotation = Quaternion.LookRotation(m_moveVec, Vector3.up);
+        }
+        //ジャンプ
         if (m_isInputJump)
         {   // スペースキーを入力したら
 
             //アニメーションのステートがLocomotionの最中のみジャンプできる
-            if (m_currentBaseState.fullPathHash == locoState && !m_hookShot.GetisLoaded)
+            //if (m_currentBaseState.fullPathHash == locoState && !m_hookShot.GetisLoaded)
             {
                 //ステート遷移中でなかったらジャンプできる
                 if (!m_anim.IsInTransition(0))
@@ -102,11 +122,7 @@ public class MoveTest : MonoBehaviour
             }
         }
 
-        //移動中は移動方向へ向く
-        if (m_moveVec.magnitude >= 0.1)
-        {
-            m_tf.rotation = Quaternion.LookRotation(m_moveVec, Vector3.up);
-        }
+
 
         //m_tf.localPosition += m_moveVec * forwardSpeed * Time.fixedDeltaTime;
 
@@ -181,31 +197,23 @@ public class MoveTest : MonoBehaviour
         }
         // REST中の処理
         // 現在のベースレイヤーがrestStateの時
-        else if (m_currentBaseState.fullPathHash == restState)
-        {
-            //cameraObject.SendMessage("setCameraPositionFrontView");		// カメラを正面に切り替える
-            // ステートが遷移中でない場合、Rest bool値をリセットする（ループしないようにする）
-            if (!m_anim.IsInTransition(0))
-            {
-                m_anim.SetBool("Rest", false);
-            }
-        }
+        //else if (m_currentBaseState.fullPathHash == restState)
+        //{
+        //    //cameraObject.SendMessage("setCameraPositionFrontView");		// カメラを正面に切り替える
+        //    // ステートが遷移中でない場合、Rest bool値をリセットする（ループしないようにする）
+        //    if (!m_anim.IsInTransition(0))
+        //    {
+        //        m_anim.SetBool("Rest", false);
+        //    }
+        //}
     }
     // 以下、メイン処理.リジッドボディと絡めるので、FixedUpdate内で処理を行う.
     void FixedUpdate()
     {
 
-        if (m_cameraChanger.is2D)
-        {
+        //キャラクターを移動させる
+        m_rb.AddForce(m_moveVec * m_forwardSpeed, ForceMode.VelocityChange);
 
-
-        }
-        else
-        {
-
-            //キャラクターを移動させる
-            m_rb.AddForce(m_moveVec * m_forwardSpeed, ForceMode.VelocityChange);
-        }
 
 
 
