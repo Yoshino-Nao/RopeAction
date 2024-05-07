@@ -7,10 +7,9 @@ using System.Linq;
 
 public class HookShot : MonoBehaviour
 {
+    [SerializeField] private float m_langth = 10f;
     public ObiSolver solver;
     public ObiCollider character;
-    [SerializeField] private RopeGrabInteractable m_rightGrab;
-    [SerializeField] private RopeGrabInteractable m_leftGrab;
     public Material material;
     public ObiRopeSection section;
 
@@ -21,21 +20,26 @@ public class HookShot : MonoBehaviour
     public int particlePoolSize = 100;
 
     private ObiRope Obirope;
-    private ObiRopeBlueprint blueprint;
-
+    public ObiRopeBlueprint blueprint;
     private ObiRopeCursor cursor;
     ObiConstraints<ObiPinConstraintsBatch> pinConstraints;
     private ObiPinConstraintsBatch batch1;
+    [SerializeField] private Rope rope;
+
 
     private RaycastHit hookAttachment;
+    //ロープをアタッチしているオブジェクト
     private GameObject AttachmentObj = null;
+    public GameObject GetAttachmentObj
+    {
+        get { return AttachmentObj; }
+    }
     private ObiColliderBase hookAttachedColl;
 
     //ロープをつけられるオブジェクトまでの一番短い距離
     private float MinLength = 999;
     //ロープをつけられるオブジェクトの検知フラグ
     private bool Checkflag = false;
-    private GameObject obj;
 
     public bool GetisLoaded
     {
@@ -75,6 +79,8 @@ public class HookShot : MonoBehaviour
         cursor = Obirope.gameObject.GetComponent<ObiRopeCursor>();
         //cursor.cursorMu = 0;
         //cursor.direction = true;
+
+
     }
 
     private void OnDestroy()
@@ -119,6 +125,11 @@ public class HookShot : MonoBehaviour
         int filter = ObiUtils.MakeFilter(ObiUtils.CollideWithEverything, 0);
         blueprint.path.Clear();
         blueprint.path.AddControlPoint(Vector3.zero, Vector3.zero, Vector3.zero, Vector3.up, 0.1f, 0.1f, 1, filter, Color.white, "Hook start");
+        //int Count = 10;
+        //for (int i = 0; i < Count; i++)
+        //{
+        //    blueprint.path.AddControlPoint(localHit.normalized * 0.5f * i, Vector3.zero, Vector3.zero, Vector3.up, 0.1f, 0.1f, 1, filter, Color.white, "Hook " + i.ToString());
+        //}
         blueprint.path.AddControlPoint(localHit.normalized * 0.5f, Vector3.zero, Vector3.zero, Vector3.up, 0.1f, 0.1f, 1, filter, Color.white, "Hook end");
         blueprint.path.FlushEvents();
 
@@ -203,16 +214,10 @@ public class HookShot : MonoBehaviour
 
     void Update()
     {
-        AttachmentObj = Explosion();
-        //右クリックで発射
-        if (Input.GetMouseButtonDown(1) && AttachmentObj)
-        {
-            if (!Obirope.isLoaded)
-                LaunchHook();
-            else
-                DetachHook();
-        }
-
+        
+        DebugPrint.Print(string.Format("AttachmentObj:{0}", AttachmentObj?.name));
+        
+        //フック発射中
         if (Obirope.isLoaded)
         {
             //Debug.Log()
@@ -220,8 +225,8 @@ public class HookShot : MonoBehaviour
             //{
             //    Debug.Log(a.owner.name);
             //}
-            m_leftGrab.Grab();
-            m_rightGrab.Grab();
+            //m_leftGrab.Grab();
+            //m_rightGrab.Grab();
             if (Input.GetKey(KeyCode.Space))
             {
                 cursor.ChangeLength(Obirope.restLength - hookExtendRetractSpeed * Time.deltaTime);
@@ -231,9 +236,18 @@ public class HookShot : MonoBehaviour
                 cursor.ChangeLength(Obirope.restLength + hookExtendRetractSpeed * Time.deltaTime);
             }
         }
+        //通常
         else
         {
-
+            AttachmentObj = Explosion();
+        }
+        //右クリックで発射
+        if (Input.GetMouseButtonDown(1) && AttachmentObj)
+        {
+            if (!Obirope.isLoaded)
+                LaunchHook();
+            else
+                DetachHook();
         }
     }
 
@@ -241,15 +255,16 @@ public class HookShot : MonoBehaviour
     {
         var hits = Physics.SphereCastAll(
             transform.position,     //中心
-            5.0f,                   //半径
-            Vector3.forward).Select(h => h.transform.gameObject).ToList();    //方向
+            m_langth,                   //半径
+            Vector3.forward, 0f, 1 << LayerMask.NameToLayer("Ropeattach")).Select(h => h.transform.gameObject).ToList();    //方向
 
         //Debug.Log($"検出されたコライダーの数{hits.Length}");
 
+        GameObject obj = null;
         foreach (var hit in hits)
         {
             //レイに接触したオブジェクトのタグがRopeattachの時
-            if (hit.tag == "Ropeattach")
+            //if (hit.tag == "Ropeattach")
             {
                 //エネミー検知フラグ
                 Checkflag = true;
@@ -265,11 +280,11 @@ public class HookShot : MonoBehaviour
                 }
             }
             //エネミーを一度も検知しなければ
-            else if (!Checkflag)
-            {
-                //エネミー以外のオブジェクトを返す
-                return null;
-            }
+            // if (!Checkflag)
+            //{
+            //    //エネミー以外のオブジェクトを返す
+            //    return null;
+            //}
         }
         //距離リセット
         MinLength = 999;

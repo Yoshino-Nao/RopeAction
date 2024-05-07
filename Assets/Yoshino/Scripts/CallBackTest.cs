@@ -13,6 +13,11 @@ public class CallBackTest : MonoBehaviour
     {
         ropeInteractable.Grab();
     }
+    [Button]
+    void DropTest() 
+    {
+        ropeInteractable.Drop();
+    }
     // Start is called before the first frame update
     void Start()
     {

@@ -1,4 +1,5 @@
 ﻿using Obi;
+using RootMotion.FinalIK;
 using UnityEngine;
 
 public class MoveTest : MonoBehaviour
@@ -25,8 +26,10 @@ public class MoveTest : MonoBehaviour
     private Rigidbody m_rb;
     private Transform m_tf;
     private Transform m_CameraTf;
-    [SerializeField] private RopeCollisionDetector m_collisionDetector;
-    private ObiContactEventDispatcher contactEventDispatcher;
+
+    private FullBodyBipedIK m_fullBodyBipedIK;
+    private float m_ikArmWeght = 0;
+
     // キャラクターコントローラ（カプセルコライダ）の移動量
     private Vector3 m_moveVec;
     private bool m_isInputJump;
@@ -60,8 +63,7 @@ public class MoveTest : MonoBehaviour
         m_tf = transform;
         m_CameraTf = Camera.main.transform;
         m_hookShot = GetComponentInChildren<HookShot>();
-        contactEventDispatcher = FindObjectOfType<ObiContactEventDispatcher>();
-
+        m_fullBodyBipedIK = GetComponentInChildren<FullBodyBipedIK>();
         //contactEventDispatcher.onContactEnter
         m_cameraChanger = GetComponent<CameraChanger>();
     }
@@ -74,7 +76,7 @@ public class MoveTest : MonoBehaviour
         float h = Input.GetAxis("Horizontal");              // 入力デバイスの水平軸をhで定義
         float v = Input.GetAxis("Vertical");                // 入力デバイスの垂直軸をvで定義
         m_isInputJump = Input.GetButtonDown("Jump");
-
+        m_anim.SetBool("Jump", false);
         if (m_cameraChanger.m_is3DCamera)
         {
             //3Dの場合はカメラに依存する
@@ -101,11 +103,28 @@ public class MoveTest : MonoBehaviour
         {
             m_anim.SetFloat("Speed", 0);
         }
-        //移動中は移動方向へ向く
-        if (m_moveVec.magnitude >= 0.1)
+        float WeghtTarget;
+        //フックを発射中でない時
+        if (!m_hookShot.GetisLoaded)
         {
-            m_tf.rotation = Quaternion.LookRotation(m_moveVec, Vector3.up);
+            //移動中は移動方向へ向く
+            if (m_moveVec.magnitude >= 0.1)
+            {
+                m_tf.rotation = Quaternion.LookRotation(m_moveVec, Vector3.up);
+            }
+            WeghtTarget = 0;
         }
+        //フックを発射中
+        else
+        {
+            Vector3 Dir = (m_hookShot.GetAttachmentObj.transform.position - m_tf.position).normalized;
+            Dir = Vector3.ProjectOnPlane(Dir, Vector3.up);
+            m_tf.rotation = Quaternion.LookRotation(Dir, Vector3.up);
+            WeghtTarget = 1;
+        }
+        m_ikArmWeght = Mathf.MoveTowards(m_ikArmWeght, WeghtTarget, Time.deltaTime * 2);
+        m_fullBodyBipedIK.solver.leftHandEffector.positionWeight = m_ikArmWeght;
+        m_fullBodyBipedIK.solver.rightHandEffector.positionWeight = m_ikArmWeght;
         //ジャンプ
         if (m_isInputJump)
         {   // スペースキーを入力したら
@@ -137,82 +156,14 @@ public class MoveTest : MonoBehaviour
                 resetCollider();
             }
         }
-        // JUMP中の処理
-        // 現在のベースレイヤーがjumpStateの時
-        else if (m_currentBaseState.fullPathHash == jumpState)
-        {
-            //cameraObject.SendMessage("setCameraPositionJumpView");  // ジャンプ中のカメラに変更
-            // ステートがトランジション中でない場合
-            if (!m_anim.IsInTransition(0))
-            {
-
-                // 以下、カーブ調整をする場合の処理
-                if (useCurves)
-                {
-                    // 以下JUMP00アニメーションについているカーブJumpHeightとGravityControl
-                    // JumpHeight:JUMP00でのジャンプの高さ（0〜1）
-                    // GravityControl:1⇒ジャンプ中（重力無効）、0⇒重力有効
-                    float jumpHeight = m_anim.GetFloat("JumpHeight");
-                    float gravityControl = m_anim.GetFloat("GravityControl");
-                    if (gravityControl > 0)
-                        m_rb.useGravity = false;  //ジャンプ中の重力の影響を切る
-
-                    // レイキャストをキャラクターのセンターから落とす
-                    Ray ray = new Ray(m_tf.position + Vector3.up, -Vector3.up);
-                    RaycastHit hitInfo = new RaycastHit();
-                    // 高さが useCurvesHeight 以上ある時のみ、コライダーの高さと中心をJUMP00アニメーションについているカーブで調整する
-                    if (Physics.Raycast(ray, out hitInfo))
-                    {
-                        if (hitInfo.distance > useCurvesHeight)
-                        {
-                            m_col.height = m_orgColHight - jumpHeight;          // 調整されたコライダーの高さ
-                            float adjCenterY = m_orgVectColCenter.y + jumpHeight;
-                            m_col.center = new Vector3(0, adjCenterY, 0); // 調整されたコライダーのセンター
-                        }
-                        else
-                        {
-                            // 閾値よりも低い時には初期値に戻す（念のため）					
-                            resetCollider();
-                        }
-                    }
-                }
-                // Jump bool値をリセットする（ループしないようにする）				
-                m_anim.SetBool("Jump", false);
-            }
-        }
-        // IDLE中の処理
-        // 現在のベースレイヤーがidleStateの時
-        else if (m_currentBaseState.fullPathHash == idleState)
-        {
-            //カーブでコライダ調整をしている時は、念のためにリセットする
-            if (useCurves)
-            {
-                resetCollider();
-            }
-            // スペースキーを入力したらRest状態になる
-            if (Input.GetButtonDown("Jump"))
-            {
-                m_anim.SetBool("Rest", true);
-            }
-        }
-        // REST中の処理
-        // 現在のベースレイヤーがrestStateの時
-        //else if (m_currentBaseState.fullPathHash == restState)
-        //{
-        //    //cameraObject.SendMessage("setCameraPositionFrontView");		// カメラを正面に切り替える
-        //    // ステートが遷移中でない場合、Rest bool値をリセットする（ループしないようにする）
-        //    if (!m_anim.IsInTransition(0))
-        //    {
-        //        m_anim.SetBool("Rest", false);
-        //    }
-        //}
     }
     // 以下、メイン処理.リジッドボディと絡めるので、FixedUpdate内で処理を行う.
     void FixedUpdate()
     {
 
+
         //キャラクターを移動させる
-        m_rb.AddForce(m_moveVec * m_forwardSpeed, ForceMode.VelocityChange);
+        m_rb.AddForce(m_moveVec * m_forwardSpeed, ForceMode.Acceleration);
 
 
 

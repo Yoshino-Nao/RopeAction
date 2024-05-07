@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: collision material
   m_EditorClassIdentifier: 
   dynamicFriction: 1
-  staticFriction: 0
+  staticFriction: 1
   stickiness: 0
   stickDistance: 0
   frictionCombine: 0

@@ -7,7 +7,6 @@ using UnityEngine;
 public class Rope : MonoBehaviour
 {
     [SerializeField] private ObiRope obiRope;
-    [SerializeField] ObiActorBlueprint blueprint;
     Transform obiRope_Tf;
     public RopeGrabInteractable LeftRopeGrabInteractable => this.LeftRopeGrabInteractable;
     public RopeGrabInteractable RightRopeGrabInteractable => this.RightRopeGrabInteractable;
@@ -24,18 +23,7 @@ public class Rope : MonoBehaviour
 
 
         obiRope_Tf = obiRope.transform;
-        if (blueprint != null)
-        {
-            Debug.Log("パーティクルの数:" + blueprint.particleCount);
-            for (int i = 0; blueprint.particleCount >= i; i++)
-            {
-                Debug.Log(blueprint.GetParticlePosition(i));
-                if (i > blueprint.particleCount)
-                {
-                    break;
-                }
-            }
-        }
+       
     }
 
     // Update is called once per frame
@@ -52,17 +40,7 @@ public class Rope : MonoBehaviour
     }
     private void OnDrawGizmos()
     {
-        if (obiRope == null || blueprint == null) return;
-        for (int i = 0; blueprint.particleCount >= i; i++)
-        {
-            obiRope_Tf = obiRope.transform;
-
-            Gizmos.DrawSphere((obiRope_Tf.position + blueprint.GetParticlePosition(i)), 0.1f);
-            if (i > blueprint.particleCount)
-            {
-                break;
-            }
-        }
+       
     }
     public void AddOrEnableParticleAttachment(RopeGrabInteractable ropeGrabInteractable, Transform target)
     {

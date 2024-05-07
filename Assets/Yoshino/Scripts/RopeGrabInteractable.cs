@@ -24,6 +24,11 @@ public class RopeGrabInteractable : MonoBehaviour
 
     [SerializeField] private Rope rope;
     
+    public Rope SetRope
+    {
+        set { rope = value; }
+    }
+
     private Rigidbody selfRigidbody;
 
     private Vector3 grabRopePosition;
@@ -34,8 +39,8 @@ public class RopeGrabInteractable : MonoBehaviour
     {
         this.followState = FollowState.No;
         this.selfRigidbody = GetComponent<Rigidbody>();
-        this.rope = this.GetComponentInParent<Rope>();
-        if (this.rope != null) this.transform.parent = this.rope?.transform.parent;
+        //this.rope = this.GetComponentInParent<Rope>();
+        //if (this.rope != null) this.transform.parent = this.rope?.transform.parent;
 
     }
 
