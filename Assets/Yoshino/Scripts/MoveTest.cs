@@ -76,8 +76,8 @@ public class MoveTest : MonoBehaviour
         float h = Input.GetAxis("Horizontal");              // 入力デバイスの水平軸をhで定義
         float v = Input.GetAxis("Vertical");                // 入力デバイスの垂直軸をvで定義
 
-        DebugPrint.Print(string.Format("X{0}", h));
-        DebugPrint.Print(string.Format("Y{0}", v));
+        //DebugPrint.Print(string.Format("X{0}", h));
+        //DebugPrint.Print(string.Format("Y{0}", v));
 
         m_isInputJump = Input.GetButtonDown("Jump");
         m_anim.SetBool("Jump", false);
@@ -101,10 +101,14 @@ public class MoveTest : MonoBehaviour
         //空中では歩行をしないようにする処理
         if (FootCollider())
         {
-            Vector2 Vec = new Vector2(h, v).normalized;
+            Vector3 Vec;
+            //Vec = Matrix4x4.Rotate(m_tf.rotation) * new Vector3(h, 0, v);
+            Vec = m_tf.InverseTransformDirection(m_moveVec);
+            DebugPrint.Print(string.Format("AnimVec{0}", Vec));
+
             // Animator側で設定している"Speed"パラメタを渡す
-            m_anim.SetFloat("SpeedX", m_tf.forward.x);
-            m_anim.SetFloat("SpeedY", m_tf.forward.z);
+            m_anim.SetFloat("SpeedX", Vec.x);
+            m_anim.SetFloat("SpeedY", Vec.z);
             //DebugPrint.Print(string.Format("AnimX{0}", m_anim.GetFloat("SpeedX")));
             //DebugPrint.Print(string.Format("AnimY{0}", m_anim.GetFloat("SpeedY")));
 
@@ -160,19 +164,19 @@ public class MoveTest : MonoBehaviour
         // 以下、Animatorの各ステート中での処理
         // Locomotion中
         // 現在のベースレイヤーがlocoStateの時
-        if (m_currentBaseState.fullPathHash == locoState)
-        {
-            //カーブでコライダ調整をしている時は、念のためにリセットする
-            if (useCurves)
-            {
-                resetCollider();
-            }
-        }
+        //if (m_currentBaseState.fullPathHash == locoState)
+        //{
+        //    //カーブでコライダ調整をしている時は、念のためにリセットする
+        //    if (useCurves)
+        //    {
+        //        resetCollider();
+        //    }
+        //}
     }
     private Vector3 NormalizedEx(Vector3 vec)
     {
         float len = Mathf.Sqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
-        if(len <= 0) 
+        if (len <= 0)
         {
             return Vector3.zero;
         }
