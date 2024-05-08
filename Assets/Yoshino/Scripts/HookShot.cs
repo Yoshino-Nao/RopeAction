@@ -19,6 +19,8 @@ public class HookShot : MonoBehaviour
     public float hookShootSpeed = 30;
     public int particlePoolSize = 100;
 
+    private Transform m_tf;
+    private CameraChanger m_cameraChanger = null;
     private ObiRope Obirope;
     public ObiRopeBlueprint blueprint;
     private ObiRopeCursor cursor;
@@ -55,7 +57,8 @@ public class HookShot : MonoBehaviour
 
     void Awake()
     {
-
+        m_tf = transform;
+        m_cameraChanger = GetComponentInParent<CameraChanger>();
         // Create both the rope and the solver:	
         //rope = gameObject.AddComponent<ObiRope>();
         Obirope = gameObject.GetComponent<ObiRope>();
@@ -99,8 +102,8 @@ public class HookShot : MonoBehaviour
         //mouse.z = transform.position.z - Camera.main.transform.position.z;
         //Vector3 mouseInScene = Camera.main.ScreenToWorldPoint(mouse);
 
-        //キャラクターからマウス座標へのRayを取得します。
-        Ray ray = new Ray(transform.position, AttachmentObj.transform.position - transform.position);
+
+        Ray ray = new Ray(m_tf.position, AttachmentObj.transform.position - transform.position);
         //Vector3 vec = 
 
         // Raycast to see what we hit:
@@ -194,7 +197,7 @@ public class HookShot : MonoBehaviour
 
         //ロープの両端をピンで固定します (これにより、キャラクターとロープの間の双方向のインタラクションが可能になります)。
         var batch = new ObiPinConstraintsBatch();
-        batch.AddConstraint(Obirope.elements[0].particle1, character, transform.localPosition, Quaternion.identity, 0, 0, float.PositiveInfinity);
+        batch.AddConstraint(Obirope.elements[0].particle1, character, m_tf.localPosition, Quaternion.identity, 0, 0, float.PositiveInfinity);
         batch.AddConstraint(Obirope.elements[Obirope.elements.Count - 1].particle2, hookAttachment.collider.GetComponent<ObiColliderBase>(),
                                                           hookAttachment.collider.transform.InverseTransformPoint(hookAttachment.point), Quaternion.identity, 0, 0, float.PositiveInfinity);
 
@@ -214,9 +217,9 @@ public class HookShot : MonoBehaviour
 
     void Update()
     {
-        
+
         DebugPrint.Print(string.Format("AttachmentObj:{0}", AttachmentObj?.name));
-        
+
         //フック発射中
         if (Obirope.isLoaded)
         {
@@ -253,43 +256,51 @@ public class HookShot : MonoBehaviour
 
     public GameObject Explosion()
     {
+        LayerMask layerMask = 1 << LayerMask.NameToLayer("Ropeattach");
         var hits = Physics.SphereCastAll(
-            transform.position,     //中心
+            m_tf.position,     //中心
             m_langth,                   //半径
-            Vector3.forward, 0f, 1 << LayerMask.NameToLayer("Ropeattach")).Select(h => h.transform.gameObject).ToList();    //方向
+            Vector3.forward, 0f, layerMask).Select(h => h.transform.gameObject).ToList();    //方向
 
-        //Debug.Log($"検出されたコライダーの数{hits.Length}");
+        if (!m_cameraChanger.m_is3DCamera)
+        {
+            hits = hits.Where(_ =>
+             {
+                 Vector3 Vec = Vector3.ProjectOnPlane(_.transform.position - m_tf.position, Vector3.up);
+                 Debug.Log(Mathf.Abs(Vector3.SignedAngle(m_tf.forward, Vec, Vector3.up)));
+                 return 90f >= Mathf.Abs(Vector3.SignedAngle(m_tf.forward, Vec, Vector3.up));
+             }).ToList();
+        }
+
 
         GameObject obj = null;
         foreach (var hit in hits)
         {
-            //レイに接触したオブジェクトのタグがRopeattachの時
-            //if (hit.tag == "Ropeattach")
+            //距離を求める
+            float Length = Vector3.Distance(m_tf.position, hit.transform.position);
+            //attachmentObjとの間にコライダー付きのオブジェクトがあった場合は無視する
+            if (Physics.Raycast(m_tf.position, hit.transform.position - m_tf.position, out RaycastHit hitInfo, m_langth))
             {
-                //エネミー検知フラグ
-                Checkflag = true;
-                //距離を求める
-                float Length = Vector3.Distance(transform.position, hit.transform.position);
-                //距離が短いなら
-                if (MinLength > Length)
+                DebugPrint.Print(string.Format("1{0}", hit));
+                DebugPrint.Print(string.Format("2{0}", hitInfo.collider.gameObject));
+                if (hit != hitInfo.collider.gameObject)
                 {
-                    //最短距離を更新
-                    MinLength = Length;
-                    //オブジェにエネミーを返す
-                    obj = hit;
+                    return null;
                 }
             }
-            //エネミーを一度も検知しなければ
-            // if (!Checkflag)
-            //{
-            //    //エネミー以外のオブジェクトを返す
-            //    return null;
-            //}
+
+            //距離が短いなら
+            if (MinLength > Length)
+            {
+                //最短距離を更新
+                MinLength = Length;
+                //オブジェにエネミーを返す
+                obj = hit;
+            }
+
         }
         //距離リセット
         MinLength = 999;
-        //フラグリセット
-        Checkflag = false;
 
         return obj;
 

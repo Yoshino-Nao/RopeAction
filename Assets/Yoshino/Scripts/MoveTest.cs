@@ -75,13 +75,18 @@ public class MoveTest : MonoBehaviour
         m_rb.useGravity = true;//ジャンプ中に重力を切るので、それ以外は重力の影響を受けるようにする
         float h = Input.GetAxis("Horizontal");              // 入力デバイスの水平軸をhで定義
         float v = Input.GetAxis("Vertical");                // 入力デバイスの垂直軸をvで定義
+
+        DebugPrint.Print(string.Format("X{0}", h));
+        DebugPrint.Print(string.Format("Y{0}", v));
+
         m_isInputJump = Input.GetButtonDown("Jump");
         m_anim.SetBool("Jump", false);
         if (m_cameraChanger.m_is3DCamera)
         {
             //3Dの場合はカメラに依存する
             Vector3 Forward = Vector3.Scale(m_CameraTf.forward, new Vector3(1, 0, 1)).normalized;
-            m_moveVec = (Forward * v + m_CameraTf.right * h).normalized;
+            m_moveVec = NormalizedEx((Forward * v + m_CameraTf.right * h));
+
             DebugPrint.Print(string.Format("3D"));
         }
         else
@@ -91,17 +96,23 @@ public class MoveTest : MonoBehaviour
             m_moveVec = (m_playerForwardOn2d * h).normalized;
             DebugPrint.Print(string.Format("2D"));
         }
-
+        DebugPrint.Print(string.Format("MoveVec{0}", m_moveVec));
         // 以下、キャラクターの移動処理
         //空中では歩行をしないようにする処理
         if (FootCollider())
         {
+            Vector2 Vec = new Vector2(h, v).normalized;
             // Animator側で設定している"Speed"パラメタを渡す
-            m_anim.SetFloat("Speed", Mathf.Pow(h, 2) + Mathf.Pow(v, 2));
+            m_anim.SetFloat("SpeedX", m_tf.forward.x);
+            m_anim.SetFloat("SpeedY", m_tf.forward.z);
+            //DebugPrint.Print(string.Format("AnimX{0}", m_anim.GetFloat("SpeedX")));
+            //DebugPrint.Print(string.Format("AnimY{0}", m_anim.GetFloat("SpeedY")));
+
         }
         else
         {
-            m_anim.SetFloat("Speed", 0);
+            m_anim.SetFloat("SpeedX", 0);
+            m_anim.SetFloat("SpeedY", 0);
         }
         float WeghtTarget;
         //フックを発射中でない時
@@ -111,6 +122,7 @@ public class MoveTest : MonoBehaviour
             if (m_moveVec.magnitude >= 0.1)
             {
                 m_tf.rotation = Quaternion.LookRotation(m_moveVec, Vector3.up);
+
             }
             WeghtTarget = 0;
         }
@@ -156,6 +168,15 @@ public class MoveTest : MonoBehaviour
                 resetCollider();
             }
         }
+    }
+    private Vector3 NormalizedEx(Vector3 vec)
+    {
+        float len = Mathf.Sqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
+        if(len <= 0) 
+        {
+            return Vector3.zero;
+        }
+        return new Vector3(vec.x / len, vec.y / len, vec.z / len);
     }
     // 以下、メイン処理.リジッドボディと絡めるので、FixedUpdate内で処理を行う.
     void FixedUpdate()
