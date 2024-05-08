@@ -285,7 +285,7 @@ public class HookShot : MonoBehaviour
                 DebugPrint.Print(string.Format("2{0}", hitInfo.collider.gameObject));
                 if (hit != hitInfo.collider.gameObject)
                 {
-                    return null;
+                    continue;
                 }
             }
 
