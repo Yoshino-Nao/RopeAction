@@ -21,11 +21,11 @@ public class HookShot : MonoBehaviour
 
     private Transform m_tf;
     private CameraChanger m_cameraChanger = null;
+    private UITest m_ui;
     private ObiRope Obirope;
     public ObiRopeBlueprint blueprint;
     private ObiRopeCursor cursor;
     ObiConstraints<ObiPinConstraintsBatch> pinConstraints;
-    private ObiPinConstraintsBatch batch1;
     [SerializeField] private Rope rope;
 
 
@@ -36,12 +36,9 @@ public class HookShot : MonoBehaviour
     {
         get { return AttachmentObj; }
     }
-    private ObiColliderBase hookAttachedColl;
 
     //ロープをつけられるオブジェクトまでの一番短い距離
     private float MinLength = 999;
-    //ロープをつけられるオブジェクトの検知フラグ
-    private bool Checkflag = false;
 
     public bool GetisLoaded
     {
@@ -59,6 +56,7 @@ public class HookShot : MonoBehaviour
     {
         m_tf = transform;
         m_cameraChanger = GetComponentInParent<CameraChanger>();
+        m_ui = GetComponentInParent<UITest>();
         // Create both the rope and the solver:	
         //rope = gameObject.AddComponent<ObiRope>();
         Obirope = gameObject.GetComponent<ObiRope>();
@@ -243,6 +241,7 @@ public class HookShot : MonoBehaviour
         else
         {
             AttachmentObj = Explosion();
+            m_ui.m_attachTf = AttachmentObj.transform;
         }
         //右クリックで発射
         if (Input.GetMouseButtonDown(1) && AttachmentObj)
