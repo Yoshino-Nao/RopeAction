@@ -10,22 +10,32 @@ public class Enemy1 : MonoBehaviour
     private float moveSpeed;
     [SerializeField, Header("移動ルート")]
     private Transform []target;
+    [SerializeField, Header("クールタイム")]
+    private float Timer;
+    private float nowTimer;
 
     void Update()
     {
-        //目的地まで移動する処理
-        transform.position = Vector3.MoveTowards(transform.position, target[point].position, moveSpeed * Time.deltaTime);
-        //目的地に到着したら
-        if(transform.position == target[point].position)
+        if(Timer > nowTimer)
         {
-            //ターゲットを次の地点に変更
-            point++;
+            nowTimer += Time.deltaTime;
         }
-        //最終目的地に到達したら移動をループする
-        if(point == target.Length)
+        else
         {
-            point = 0;
+            //目的地まで移動する処理
+            transform.position = Vector3.MoveTowards(transform.position, target[point].position, moveSpeed * Time.deltaTime);
+            //目的地に到着したら
+            if (transform.position == target[point].position)
+            {
+                //ターゲットを次の地点に変更
+                point++;
+                nowTimer = 0;
+            }
+            //最終目的地に到達したら移動をループする
+            if (point == target.Length)
+            {
+                point = 0;
+            }
         }
-        
     }
 }
