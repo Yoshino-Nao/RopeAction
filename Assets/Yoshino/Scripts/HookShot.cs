@@ -221,13 +221,10 @@ public class HookShot : MonoBehaviour
         //フック発射中
         if (Obirope.isLoaded)
         {
-            //Debug.Log()
-            //foreach (var a in batch1.pinBodies)
-            //{
-            //    Debug.Log(a.owner.name);
-            //}
-            //m_leftGrab.Grab();
-            //m_rightGrab.Grab();
+            float Wheel = Input.GetAxis("Mouse ScrollWheel");
+            DebugPrint.Print(string.Format("Wheel{0}",Wheel));
+
+
             if (Input.GetKey(KeyCode.Space))
             {
                 cursor.ChangeLength(Obirope.restLength - hookExtendRetractSpeed * Time.deltaTime);
@@ -236,12 +233,16 @@ public class HookShot : MonoBehaviour
             {
                 cursor.ChangeLength(Obirope.restLength + hookExtendRetractSpeed * Time.deltaTime);
             }
+
+            cursor.ChangeLength(Obirope.restLength - hookExtendRetractSpeed * Wheel * Time.deltaTime);
+
+
         }
         //通常
         else
         {
             AttachmentObj = Explosion();
-            m_ui.m_attachTf = AttachmentObj.transform;
+            //m_ui.m_attachTf = AttachmentObj.transform;
         }
         //右クリックで発射
         if (Input.GetMouseButtonDown(1) && AttachmentObj)

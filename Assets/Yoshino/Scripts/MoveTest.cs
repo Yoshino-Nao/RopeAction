@@ -96,7 +96,7 @@ public class MoveTest : MonoBehaviour
             m_moveVec = (m_playerForwardOn2d * h).normalized;
             DebugPrint.Print(string.Format("2D"));
         }
-        DebugPrint.Print(string.Format("MoveVec{0}", m_moveVec));
+        //DebugPrint.Print(string.Format("MoveVec{0}", m_moveVec));
         // 以下、キャラクターの移動処理
         //空中では歩行をしないようにする処理
         if (FootCollider())
@@ -104,7 +104,7 @@ public class MoveTest : MonoBehaviour
             Vector3 Vec;
             //Vec = Matrix4x4.Rotate(m_tf.rotation) * new Vector3(h, 0, v);
             Vec = m_tf.InverseTransformDirection(m_moveVec);
-            DebugPrint.Print(string.Format("AnimVec{0}", Vec));
+            //DebugPrint.Print(string.Format("AnimVec{0}", Vec));
 
             // Animator側で設定している"Speed"パラメタを渡す
             m_anim.SetFloat("SpeedX", Vec.x);
