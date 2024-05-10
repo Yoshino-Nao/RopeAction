@@ -126,7 +126,6 @@ public class MoveTest : MonoBehaviour
             if (m_moveVec.magnitude >= 0.1)
             {
                 m_tf.rotation = Quaternion.LookRotation(m_moveVec, Vector3.up);
-
             }
             WeghtTarget = 0;
         }

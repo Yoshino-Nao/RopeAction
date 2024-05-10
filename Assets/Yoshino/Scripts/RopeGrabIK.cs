@@ -50,10 +50,9 @@ public class RopeGrabIK : MonoBehaviour
             Vector3 WorldPos = m_ropeParticleGetter.position;
             Vector3 PlayerCenter = m_playerTf.position + m_playerCap.center + m_playerCap.center;
             WorldPos = PlayerCenter + (m_hookShot.GetAttachmentObj.transform.position - PlayerCenter).normalized * radius;
+            m_ropeParticleGetter.position = WorldPos;
             if (m_obiRope.TryGetNearestParticleIndex(WorldPos, out var outParticleIndex))
             {
-                DebugPrint.Print(string.Format("Index:{0}", outParticleIndex));
-                //if (outParticleIndex < 390) return;
                 if (m_obiRope.TryGetRopeProjectionPosition(WorldPos, outParticleIndex, m_solver, out var projectionPosition, out var outRopeDirection))
                 {
                     m_tf.position = projectionPosition;
