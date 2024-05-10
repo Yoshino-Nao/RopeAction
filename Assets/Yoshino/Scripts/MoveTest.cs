@@ -26,6 +26,10 @@ public class MoveTest : MonoBehaviour
     private Rigidbody m_rb;
     private Transform m_tf;
     private Transform m_CameraTf;
+    public bool m_isGround
+    {
+        get { return FootCollider(); }
+    }
 
     private FullBodyBipedIK m_fullBodyBipedIK;
     private float m_ikArmWeght = 0;
@@ -85,7 +89,7 @@ public class MoveTest : MonoBehaviour
         {
             //3Dの場合はカメラに依存する
             Vector3 Forward = Vector3.Scale(m_CameraTf.forward, new Vector3(1, 0, 1)).normalized;
-            m_moveVec = NormalizedEx((Forward * v + m_CameraTf.right * h));
+            m_moveVec = (Forward * v + m_CameraTf.right * h);
 
             DebugPrint.Print(string.Format("3D"));
         }
@@ -96,7 +100,7 @@ public class MoveTest : MonoBehaviour
             m_moveVec = (m_playerForwardOn2d * h).normalized;
             DebugPrint.Print(string.Format("2D"));
         }
-        //DebugPrint.Print(string.Format("MoveVec{0}", m_moveVec));
+        DebugPrint.Print(string.Format("MoveVec{0}", m_moveVec));
         // 以下、キャラクターの移動処理
         //空中では歩行をしないようにする処理
         if (FootCollider())
@@ -104,7 +108,7 @@ public class MoveTest : MonoBehaviour
             Vector3 Vec;
             //Vec = Matrix4x4.Rotate(m_tf.rotation) * new Vector3(h, 0, v);
             Vec = m_tf.InverseTransformDirection(m_moveVec);
-            //DebugPrint.Print(string.Format("AnimVec{0}", Vec));
+            DebugPrint.Print(string.Format("AnimVec{0}", Vec));
 
             // Animator側で設定している"Speed"パラメタを渡す
             m_anim.SetFloat("SpeedX", Vec.x);

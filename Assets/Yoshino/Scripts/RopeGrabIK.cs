@@ -11,6 +11,7 @@ public class RopeGrabIK : MonoBehaviour
     [SerializeField] private Transform m_hookTf;
     [SerializeField] private Transform m_playerTf;
     [SerializeField] private CapsuleCollider m_playerCap;
+    private MoveTest m_player;
     private Transform m_tf;
     private ObiSolver m_solver;
     [SerializeField] private HookShot m_hookShot;
@@ -48,8 +49,8 @@ public class RopeGrabIK : MonoBehaviour
         if (m_hookShot.GetisLoaded)
         {
             Vector3 WorldPos = m_ropeParticleGetter.position;
-            Vector3 PlayerCenter = m_playerTf.position + m_playerCap.center + m_playerCap.center;
-            WorldPos = PlayerCenter + (m_hookShot.GetAttachmentObj.transform.position - PlayerCenter).normalized * radius;
+            //Vector3 PlayerCenter = m_playerTf.position + m_playerCap.center + m_playerCap.center;
+            //WorldPos = PlayerCenter + (m_hookShot.GetAttachmentObj.transform.position - PlayerCenter).normalized * radius;
             m_ropeParticleGetter.position = WorldPos;
             if (m_obiRope.TryGetNearestParticleIndex(WorldPos, out var outParticleIndex))
             {

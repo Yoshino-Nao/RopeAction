@@ -730,6 +730,7 @@ MonoBehaviour:
   m_obiRope: {fileID: 6079209034565447418}
   m_hookTf: {fileID: 3734674886007099302}
   m_playerTf: {fileID: 3259156906742741579}
+  m_playerCap: {fileID: 0}
   m_hookShot: {fileID: 8447773001050728358}
   m_ropeParticleGetter: {fileID: 1699680436093757204}
   radius: 0.1
