@@ -33,6 +33,7 @@ public class RopeGrabIK : MonoBehaviour
     {
         m_tf = transform;
         m_solver = GetComponentInParent<ObiSolver>();
+        m_player = GetComponentInParent<MoveTest>();
         //m_posA = m_actor.GetParticlePosition(index);
         //m_posB = m_actor.GetParticlePosition(index + m_obiRope.activeParticleCount - 2);
     }
@@ -49,12 +50,18 @@ public class RopeGrabIK : MonoBehaviour
         if (m_hookShot.GetisLoaded)
         {
             Vector3 WorldPos = m_ropeParticleGetter.position;
-            //Vector3 PlayerCenter = m_playerTf.position + m_playerCap.center + m_playerCap.center;
-            //WorldPos = PlayerCenter + (m_hookShot.GetAttachmentObj.transform.position - PlayerCenter).normalized * radius;
-            m_ropeParticleGetter.position = WorldPos;
-            if (m_obiRope.TryGetNearestParticleIndex(WorldPos, out var outParticleIndex))
+            Vector3 PlayerCenter = m_playerTf.position + m_playerTf.forward * m_playerCap.radius * 2;
+            WorldPos = PlayerCenter + m_playerCap.center;
+            if (!m_player.GetIsGround)
             {
-                if (m_obiRope.TryGetRopeProjectionPosition(WorldPos, outParticleIndex, m_solver, out var projectionPosition, out var outRopeDirection))
+                WorldPos = WorldPos + m_playerCap.center - m_playerTf.forward * m_playerCap.radius;
+            }
+
+            //WorldPos = PlayerCenter + (m_hookShot.GetAttachmentObj.transform.position - PlayerCenter).normalized * radius;
+            m_ropeParticleGetter.position = Vector3.MoveTowards(m_ropeParticleGetter.position, WorldPos, Time.deltaTime);
+            if (m_obiRope.TryGetNearestParticleIndex(m_ropeParticleGetter.position, out var outParticleIndex))
+            {
+                if (m_obiRope.TryGetRopeProjectionPosition(m_ropeParticleGetter.position, outParticleIndex, m_solver, out var projectionPosition, out var outRopeDirection))
                 {
                     m_tf.position = projectionPosition;
                     m_tf.rotation = Quaternion.LookRotation(-outRopeDirection);

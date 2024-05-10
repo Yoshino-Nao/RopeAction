@@ -26,7 +26,7 @@ public class MoveTest : MonoBehaviour
     private Rigidbody m_rb;
     private Transform m_tf;
     private Transform m_CameraTf;
-    public bool m_isGround
+    public bool GetIsGround
     {
         get { return FootCollider(); }
     }
@@ -143,7 +143,9 @@ public class MoveTest : MonoBehaviour
         }
         m_ikArmWeght = Mathf.MoveTowards(m_ikArmWeght, WeghtTarget, Time.deltaTime * 2);
         m_fullBodyBipedIK.solver.leftHandEffector.positionWeight = m_ikArmWeght;
+        m_fullBodyBipedIK.solver.leftHandEffector.rotationWeight = m_ikArmWeght;
         m_fullBodyBipedIK.solver.rightHandEffector.positionWeight = m_ikArmWeght;
+        m_fullBodyBipedIK.solver.rightHandEffector.rotationWeight = m_ikArmWeght;
         //ジャンプ
         if (m_isInputJump)
         {   // スペースキーを入力したら

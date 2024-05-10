@@ -16854,7 +16854,7 @@ MonoBehaviour:
     - bone: {fileID: 4619234573278476017}
       target: {fileID: 0}
       positionWeight: 1
-      rotationWeight: 0
+      rotationWeight: 1
       position: {x: 0, y: 0, z: 0}
       rotation: {x: 0, y: 0, z: 0, w: 1}
       positionOffset: {x: 0, y: 0, z: 0}
@@ -16868,7 +16868,7 @@ MonoBehaviour:
     - bone: {fileID: 2966828890566099599}
       target: {fileID: 0}
       positionWeight: 1
-      rotationWeight: 0.1
+      rotationWeight: 1
       position: {x: 0, y: 0, z: 0}
       rotation: {x: 0, y: 0, z: 0, w: 1}
       positionOffset: {x: 0, y: 0, z: 0}
