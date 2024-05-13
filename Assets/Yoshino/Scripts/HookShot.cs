@@ -55,6 +55,12 @@ public class HookShot : MonoBehaviour
 
     void Awake()
     {
+        if (solver == null)
+        {
+            solver = GetComponentInParent<ObiSolver>();
+        }
+
+
         m_tf = transform;
         m_cameraChanger = GetComponentInParent<CameraChanger>();
         // Create both the rope and the solver:	
@@ -216,7 +222,14 @@ public class HookShot : MonoBehaviour
     {
 
         DebugPrint.Print(string.Format("AttachmentObj:{0}", AttachmentObj?.name));
-
+        //右クリックで発射
+        if (Input.GetMouseButtonDown(1) && AttachmentObj)
+        {
+            if (!Obirope.isLoaded)
+                LaunchHook();
+            else
+                DetachHook();
+        }
         //フック発射中
         if (Obirope.isLoaded)
         {
@@ -247,14 +260,7 @@ public class HookShot : MonoBehaviour
                 m_ui.m_attachTf = AttachmentObj?.transform;
             }
         }
-        //右クリックで発射
-        if (Input.GetMouseButtonDown(1) && AttachmentObj)
-        {
-            if (!Obirope.isLoaded)
-                LaunchHook();
-            else
-                DetachHook();
-        }
+        
     }
 
     public GameObject Explosion()

@@ -32,7 +32,7 @@ public class MoveTest : MonoBehaviour
     }
 
     private FullBodyBipedIK m_fullBodyBipedIK;
-    private float m_ikArmWeght = 0;
+    private float m_ikArmWeight = 0;
 
     // キャラクターコントローラ（カプセルコライダ）の移動量
     private Vector3 m_moveVec;
@@ -141,11 +141,12 @@ public class MoveTest : MonoBehaviour
             m_tf.rotation = Quaternion.LookRotation(Dir, Vector3.up);
             WeghtTarget = 1;
         }
-        m_ikArmWeght = Mathf.MoveTowards(m_ikArmWeght, WeghtTarget, Time.deltaTime * 2);
-        m_fullBodyBipedIK.solver.leftHandEffector.positionWeight = m_ikArmWeght;
-        m_fullBodyBipedIK.solver.leftHandEffector.rotationWeight = m_ikArmWeght;
-        m_fullBodyBipedIK.solver.rightHandEffector.positionWeight = m_ikArmWeght;
-        m_fullBodyBipedIK.solver.rightHandEffector.rotationWeight = m_ikArmWeght;
+        //IKのWeightをロープの有無で補間
+        m_ikArmWeight = Mathf.MoveTowards(m_ikArmWeight, WeghtTarget, Time.deltaTime * 2);
+        m_fullBodyBipedIK.solver.leftHandEffector.positionWeight = m_ikArmWeight;
+        m_fullBodyBipedIK.solver.leftHandEffector.rotationWeight = m_ikArmWeight;
+        m_fullBodyBipedIK.solver.rightHandEffector.positionWeight = m_ikArmWeight;
+        m_fullBodyBipedIK.solver.rightHandEffector.rotationWeight = m_ikArmWeight;
         //ジャンプ
         if (m_isInputJump)
         {   // スペースキーを入力したら
