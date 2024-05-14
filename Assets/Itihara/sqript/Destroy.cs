@@ -4,8 +4,12 @@ using UnityEngine;
 
 public class Destroy : MonoBehaviour
 {
+    private void Start()
+    {
+        GetComponent<Rigidbody>();
+    }
     //Õ“Ë‚µ‚½Aobject”j‰ó
-      void OnCollisionEnter(Collision collision)
+    void OnCollisionEnter(Collision collision)
     {
         //playerƒ^ƒO‚ªğŒ
         if (collision.gameObject.tag == "Player")
