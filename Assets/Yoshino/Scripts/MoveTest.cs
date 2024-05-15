@@ -21,21 +21,24 @@ public class MoveTest : MonoBehaviour
     [SerializeField] private float m_jumpPower = 3.0f;
 
     [SerializeField] Vector3 m_playerForwardOn2d = Vector3.right;
+
+    [SerializeField] private Transform test;
     // キャラクターコントローラ（カプセルコライダ）の参照
     private CapsuleCollider m_col;
     private Rigidbody m_rb;
     private Transform m_tf;
     private Transform m_CameraTf;
+    private bool m_isGround;
     public bool GetIsGround
     {
-        get { return FootCollider(); }
+        get { return m_isGround; }
     }
 
     private FullBodyBipedIK m_fullBodyBipedIK;
     private float m_ikArmWeight = 0;
 
     // キャラクターコントローラ（カプセルコライダ）の移動量
-    private Vector3 m_moveVec;
+    private Vector3 m_moveDir;
     private bool m_isInputJump;
     // CapsuleColliderで設定されているコライダのHeiht、Centerの初期値を収める変数
     private float m_orgColHight;
@@ -77,137 +80,128 @@ public class MoveTest : MonoBehaviour
         m_anim.speed = m_animSpeed;                             // Animatorのモーション再生速度に animSpeedを設定する
         m_currentBaseState = m_anim.GetCurrentAnimatorStateInfo(0); // 参照用のステート変数にBase Layer (0)の現在のステートを設定する
         m_rb.useGravity = true;//ジャンプ中に重力を切るので、それ以外は重力の影響を受けるようにする
-        float h = Input.GetAxis("Horizontal");              // 入力デバイスの水平軸をhで定義
-        float v = Input.GetAxis("Vertical");                // 入力デバイスの垂直軸をvで定義
-
-        //DebugPrint.Print(string.Format("X{0}", h));
-        //DebugPrint.Print(string.Format("Y{0}", v));
-
-        m_isInputJump = Input.GetButtonDown("Jump");
+        m_isGround = FootCollider();
         m_anim.SetBool("Jump", false);
-        if (m_cameraChanger.m_is3DCamera)
+        SetMoveDir();
+        //空中では歩行アニメーションをしないようにする処理
+        if (m_isGround)
         {
-            //3Dの場合はカメラに依存する
-            Vector3 Forward = Vector3.Scale(m_CameraTf.forward, new Vector3(1, 0, 1)).normalized;
-            m_moveVec = (Forward * v + m_CameraTf.right * h);
-
-            DebugPrint.Print(string.Format("3D"));
-        }
-        else
-        {
-            v = 0f;
-            //2Dの場合は左右の入力のみを移動に使用する
-            m_moveVec = (m_playerForwardOn2d * h).normalized;
-            DebugPrint.Print(string.Format("2D"));
-        }
-        DebugPrint.Print(string.Format("MoveVec{0}", m_moveVec));
-        // 以下、キャラクターの移動処理
-        //空中では歩行をしないようにする処理
-        if (FootCollider())
-        {
-            Vector3 Vec;
-            //Vec = Matrix4x4.Rotate(m_tf.rotation) * new Vector3(h, 0, v);
-            Vec = m_tf.InverseTransformDirection(m_moveVec);
-            DebugPrint.Print(string.Format("AnimVec{0}", Vec));
-
+            Vector3 Vec = m_tf.InverseTransformDirection(m_moveDir);
+            //DebugPrint.Print(string.Format("AnimVec{0}", Vec));
             // Animator側で設定している"Speed"パラメタを渡す
             m_anim.SetFloat("SpeedX", Vec.x);
             m_anim.SetFloat("SpeedY", Vec.z);
-            //DebugPrint.Print(string.Format("AnimX{0}", m_anim.GetFloat("SpeedX")));
-            //DebugPrint.Print(string.Format("AnimY{0}", m_anim.GetFloat("SpeedY")));
-
         }
         else
         {
             m_anim.SetFloat("SpeedX", 0);
             m_anim.SetFloat("SpeedY", 0);
         }
-        float WeghtTarget;
-        //フックを発射中でない時
-        if (!m_hookShot.GetisLoaded)
+        //ジャンプ
+        if (Input.GetButtonDown("Jump"))
         {
-            //移動中は移動方向へ向く
-            if (m_moveVec.magnitude >= 0.1)
+            //ステート遷移中でなかったらジャンプできる
+            if (!m_anim.IsInTransition(0))
             {
-                m_tf.rotation = Quaternion.LookRotation(m_moveVec, Vector3.up);
+                m_rb.AddForce(Vector3.up * m_jumpPower, ForceMode.Impulse);
+                m_anim.SetBool("Jump", true);     // Animatorにジャンプに切り替えるフラグを送る
             }
-            WeghtTarget = 0;
-        }
-        //フックを発射中
-        else
-        {
-            Vector3 Dir = (m_hookShot.GetAttachmentObj.transform.position - m_tf.position).normalized;
-            Dir = Vector3.ProjectOnPlane(Dir, Vector3.up);
-            m_tf.rotation = Quaternion.LookRotation(Dir, Vector3.up);
-            WeghtTarget = 1;
         }
         //IKのWeightをロープの有無で補間
-        m_ikArmWeight = Mathf.MoveTowards(m_ikArmWeight, WeghtTarget, Time.deltaTime * 2);
-        m_fullBodyBipedIK.solver.leftHandEffector.positionWeight = m_ikArmWeight;
-        m_fullBodyBipedIK.solver.leftHandEffector.rotationWeight = m_ikArmWeight;
-        m_fullBodyBipedIK.solver.rightHandEffector.positionWeight = m_ikArmWeight;
-        m_fullBodyBipedIK.solver.rightHandEffector.rotationWeight = m_ikArmWeight;
-        //ジャンプ
-        if (m_isInputJump)
-        {   // スペースキーを入力したら
-
-            //アニメーションのステートがLocomotionの最中のみジャンプできる
-            //if (m_currentBaseState.fullPathHash == locoState && !m_hookShot.GetisLoaded)
-            {
-                //ステート遷移中でなかったらジャンプできる
-                if (!m_anim.IsInTransition(0))
-                {
-                    m_rb.AddForce(Vector3.up * m_jumpPower, ForceMode.Impulse);
-                    m_anim.SetBool("Jump", true);     // Animatorにジャンプに切り替えるフラグを送る
-                }
-            }
-        }
-
-
-
-        //m_tf.localPosition += m_moveVec * forwardSpeed * Time.fixedDeltaTime;
-
-        // 以下、Animatorの各ステート中での処理
-        // Locomotion中
-        // 現在のベースレイヤーがlocoStateの時
-        //if (m_currentBaseState.fullPathHash == locoState)
-        //{
-        //    //カーブでコライダ調整をしている時は、念のためにリセットする
-        //    if (useCurves)
-        //    {
-        //        resetCollider();
-        //    }
-        //}
-    }
-    private Vector3 NormalizedEx(Vector3 vec)
-    {
-        float len = Mathf.Sqrt(vec.x * vec.x + vec.y * vec.y + vec.z * vec.z);
-        if (len <= 0)
-        {
-            return Vector3.zero;
-        }
-        return new Vector3(vec.x / len, vec.y / len, vec.z / len);
+        InterpolationIKWeight();
+        RopeLaunching();
+        NotRopeLaunching();
+        //if (test != null)
+        //    m_tf.LookAt(test);
     }
     // 以下、メイン処理.リジッドボディと絡めるので、FixedUpdate内で処理を行う.
     void FixedUpdate()
     {
+        ForceMode Mode = ForceMode.Acceleration;
+        //フックを発射中でない時
+        if (!m_hookShot.GetisLoaded)
+        {
 
+        }
+        //フックを発射中
+        else
+        {
+            Mode = ForceMode.Impulse;
+        }
 
         //キャラクターを移動させる
-        m_rb.AddForce(m_moveVec * m_forwardSpeed, ForceMode.Acceleration);
-
-
-
-
-
-
-
-
-
-
+        m_rb.AddForce(m_moveDir * m_forwardSpeed, Mode);
 
     }
+    private void SetMoveDir()
+    {
+        float h = Input.GetAxis("Horizontal");              // 入力デバイスの水平軸をhで定義
+        float v = Input.GetAxis("Vertical");                // 入力デバイスの垂直軸をvで定義
+        if (m_cameraChanger.m_is3DCamera)
+        {
+            //3Dの場合はカメラに依存する
+            Vector3 Forward = Vector3.Scale(m_CameraTf.forward, new Vector3(1, 0, 1)).normalized;
+            m_moveDir = (Forward * v + m_CameraTf.right * h);
+        }
+        else
+        {
+            v = 0f;
+            //2Dの場合は左右の入力のみを移動に使用する
+            m_moveDir = (m_playerForwardOn2d * h).normalized;
+        }
+        DebugPrint.Print(string.Format("MoveVec{0}", m_moveDir));
+    }
 
+    private void InterpolationIKWeight()
+    {
+        //ロープ発射中は1、でなければ0
+        float WeightTarget = m_hookShot.GetisLoaded ? 1 : 0;
+        m_ikArmWeight = Mathf.MoveTowards(m_ikArmWeight, WeightTarget, Time.deltaTime * 2);
+        m_fullBodyBipedIK.solver.leftHandEffector.positionWeight = m_ikArmWeight;
+        m_fullBodyBipedIK.solver.leftHandEffector.rotationWeight = m_ikArmWeight;
+        m_fullBodyBipedIK.solver.rightHandEffector.positionWeight = m_ikArmWeight;
+        m_fullBodyBipedIK.solver.rightHandEffector.rotationWeight = m_ikArmWeight;
+    }
+    /// <summary>
+    ///　通常状態
+    /// </summary>
+    private void NotRopeLaunching()
+    {
+        if (m_hookShot.GetisLoaded) return;
+
+        //移動中は移動方向へ向く
+        if (m_moveDir.magnitude >= 0.1)
+        {
+            m_tf.rotation = Quaternion.LookRotation(m_moveDir, Vector3.up);
+        }
+    }
+    /// <summary>
+    /// ロープ発射中状態
+    /// </summary>
+    private void RopeLaunching()
+    {
+        if (!m_hookShot.GetisLoaded) return;
+        
+        //AttachmentObjの方向に向き続ける
+        Vector3 Dir = (m_hookShot.GetAttachmentObj.transform.position - m_tf.position).normalized;
+        Debug.DrawRay(m_tf.position, Dir * 100);
+        if (m_isGround)
+        {
+            Dir = Vector3.ProjectOnPlane(Dir, Vector3.up);
+            m_tf.rotation = Quaternion.LookRotation(Dir, Vector3.up);
+        }
+        else
+        {
+            Dir = Vector3.ProjectOnPlane(Dir, Vector3.up);
+            m_tf.rotation = Quaternion.LookRotation(Dir, Vector3.up);
+
+            //m_tf.rotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(m_moveDir, Dir));
+            //Quaternion.LookRotation(Dir, Vector3.up) *
+            //m_tf.rotation = Quaternion.LookRotation(Dir) * Quaternion.Euler(m_tf.rotation.x + 90, m_tf.rotation.y, m_tf.rotation.z);
+
+        }
+
+    }
     void OnGUI()
     {
         //GUI.Box(new Rect(Screen.width - 260, 10, 250, 150), "Interaction");
@@ -229,7 +223,7 @@ public class MoveTest : MonoBehaviour
     private bool FootCollider()
     {
         RaycastHit hit;
-        return (Physics.SphereCast(m_tf.position + m_col.center, m_col.radius, -Vector3.up, out hit, m_col.height / 2));
+        return (Physics.SphereCast(m_tf.position + m_col.center, m_col.radius, -m_tf.up, out hit, m_col.height / 2));
     }
 
 }

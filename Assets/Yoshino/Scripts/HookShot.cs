@@ -24,7 +24,7 @@ public class HookShot : MonoBehaviour
     [SerializeField] private UITest m_ui;
     private ObiRope Obirope;
     [SerializeField] private MeshRenderer m_grabMesh;
-    public ObiRopeBlueprint blueprint;
+    private ObiRopeBlueprint blueprint;
     private ObiRopeCursor cursor;
     ObiConstraints<ObiPinConstraintsBatch> pinConstraints;
     [SerializeField] private Rope rope;
@@ -268,8 +268,11 @@ public class HookShot : MonoBehaviour
         LayerMask layerMask = 1 << LayerMask.NameToLayer("Ropeattach");
         var hits = Physics.SphereCastAll(
             m_tf.position,     //中心
-            m_langth,                   //半径
-            Vector3.forward, 0f, layerMask).Select(h => h.transform.gameObject).ToList();    //方向
+            m_langth,          //半径
+            Vector3.forward,   //方向
+            0f,                //長さ
+            layerMask          //レイヤーマスク
+            ).Select(h => h.transform.gameObject).ToList();
 
         if (!m_cameraChanger.m_is3DCamera)
         {
