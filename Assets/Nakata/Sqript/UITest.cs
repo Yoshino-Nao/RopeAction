@@ -28,7 +28,7 @@ public class UITest : MonoBehaviour
 
         //ビューポート座標からスクリーン座標に変換
         rectTf.position = Camera.main.ViewportToScreenPoint(view);
-        Debug.Log(rectTf.position);
+        //Debug.Log(rectTf.position);
 
         //if(Image.position.z<0)
         //{

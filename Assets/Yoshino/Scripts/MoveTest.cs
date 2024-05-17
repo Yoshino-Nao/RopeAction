@@ -1,6 +1,8 @@
 ﻿using Obi;
 using RootMotion.FinalIK;
+using System.Collections;
 using UnityEngine;
+using VInspector;
 
 public class MoveTest : MonoBehaviour
 {
@@ -22,7 +24,14 @@ public class MoveTest : MonoBehaviour
 
     [SerializeField] Vector3 m_playerForwardOn2d = Vector3.right;
 
-    [SerializeField] private Transform test;
+    [SerializeField] private float m_grabTotalTime = 1f;
+
+    [Button]
+    void test()
+    {
+        m_hookShot.transform.position = m_ikTarget.transform.position;
+    }
+
     // キャラクターコントローラ（カプセルコライダ）の参照
     private CapsuleCollider m_col;
     private Rigidbody m_rb;
@@ -53,8 +62,12 @@ public class MoveTest : MonoBehaviour
     static int jumpState = Animator.StringToHash("Base Layer.Jump");
     static int restState = Animator.StringToHash("Base Layer.Rest");
 
+    private ObiSolver obiSolver;
     private CameraChanger m_cameraChanger;
     HookShot m_hookShot;
+    private IKTarget m_ikTarget;
+    public float m_hookLerpT = 0f;
+    public bool m_isGrabbing = false;
     // 初期化
     void Start()
     {
@@ -70,9 +83,12 @@ public class MoveTest : MonoBehaviour
         m_tf = transform;
         m_CameraTf = Camera.main.transform;
         m_hookShot = GetComponentInChildren<HookShot>();
+        m_ikTarget = GetComponentInChildren<IKTarget>();
         m_fullBodyBipedIK = GetComponentInChildren<FullBodyBipedIK>();
         //contactEventDispatcher.onContactEnter
+        obiSolver = GetComponentInParent<ObiSolver>();
         m_cameraChanger = GetComponent<CameraChanger>();
+        SetIKWeight(0);
     }
 
     private void Update()
@@ -107,19 +123,18 @@ public class MoveTest : MonoBehaviour
                 m_anim.SetBool("Jump", true);     // Animatorにジャンプに切り替えるフラグを送る
             }
         }
+
         //IKのWeightをロープの有無で補間
-        InterpolationIKWeight();
-        RopeLaunching();
+        //InterpolationIKWeight();
+        RopeGrabbing();
         NotRopeLaunching();
-        //if (test != null)
-        //    m_tf.LookAt(test);
     }
     // 以下、メイン処理.リジッドボディと絡めるので、FixedUpdate内で処理を行う.
     void FixedUpdate()
     {
         ForceMode Mode = ForceMode.Acceleration;
         //フックを発射中でない時
-        if (!m_hookShot.GetisLoaded)
+        if (!m_hookShot)
         {
 
         }
@@ -152,22 +167,63 @@ public class MoveTest : MonoBehaviour
         DebugPrint.Print(string.Format("MoveVec{0}", m_moveDir));
     }
 
-    private void InterpolationIKWeight()
+    public bool InterpolationIKWeight()
     {
-        //ロープ発射中は1、でなければ0
-        float WeightTarget = m_hookShot.GetisLoaded ? 1 : 0;
-        m_ikArmWeight = Mathf.MoveTowards(m_ikArmWeight, WeightTarget, Time.deltaTime * 2);
+        //
+        m_hookLerpT += Time.deltaTime / m_grabTotalTime;
+
+        m_ikArmWeight = 1f;
         m_fullBodyBipedIK.solver.leftHandEffector.positionWeight = m_ikArmWeight;
         m_fullBodyBipedIK.solver.leftHandEffector.rotationWeight = m_ikArmWeight;
         m_fullBodyBipedIK.solver.rightHandEffector.positionWeight = m_ikArmWeight;
         m_fullBodyBipedIK.solver.rightHandEffector.rotationWeight = m_ikArmWeight;
+
+        m_hookShot.transform.position = Vector3.Lerp(m_hookShot.transform.position, m_ikTarget.transform.position, m_hookLerpT);
+
+        return m_hookLerpT >= 1;
+    }
+    public void SetIKWeight(float weight)
+    {
+        m_ikArmWeight = weight;
+        m_fullBodyBipedIK.solver.leftHandEffector.positionWeight = m_ikArmWeight;
+        m_fullBodyBipedIK.solver.leftHandEffector.rotationWeight = m_ikArmWeight;
+        m_fullBodyBipedIK.solver.rightHandEffector.positionWeight = m_ikArmWeight;
+        m_fullBodyBipedIK.solver.rightHandEffector.rotationWeight = m_ikArmWeight;
+    }
+    public void ToRecoverHook()
+    {
+        //プレイヤーに親子関係を付けなおす
+        m_hookShot.transform.parent = m_tf;
+        m_hookShot.transform.localPosition = m_ikTarget.transform.localPosition;
+        Release();
+    }
+    public void Release()
+    {
+        SetIKWeight(0);
+        m_isGrabbing = false;
+    }
+    public IEnumerator Grab()
+    {
+        m_hookShot.DisabledCollition();
+        m_hookShot.ClearPinConstraints();
+        yield return new WaitUntil(() => InterpolationIKWeight());
+        SetIKWeight(1);
+        m_hookShot.SetParent(m_tf);
+        m_hookShot.EnableCollition();
+        m_isGrabbing = true;
     }
     /// <summary>
     ///　通常状態
     /// </summary>
     private void NotRopeLaunching()
     {
-        if (m_hookShot.GetisLoaded) return;
+        if (m_isGrabbing) return;
+        float dist = Vector3.Distance(m_tf.position, m_hookShot.transform.position);
+        float length = 2f;
+        if (Input.GetKeyDown(KeyCode.V) && dist <= length)
+        {
+            StartCoroutine(Grab());
+        }
 
         //移動中は移動方向へ向く
         if (m_moveDir.magnitude >= 0.1)
@@ -176,14 +232,16 @@ public class MoveTest : MonoBehaviour
         }
     }
     /// <summary>
-    /// ロープ発射中状態
+    /// ロープを掴んだ状態
     /// </summary>
-    private void RopeLaunching()
+    private void RopeGrabbing()
     {
-        if (!m_hookShot.GetisLoaded) return;
-        
-        //AttachmentObjの方向に向き続ける
-        Vector3 Dir = (m_hookShot.GetAttachmentObj.transform.position - m_tf.position).normalized;
+        if (!m_isGrabbing) return;
+
+
+
+        //HookShotの方向に向き続ける
+        Vector3 Dir = (m_hookShot.transform.position - m_tf.position).normalized;
         Debug.DrawRay(m_tf.position, Dir * 100);
         if (m_isGround)
         {
@@ -202,6 +260,7 @@ public class MoveTest : MonoBehaviour
         }
 
     }
+
     void OnGUI()
     {
         //GUI.Box(new Rect(Screen.width - 260, 10, 250, 150), "Interaction");

@@ -739,6 +739,7 @@ PlayerSettings:
   webGLPowerPreference: 2
   scriptingDefineSymbols:
     Android: OBI_ONI_SUPPORTED
+    Nintendo Switch: MAGICACLOTH2
     Standalone: OBI_ONI_SUPPORTED;MAGICACLOTH2
     iPhone: OBI_ONI_SUPPORTED
   additionalCompilerArguments: {}

@@ -20,6 +20,8 @@ public class HookShot : MonoBehaviour
     public int particlePoolSize = 100;
 
     private Transform m_tf;
+    private SphereCollider m_col;
+    private Rigidbody m_rb;
     private CameraChanger m_cameraChanger = null;
     [SerializeField] private UITest m_ui;
     private ObiRope Obirope;
@@ -33,6 +35,12 @@ public class HookShot : MonoBehaviour
     private RaycastHit hookAttachment;
     //ロープをアタッチしているオブジェクト
     private GameObject AttachmentObj = null;
+
+    private MoveTest m_player;
+
+    private VirtualChildBehaviour m_childBehaviour;
+    private bool m_toggle = false;
+    private bool m_isGrabbing = false;
     public GameObject GetAttachmentObj
     {
         get { return AttachmentObj; }
@@ -62,7 +70,11 @@ public class HookShot : MonoBehaviour
 
 
         m_tf = transform;
+        m_col = GetComponent<SphereCollider>();
+        m_rb = GetComponent<Rigidbody>();
         m_cameraChanger = GetComponentInParent<CameraChanger>();
+        m_player = FindObjectOfType<MoveTest>();
+        m_childBehaviour = GetComponent<VirtualChildBehaviour>();
         // Create both the rope and the solver:	
         //rope = gameObject.AddComponent<ObiRope>();
         Obirope = gameObject.GetComponent<ObiRope>();
@@ -121,6 +133,7 @@ public class HookShot : MonoBehaviour
 
     private IEnumerator AttachHook()
     {
+        //1フレーム待つ
         yield return null;
 
         //Pin Constraintsをクリア
@@ -131,13 +144,13 @@ public class HookShot : MonoBehaviour
         //ロープ パスを手順に従って生成します (時間の経過とともに延長するため、短いセグメントのみ)。
         int filter = ObiUtils.MakeFilter(ObiUtils.CollideWithEverything, 0);
         blueprint.path.Clear();
-        blueprint.path.AddControlPoint(Vector3.zero, Vector3.zero, Vector3.up * 2, Vector3.up, 0.1f, 0.1f, 1, filter, Color.white, "Hook start");
+        blueprint.path.AddControlPoint(Vector3.zero, Vector3.zero, Vector3.zero, Vector3.up, 0.1f, 0.1f, 1, filter, Color.white, "Hook start");
         //int Count = 10;
         //for (int i = 0; i < Count; i++)
         //{
         //    blueprint.path.AddControlPoint(localHit.normalized * 0.5f * i, Vector3.zero, Vector3.zero, Vector3.up, 0.1f, 0.1f, 1, filter, Color.white, "Hook " + i.ToString());
         //}
-        blueprint.path.AddControlPoint(localHit.normalized * 3f, Vector3.zero, Vector3.zero, Vector3.up, 0.1f, 0.1f, 1, filter, Color.white, "Hook end");
+        blueprint.path.AddControlPoint(localHit.normalized * 0.5f, Vector3.zero, Vector3.zero, Vector3.up, 0.1f, 0.1f, 1, filter, Color.white, "Hook end");
         blueprint.path.FlushEvents();
 
         //ロープのパーティクル表現を生成します (完了するまで待ちます)。
@@ -201,21 +214,74 @@ public class HookShot : MonoBehaviour
 
         //ロープの両端をピンで固定します (これにより、キャラクターとロープの間の双方向のインタラクションが可能になります)。
         var batch = new ObiPinConstraintsBatch();
-        batch.AddConstraint(Obirope.elements[0].particle1, character, m_tf.localPosition, Quaternion.identity, 0, 0, float.PositiveInfinity);
+        ObiColliderBase playerCol = m_player.GetComponent<ObiColliderBase>();
+        //batch.AddConstraint(Obirope.elements[0].particle1, character, m_tf.localPosition, Quaternion.identity, 0, 0, float.PositiveInfinity);
+        //batch.AddConstraint(Obirope.elements[Obirope.elements.Count - 1].particle2, hookAttachment.collider.GetComponent<ObiColliderBase>(),
+        //                                                  hookAttachment.collider.transform.InverseTransformPoint(hookAttachment.point), Quaternion.identity, 0, 0, float.PositiveInfinity);
+        batch.AddConstraint(Obirope.elements[0].particle1, character, Vector3.zero, Quaternion.identity, 0, 0, float.PositiveInfinity);
         batch.AddConstraint(Obirope.elements[Obirope.elements.Count - 1].particle2, hookAttachment.collider.GetComponent<ObiColliderBase>(),
                                                           hookAttachment.collider.transform.InverseTransformPoint(hookAttachment.point), Quaternion.identity, 0, 0, float.PositiveInfinity);
-
 
         batch.activeConstraintCount = 2;
         pinConstraints.AddBatch(batch);
         Obirope.SetConstraintsDirty(Oni.ConstraintType.Pin);
-    }
+        m_tf.parent = solver.transform;
 
+        StartCoroutine(m_player.Grab());
+    }
+    public void ClearPinConstraints()
+    {
+        //pinConstraints = Obirope.GetConstraintsByType(Oni.ConstraintType.Pin) as ObiConstraints<ObiPinConstraintsBatch>;
+        //pinConstraints.Clear();
+    }
+    /// <summary>
+    /// Hookの当たり判定を設定する
+    /// </summary>
+    public void EnableCollition()
+    {
+        //for (int i = 0; i < Obirope.activeParticleCount; ++i)
+        //    solver.invMasses[Obirope.solverIndices[i]] = 10;
+        if (hookAttachment.rigidbody.isKinematic)
+        {
+            m_tf.parent = m_player.transform;
+            var batch = new ObiPinConstraintsBatch();
+            ObiColliderBase playerCol = m_player.GetComponent<ObiColliderBase>();
+            batch.AddConstraint(Obirope.elements[0].particle1, playerCol, m_tf.localPosition, Quaternion.identity, 0, 0, float.PositiveInfinity);
+            batch.AddConstraint(Obirope.elements[Obirope.elements.Count - 1].particle2, hookAttachment.collider.GetComponent<ObiColliderBase>(),
+                                                              hookAttachment.collider.transform.InverseTransformPoint(hookAttachment.point), Quaternion.identity, 0, 0, float.PositiveInfinity);
+            batch.activeConstraintCount = 2;
+            pinConstraints.AddBatch(batch);
+            Obirope.SetConstraintsDirty(Oni.ConstraintType.Pin);
+        }
+    }
+    /// <summary>
+    /// Hookの当たり判定をなくす
+    /// </summary>
+    public void DisabledCollition()
+    {
+        //for (int i = 0; i < Obirope.activeParticleCount; ++i)
+        //    solver.invMasses[Obirope.solverIndices[i]] = 0;
+        m_player.m_hookLerpT = 0f;
+        m_col.isTrigger = true;
+        m_rb.isKinematic = true;
+    }
+    public void SetParent(Transform parent)
+    {
+        if (parent == null)
+        {
+            m_childBehaviour.UnregisterParent();
+        }
+        else
+        {
+            m_childBehaviour.RegisterParent(parent);
+        }
+    }
     private void DetachHook()
     {
         // Set the rope blueprint to null (automatically removes the previous blueprint from the solver, if any).
         Obirope.ropeBlueprint = null;
         Obirope.GetComponent<MeshRenderer>().enabled = false;
+        m_player.ToRecoverHook();
     }
 
     void Update()
@@ -230,9 +296,36 @@ public class HookShot : MonoBehaviour
             else
                 DetachHook();
         }
+        if (Input.GetKeyDown(KeyCode.V))
+        {
+            m_toggle = m_toggle ? false : true;
+        }
+        DebugPrint.Print(string.Format("{0}", m_toggle));
+
+
+        //Debug.Log(dist);
+
         //フック発射中
         if (Obirope.isLoaded)
         {
+            //if (Input.GetKeyDown(KeyCode.V))
+            //{
+            //    if (!m_childBehaviour.ExistVirtualParent)
+            //    {
+            //        StartCoroutine(Grabable());
+            //    }
+            //    else
+            //    {
+            //        m_childBehaviour.UnregisterParent();
+            //        m_player.Release();
+            //        m_col.isTrigger = false;
+            //        m_rb.isKinematic = false;
+            //    }
+            //}
+            //else
+            //{
+
+            //}
             float Wheel = Input.GetAxis("Mouse ScrollWheel");
             DebugPrint.Print(string.Format("Wheel{0}", Wheel));
             m_grabMesh.enabled = true;
@@ -260,9 +353,18 @@ public class HookShot : MonoBehaviour
                 m_ui.m_attachTf = AttachmentObj?.transform;
             }
         }
-        
-    }
 
+    }
+    public IEnumerator Grabable()
+    {
+        DisabledCollition();
+
+        yield return new WaitUntil(() => m_player.InterpolationIKWeight());
+        SetParent(m_player.transform);
+        m_isGrabbing = true;
+        EnableCollition();
+        //m_weightT = 0f;
+    }
     public GameObject Explosion()
     {
         LayerMask layerMask = 1 << LayerMask.NameToLayer("Ropeattach");
