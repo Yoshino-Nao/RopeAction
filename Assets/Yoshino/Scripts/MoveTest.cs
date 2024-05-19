@@ -66,7 +66,13 @@ public class MoveTest : MonoBehaviour
     private CameraChanger m_cameraChanger;
     HookShot m_hookShot;
     private IKTarget m_ikTarget;
-    public float m_hookLerpT = 0f;
+    public float m_lerpTGrabPoint = 0f;
+    private GrabPoint m_grabPoint;
+    public GrabPoint SetGrabPoint
+    {
+        set { m_grabPoint = value; }
+    }
+
     public bool m_isGrabbing = false;
     // 初期化
     void Start()
@@ -123,11 +129,11 @@ public class MoveTest : MonoBehaviour
                 m_anim.SetBool("Jump", true);     // Animatorにジャンプに切り替えるフラグを送る
             }
         }
-
+        m_hookShot.HookShooting();
         //IKのWeightをロープの有無で補間
         //InterpolationIKWeight();
+        RopeRelease();
         RopeGrabbing();
-        NotRopeLaunching();
     }
     // 以下、メイン処理.リジッドボディと絡めるので、FixedUpdate内で処理を行う.
     void FixedUpdate()
@@ -166,21 +172,14 @@ public class MoveTest : MonoBehaviour
         }
         DebugPrint.Print(string.Format("MoveVec{0}", m_moveDir));
     }
-
-    public bool InterpolationIKWeight()
+    public bool LerpGrabPoint()
     {
         //
-        m_hookLerpT += Time.deltaTime / m_grabTotalTime;
+        m_lerpTGrabPoint += Time.deltaTime / m_grabTotalTime;
 
-        m_ikArmWeight = 1f;
-        m_fullBodyBipedIK.solver.leftHandEffector.positionWeight = m_ikArmWeight;
-        m_fullBodyBipedIK.solver.leftHandEffector.rotationWeight = m_ikArmWeight;
-        m_fullBodyBipedIK.solver.rightHandEffector.positionWeight = m_ikArmWeight;
-        m_fullBodyBipedIK.solver.rightHandEffector.rotationWeight = m_ikArmWeight;
+        m_grabPoint.transform.position = Vector3.Lerp(m_grabPoint.transform.position, m_ikTarget.transform.position, m_lerpTGrabPoint);
 
-        m_hookShot.transform.position = Vector3.Lerp(m_hookShot.transform.position, m_ikTarget.transform.position, m_hookLerpT);
-
-        return m_hookLerpT >= 1;
+        return m_lerpTGrabPoint >= 1;
     }
     public void SetIKWeight(float weight)
     {
@@ -190,41 +189,52 @@ public class MoveTest : MonoBehaviour
         m_fullBodyBipedIK.solver.rightHandEffector.positionWeight = m_ikArmWeight;
         m_fullBodyBipedIK.solver.rightHandEffector.rotationWeight = m_ikArmWeight;
     }
-    public void ToRecoverHook()
-    {
-        //プレイヤーに親子関係を付けなおす
-        m_hookShot.transform.parent = m_tf;
-        m_hookShot.transform.localPosition = m_ikTarget.transform.localPosition;
-        Release();
-    }
+    /// <summary>
+    /// ロープを離す処理
+    /// </summary>
     public void Release()
     {
+        m_hookShot.ConnectToObj(m_grabPoint.GetObiCol);
+        //IKを解除し物理演算を開始
         SetIKWeight(0);
+        m_grabPoint.SetParent(null);
+        m_grabPoint.EnablePhysics();
+
+
         m_isGrabbing = false;
     }
     public IEnumerator Grab()
     {
-        m_hookShot.DisabledCollition();
-        m_hookShot.ClearPinConstraints();
-        yield return new WaitUntil(() => InterpolationIKWeight());
+        m_lerpTGrabPoint = 0f;
+        //m_hookShot.DisabledCollition();
         SetIKWeight(1);
-        m_hookShot.SetParent(m_tf);
-        m_hookShot.EnableCollition();
+        yield return new WaitUntil(() => LerpGrabPoint());
+        m_isGrabbing = true;
+        m_grabPoint.SetParent(m_tf);
+        //m_hookShot.GrabRope();
+    }
+    public void GrabPointSetUp()
+    {
+        m_grabPoint.SetUp();
+        SetIKWeight(1);
+        m_grabPoint.SetParent(m_tf);
         m_isGrabbing = true;
     }
     /// <summary>
     ///　通常状態
     /// </summary>
-    private void NotRopeLaunching()
+    private void RopeRelease()
     {
         if (m_isGrabbing) return;
-        float dist = Vector3.Distance(m_tf.position, m_hookShot.transform.position);
-        float length = 2f;
-        if (Input.GetKeyDown(KeyCode.V) && dist <= length)
+        if (m_grabPoint != null)
         {
-            StartCoroutine(Grab());
+            float dist = Vector3.Distance(m_tf.position, m_grabPoint.transform.position);
+            float length = 2f;
+            if (Input.GetKeyDown(KeyCode.V) && dist <= length)
+            {
+                StartCoroutine(Grab());
+            }
         }
-
         //移動中は移動方向へ向く
         if (m_moveDir.magnitude >= 0.1)
         {
@@ -237,11 +247,13 @@ public class MoveTest : MonoBehaviour
     private void RopeGrabbing()
     {
         if (!m_isGrabbing) return;
-
-
-
+        if (Input.GetKeyDown(KeyCode.V))
+        {
+            Release();
+        }
+        m_hookShot.RopeChangeLength();
         //HookShotの方向に向き続ける
-        Vector3 Dir = (m_hookShot.transform.position - m_tf.position).normalized;
+        Vector3 Dir = (m_grabPoint.transform.position - m_tf.position).normalized;
         Debug.DrawRay(m_tf.position, Dir * 100);
         if (m_isGround)
         {

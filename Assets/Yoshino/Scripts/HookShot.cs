@@ -40,6 +40,9 @@ public class HookShot : MonoBehaviour
 
     private VirtualChildBehaviour m_childBehaviour;
     private bool m_toggle = false;
+
+    [SerializeField] private GrabPoint m_grabPoint;
+    private GameObject m_grabObj;
     private bool m_isGrabbing = false;
     public GameObject GetAttachmentObj
     {
@@ -110,7 +113,7 @@ public class HookShot : MonoBehaviour
     /**
 	 * シーンに対してレイキャストして、フックを何かに取り付けられるかどうかを確認します。
 	 */
-    private void LaunchHook()
+    public void LaunchHook()
     {
 
         //このオブジェクトと同じ XY 平面内のシーン内のマウスの位置を取得します。
@@ -214,20 +217,24 @@ public class HookShot : MonoBehaviour
 
         //ロープの両端をピンで固定します (これにより、キャラクターとロープの間の双方向のインタラクションが可能になります)。
         var batch = new ObiPinConstraintsBatch();
-        ObiColliderBase playerCol = m_player.GetComponent<ObiColliderBase>();
-        //batch.AddConstraint(Obirope.elements[0].particle1, character, m_tf.localPosition, Quaternion.identity, 0, 0, float.PositiveInfinity);
-        //batch.AddConstraint(Obirope.elements[Obirope.elements.Count - 1].particle2, hookAttachment.collider.GetComponent<ObiColliderBase>(),
-        //                                                  hookAttachment.collider.transform.InverseTransformPoint(hookAttachment.point), Quaternion.identity, 0, 0, float.PositiveInfinity);
-        batch.AddConstraint(Obirope.elements[0].particle1, character, Vector3.zero, Quaternion.identity, 0, 0, float.PositiveInfinity);
+        batch.AddConstraint(Obirope.elements[0].particle1, character, m_tf.localPosition, Quaternion.identity, 0, 0, float.PositiveInfinity);
         batch.AddConstraint(Obirope.elements[Obirope.elements.Count - 1].particle2, hookAttachment.collider.GetComponent<ObiColliderBase>(),
                                                           hookAttachment.collider.transform.InverseTransformPoint(hookAttachment.point), Quaternion.identity, 0, 0, float.PositiveInfinity);
+
+        //ObiColliderBase obiCollider = m_grabObj.GetComponent<ObiColliderBase>();
+        //batch.AddConstraint(Obirope.elements[0].particle1, obiCollider, Vector3.zero, Quaternion.identity, 0, 0, float.PositiveInfinity);
+        //batch.AddConstraint(Obirope.elements[Obirope.elements.Count - 1].particle2, hookAttachment.collider.GetComponent<ObiColliderBase>(),
+        //                                                  hookAttachment.collider.transform.InverseTransformPoint(hookAttachment.point), Quaternion.identity, 0, 0, float.PositiveInfinity);
 
         batch.activeConstraintCount = 2;
         pinConstraints.AddBatch(batch);
         Obirope.SetConstraintsDirty(Oni.ConstraintType.Pin);
-        m_tf.parent = solver.transform;
-
-        StartCoroutine(m_player.Grab());
+        //GrabPointを生成しロープをGrabPointと繋ぐ
+        m_grabObj = Instantiate(m_grabPoint.gameObject, m_tf.position, Quaternion.identity, solver.transform);
+        m_player.SetGrabPoint = m_grabObj.GetComponent<GrabPoint>();
+        m_player.GrabPointSetUp();
+        //ConnectToObj(m_player.GetComponent<ObiColliderBase>());
+        //StartCoroutine(m_player.Grab());
     }
     public void ClearPinConstraints()
     {
@@ -235,58 +242,41 @@ public class HookShot : MonoBehaviour
         //pinConstraints.Clear();
     }
     /// <summary>
-    /// Hookの当たり判定を設定する
+    /// ロープとオブジェクトを繋ぐ
     /// </summary>
-    public void EnableCollition()
+    public void ConnectToObj(ObiColliderBase collider)
     {
-        //for (int i = 0; i < Obirope.activeParticleCount; ++i)
-        //    solver.invMasses[Obirope.solverIndices[i]] = 10;
-        if (hookAttachment.rigidbody.isKinematic)
-        {
-            m_tf.parent = m_player.transform;
-            var batch = new ObiPinConstraintsBatch();
-            ObiColliderBase playerCol = m_player.GetComponent<ObiColliderBase>();
-            batch.AddConstraint(Obirope.elements[0].particle1, playerCol, m_tf.localPosition, Quaternion.identity, 0, 0, float.PositiveInfinity);
-            batch.AddConstraint(Obirope.elements[Obirope.elements.Count - 1].particle2, hookAttachment.collider.GetComponent<ObiColliderBase>(),
-                                                              hookAttachment.collider.transform.InverseTransformPoint(hookAttachment.point), Quaternion.identity, 0, 0, float.PositiveInfinity);
-            batch.activeConstraintCount = 2;
-            pinConstraints.AddBatch(batch);
-            Obirope.SetConstraintsDirty(Oni.ConstraintType.Pin);
-        }
+        pinConstraints = Obirope.GetConstraintsByType(Oni.ConstraintType.Pin) as ObiConstraints<ObiPinConstraintsBatch>;
+        pinConstraints.Clear();
+        var batch = new ObiPinConstraintsBatch();
+        batch.AddConstraint(Obirope.elements[0].particle1, collider, Vector3.zero ,Quaternion.identity, 0, 0, float.PositiveInfinity);
+        batch.AddConstraint(Obirope.elements[Obirope.elements.Count - 1].particle2, hookAttachment.collider.GetComponent<ObiColliderBase>(),
+                                                          hookAttachment.collider.transform.InverseTransformPoint(hookAttachment.point), Quaternion.identity, 0, 0, float.PositiveInfinity);
+        batch.activeConstraintCount = 2;
+        pinConstraints.AddBatch(batch);
+        Obirope.SetConstraintsDirty(Oni.ConstraintType.Pin);
     }
     /// <summary>
     /// Hookの当たり判定をなくす
     /// </summary>
-    public void DisabledCollition()
+    public void ReleaseRope()
     {
-        //for (int i = 0; i < Obirope.activeParticleCount; ++i)
-        //    solver.invMasses[Obirope.solverIndices[i]] = 0;
-        m_player.m_hookLerpT = 0f;
-        m_col.isTrigger = true;
-        m_rb.isKinematic = true;
+
     }
-    public void SetParent(Transform parent)
-    {
-        if (parent == null)
-        {
-            m_childBehaviour.UnregisterParent();
-        }
-        else
-        {
-            m_childBehaviour.RegisterParent(parent);
-        }
-    }
+
     private void DetachHook()
     {
         // Set the rope blueprint to null (automatically removes the previous blueprint from the solver, if any).
         Obirope.ropeBlueprint = null;
         Obirope.GetComponent<MeshRenderer>().enabled = false;
-        m_player.ToRecoverHook();
+        //プレイヤーのIKをリセット
+        m_player.SetIKWeight(0);
+        m_player.m_isGrabbing = false;
+        //GrabPointを削除
+        Destroy(m_grabObj);
     }
-
-    void Update()
+    public void HookShooting()
     {
-
         DebugPrint.Print(string.Format("AttachmentObj:{0}", AttachmentObj?.name));
         //右クリックで発射
         if (Input.GetMouseButtonDown(1) && AttachmentObj)
@@ -296,52 +286,10 @@ public class HookShot : MonoBehaviour
             else
                 DetachHook();
         }
-        if (Input.GetKeyDown(KeyCode.V))
-        {
-            m_toggle = m_toggle ? false : true;
-        }
-        DebugPrint.Print(string.Format("{0}", m_toggle));
-
-
-        //Debug.Log(dist);
-
         //フック発射中
         if (Obirope.isLoaded)
         {
-            //if (Input.GetKeyDown(KeyCode.V))
-            //{
-            //    if (!m_childBehaviour.ExistVirtualParent)
-            //    {
-            //        StartCoroutine(Grabable());
-            //    }
-            //    else
-            //    {
-            //        m_childBehaviour.UnregisterParent();
-            //        m_player.Release();
-            //        m_col.isTrigger = false;
-            //        m_rb.isKinematic = false;
-            //    }
-            //}
-            //else
-            //{
-
-            //}
-            float Wheel = Input.GetAxis("Mouse ScrollWheel");
-            DebugPrint.Print(string.Format("Wheel{0}", Wheel));
             m_grabMesh.enabled = true;
-
-            if (Input.GetKey(KeyCode.Space))
-            {
-                cursor.ChangeLength(Obirope.restLength - hookExtendRetractSpeed * Time.deltaTime);
-            }
-            if (Input.GetKey(KeyCode.LeftShift))
-            {
-                cursor.ChangeLength(Obirope.restLength + hookExtendRetractSpeed * Time.deltaTime);
-            }
-
-            cursor.ChangeLength(Obirope.restLength - hookExtendRetractSpeed * Wheel * Time.deltaTime);
-
-
         }
         //通常
         else
@@ -355,15 +303,24 @@ public class HookShot : MonoBehaviour
         }
 
     }
-    public IEnumerator Grabable()
+    public void RopeChangeLength()
     {
-        DisabledCollition();
+        if (!Obirope.isLoaded) return;
+        float Wheel = Input.GetAxis("Mouse ScrollWheel");
 
-        yield return new WaitUntil(() => m_player.InterpolationIKWeight());
-        SetParent(m_player.transform);
-        m_isGrabbing = true;
-        EnableCollition();
-        //m_weightT = 0f;
+        if (Input.GetKey(KeyCode.Space))
+        {
+            cursor.ChangeLength(Obirope.restLength - hookExtendRetractSpeed * Time.deltaTime);
+        }
+        if (Input.GetKey(KeyCode.LeftShift))
+        {
+            cursor.ChangeLength(Obirope.restLength + hookExtendRetractSpeed * Time.deltaTime);
+        }
+        cursor.ChangeLength(Obirope.restLength - hookExtendRetractSpeed * Wheel * Time.deltaTime);
+    }
+    public void Grab()
+    {
+
     }
     public GameObject Explosion()
     {
@@ -395,8 +352,8 @@ public class HookShot : MonoBehaviour
             //attachmentObjとの間にコライダー付きのオブジェクトがあった場合は無視する
             if (Physics.Raycast(m_tf.position, hit.transform.position - m_tf.position, out RaycastHit hitInfo, m_langth))
             {
-                DebugPrint.Print(string.Format("1{0}", hit));
-                DebugPrint.Print(string.Format("2{0}", hitInfo.collider.gameObject));
+                //DebugPrint.Print(string.Format("1{0}", hit));
+                //DebugPrint.Print(string.Format("2{0}", hitInfo.collider.gameObject));
                 if (hit != hitInfo.collider.gameObject)
                 {
                     continue;
