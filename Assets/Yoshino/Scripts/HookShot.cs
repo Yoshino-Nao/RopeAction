@@ -26,6 +26,10 @@ public class HookShot : MonoBehaviour
     [SerializeField] private UITest m_ui;
     private ObiRope Obirope;
     [SerializeField] private MeshRenderer m_grabMesh;
+    public bool SetGrabMeshRendererEnabled
+    {
+        set { m_grabMesh.enabled = value; }
+    }
     private ObiRopeBlueprint blueprint;
     private ObiRopeCursor cursor;
     ObiConstraints<ObiPinConstraintsBatch> pinConstraints;
@@ -214,21 +218,21 @@ public class HookShot : MonoBehaviour
         //ロープが配置された時点でシミュレーションが引き継がれるように質量を復元します。
         for (int i = 0; i < Obirope.activeParticleCount; ++i)
             solver.invMasses[Obirope.solverIndices[i]] = 10; // 1/0.1 = 10
-
+        PlayerGrabs();
         //ロープの両端をピンで固定します (これにより、キャラクターとロープの間の双方向のインタラクションが可能になります)。
-        var batch = new ObiPinConstraintsBatch();
-        batch.AddConstraint(Obirope.elements[0].particle1, character, m_tf.localPosition, Quaternion.identity, 0, 0, float.PositiveInfinity);
-        batch.AddConstraint(Obirope.elements[Obirope.elements.Count - 1].particle2, hookAttachment.collider.GetComponent<ObiColliderBase>(),
-                                                          hookAttachment.collider.transform.InverseTransformPoint(hookAttachment.point), Quaternion.identity, 0, 0, float.PositiveInfinity);
+        //var batch = new ObiPinConstraintsBatch();
+        //batch.AddConstraint(Obirope.elements[0].particle1, character, m_tf.localPosition, Quaternion.identity, 0, 0, float.PositiveInfinity);
+        //batch.AddConstraint(Obirope.elements[Obirope.elements.Count - 1].particle2, hookAttachment.collider.GetComponent<ObiColliderBase>(),
+        //                                                  hookAttachment.collider.transform.InverseTransformPoint(hookAttachment.point), Quaternion.identity, 0, 0, float.PositiveInfinity);
 
         //ObiColliderBase obiCollider = m_grabObj.GetComponent<ObiColliderBase>();
         //batch.AddConstraint(Obirope.elements[0].particle1, obiCollider, Vector3.zero, Quaternion.identity, 0, 0, float.PositiveInfinity);
         //batch.AddConstraint(Obirope.elements[Obirope.elements.Count - 1].particle2, hookAttachment.collider.GetComponent<ObiColliderBase>(),
         //                                                  hookAttachment.collider.transform.InverseTransformPoint(hookAttachment.point), Quaternion.identity, 0, 0, float.PositiveInfinity);
 
-        batch.activeConstraintCount = 2;
-        pinConstraints.AddBatch(batch);
-        Obirope.SetConstraintsDirty(Oni.ConstraintType.Pin);
+        //batch.activeConstraintCount = 2;
+        //pinConstraints.AddBatch(batch);
+        //Obirope.SetConstraintsDirty(Oni.ConstraintType.Pin);
         //GrabPointを生成しロープをGrabPointと繋ぐ
         m_grabObj = Instantiate(m_grabPoint.gameObject, m_tf.position, Quaternion.identity, solver.transform);
         m_player.SetGrabPoint = m_grabObj.GetComponent<GrabPoint>();
@@ -249,7 +253,20 @@ public class HookShot : MonoBehaviour
         pinConstraints = Obirope.GetConstraintsByType(Oni.ConstraintType.Pin) as ObiConstraints<ObiPinConstraintsBatch>;
         pinConstraints.Clear();
         var batch = new ObiPinConstraintsBatch();
-        batch.AddConstraint(Obirope.elements[0].particle1, collider, Vector3.zero ,Quaternion.identity, 0, 0, float.PositiveInfinity);
+        batch.AddConstraint(Obirope.elements[0].particle1, collider, Vector3.zero, Quaternion.identity, 0, 0, float.PositiveInfinity);
+        batch.AddConstraint(Obirope.elements[Obirope.elements.Count - 1].particle2, hookAttachment.collider.GetComponent<ObiColliderBase>(),
+                                                          hookAttachment.collider.transform.InverseTransformPoint(hookAttachment.point), Quaternion.identity, 0, 0, float.PositiveInfinity);
+        batch.activeConstraintCount = 2;
+        pinConstraints.AddBatch(batch);
+        Obirope.SetConstraintsDirty(Oni.ConstraintType.Pin);
+    }
+    public void PlayerGrabs()
+    {
+        m_grabMesh.enabled = true;
+        pinConstraints = Obirope.GetConstraintsByType(Oni.ConstraintType.Pin) as ObiConstraints<ObiPinConstraintsBatch>;
+        pinConstraints.Clear();
+        var batch = new ObiPinConstraintsBatch();
+        batch.AddConstraint(Obirope.elements[0].particle1, character, m_tf.localPosition, Quaternion.identity, 0, 0, float.PositiveInfinity);
         batch.AddConstraint(Obirope.elements[Obirope.elements.Count - 1].particle2, hookAttachment.collider.GetComponent<ObiColliderBase>(),
                                                           hookAttachment.collider.transform.InverseTransformPoint(hookAttachment.point), Quaternion.identity, 0, 0, float.PositiveInfinity);
         batch.activeConstraintCount = 2;
@@ -266,6 +283,7 @@ public class HookShot : MonoBehaviour
 
     private void DetachHook()
     {
+        m_grabMesh.enabled = false;
         // Set the rope blueprint to null (automatically removes the previous blueprint from the solver, if any).
         Obirope.ropeBlueprint = null;
         Obirope.GetComponent<MeshRenderer>().enabled = false;
@@ -289,13 +307,13 @@ public class HookShot : MonoBehaviour
         //フック発射中
         if (Obirope.isLoaded)
         {
-            m_grabMesh.enabled = true;
+           // m_grabMesh.enabled = true;
         }
         //通常
         else
         {
             AttachmentObj = Explosion();
-            m_grabMesh.enabled = false;
+          //  m_grabMesh.enabled = false;
             if (m_ui != null)
             {
                 m_ui.m_attachTf = AttachmentObj?.transform;

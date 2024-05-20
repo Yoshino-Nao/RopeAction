@@ -26,12 +26,6 @@ public class MoveTest : MonoBehaviour
 
     [SerializeField] private float m_grabTotalTime = 1f;
 
-    [Button]
-    void test()
-    {
-        m_hookShot.transform.position = m_ikTarget.transform.position;
-    }
-
     // キャラクターコントローラ（カプセルコライダ）の参照
     private CapsuleCollider m_col;
     private Rigidbody m_rb;
@@ -91,7 +85,7 @@ public class MoveTest : MonoBehaviour
         m_CameraTf = Camera.main.transform;
         m_hookShot = GetComponentInChildren<HookShot>();
         m_hookCol = m_hookShot.GetComponent<ObiColliderBase>();
-       m_ikTarget = GetComponentInChildren<IKTarget>();
+        m_ikTarget = GetComponentInChildren<IKTarget>();
         m_fullBodyBipedIK = GetComponentInChildren<FullBodyBipedIK>();
         //contactEventDispatcher.onContactEnter
         obiSolver = GetComponentInParent<ObiSolver>();
@@ -132,10 +126,16 @@ public class MoveTest : MonoBehaviour
             }
         }
         m_hookShot.HookShooting();
-        //IKのWeightをロープの有無で補間
-        //InterpolationIKWeight();
-        Idle();
-        RopeGrabbing();
+        DebugPrint.Print(string.Format("{0}", m_ikArmWeight));
+
+        if (!m_isGrabbing)
+        {
+            Idle();
+        }
+        else
+        {
+            RopeGrabbing();
+        }
     }
     // 以下、メイン処理.リジッドボディと絡めるので、FixedUpdate内で処理を行う.
     void FixedUpdate()
@@ -196,6 +196,7 @@ public class MoveTest : MonoBehaviour
     /// </summary>
     public void Release()
     {
+        m_hookShot.SetGrabMeshRendererEnabled = false;
         m_hookShot.ConnectToObj(m_grabPoint.GetObiCol);
         //IKを解除し物理演算を開始
         SetIKWeight(0);
@@ -207,12 +208,13 @@ public class MoveTest : MonoBehaviour
     }
     public IEnumerator Grab()
     {
+        m_isGrabbing = true;
+        m_grabPoint.DisableCollider();
         m_lerpTGrabPoint = 0f;
         //m_hookShot.DisabledCollition();
         SetIKWeight(1);
         yield return new WaitUntil(() => LerpGrabPoint());
-        m_hookShot.ConnectToObj(m_hookCol);
-        m_isGrabbing = true;
+        m_hookShot.PlayerGrabs();
         m_grabPoint.SetParent(m_tf);
         //m_hookShot.GrabRope();
     }

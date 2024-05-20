@@ -52,4 +52,9 @@ public class GrabPoint : MonoBehaviour
         m_col.isTrigger = false;
         m_rb.isKinematic = false;
     }
+    public void DisableCollider()
+    {
+        m_col.isTrigger = true;
+        m_rb.isKinematic = true;
+    }
 }

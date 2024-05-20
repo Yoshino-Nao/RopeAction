@@ -1719,7 +1719,7 @@ GameObject:
   - component: {fileID: 605915876425933463}
   - component: {fileID: 6823372669855928767}
   m_Layer: 0
-  m_Name: Obi Rope Garb
+  m_Name: Obi Rope Grab
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -1752,64 +1752,64 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 61104f33a3f344db9b7e0d0cda41a9fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  solverIndices: e2010000e3010000e4010000e5010000e6010000e7010000e8010000e9010000ea010000eb010000ec010000ed010000ee010000ef010000f0010000f1010000f2010000f3010000f4010000f5010000f6010000f7010000f8010000f9010000fa010000fb010000fc010000fd010000fe010000ff010000000200000102000002020000030200000402000005020000060200000702000008020000090200000a0200000b0200000c0200000d0200000e0200000f020000100200001102000012020000130200001402000015020000160200001702000018020000190200001a0200001b0200001c0200001d0200001e0200001f020000200200002102000022020000230200002402000025020000260200002702000028020000290200002a0200002b0200002c0200002d0200002e0200002f020000300200003102000032020000330200003402000035020000360200003702000038020000390200003a0200003b0200003c0200003d0200003e0200003f020000400200004102000042020000430200004402000045020000460200004702000048020000490200004a0200004b0200004c0200004d0200004e0200004f0200005002000051020000
+  solverIndices: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000f000000100000001100000012000000130000001400000015000000160000001700000018000000190000001a0000001b0000001c0000001d0000001e0000001f000000200000002100000022000000230000002400000025000000260000002700000028000000290000002a0000002b0000002c0000002d0000002e0000002f000000300000003100000032000000330000003400000035000000360000003700000038000000390000003a0000003b0000003c0000003d0000003e0000003f000000400000004100000042000000430000004400000045000000460000004700000048000000490000004a0000004b0000004c0000004d0000004e0000004f000000500000005100000052000000530000005400000055000000560000005700000058000000590000005a0000005b0000005c0000005d0000005e0000005f000000600000006100000062000000630000006400000065000000660000006700000068000000690000006a0000006b0000006c0000006d0000006e0000006f000000
   m_CollisionMaterial: {fileID: 0}
   m_SurfaceCollisions: 0
   m_SelfCollisions: 0
   restLength_: 1
   elements:
-  - particle1: 482
-    particle2: 483
+  - particle1: 0
+    particle2: 1
     restLength: 0.09049519
     constraintForce: 0
     tearResistance: 1
-  - particle1: 483
-    particle2: 484
+  - particle1: 1
+    particle2: 2
     restLength: 0.09065471
     constraintForce: 0
     tearResistance: 1
-  - particle1: 484
-    particle2: 485
+  - particle1: 2
+    particle2: 3
     restLength: 0.091249645
     constraintForce: 0
     tearResistance: 1
-  - particle1: 485
-    particle2: 486
+  - particle1: 3
+    particle2: 4
     restLength: 0.09092173
     constraintForce: 0
     tearResistance: 1
-  - particle1: 486
-    particle2: 487
+  - particle1: 4
+    particle2: 5
     restLength: 0.09115636
     constraintForce: 0
     tearResistance: 1
-  - particle1: 487
-    particle2: 488
+  - particle1: 5
+    particle2: 6
     restLength: 0.091044754
     constraintForce: 0
     tearResistance: 1
-  - particle1: 488
-    particle2: 489
+  - particle1: 6
+    particle2: 7
     restLength: 0.09115636
     constraintForce: 0
     tearResistance: 1
-  - particle1: 489
-    particle2: 490
+  - particle1: 7
+    particle2: 8
     restLength: 0.0909217
     constraintForce: 0
     tearResistance: 1
-  - particle1: 490
-    particle2: 491
+  - particle1: 8
+    particle2: 9
     restLength: 0.091249764
     constraintForce: 0
     tearResistance: 1
-  - particle1: 491
-    particle2: 492
+  - particle1: 9
+    particle2: 10
     restLength: 0.09065467
     constraintForce: 0
     tearResistance: 1
-  - particle1: 492
-    particle2: 493
+  - particle1: 10
+    particle2: 11
     restLength: 0.09049511
     constraintForce: 0
     tearResistance: 1
@@ -5372,6 +5372,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7608799419398288387}
+  - component: {fileID: 377623454629833943}
   - component: {fileID: 7205192328844722259}
   - component: {fileID: 5007898359722576710}
   m_Layer: 0
@@ -5398,6 +5399,20 @@ Transform:
   - {fileID: 143038681206361137}
   m_Father: {fileID: 1689508515354595564}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &377623454629833943
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2517573769603134870}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9ec801f845c2d3468a298fb1671458c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_rightTarget: {fileID: 0}
+  m_leftTarget: {fileID: 0}
 --- !u!135 &7205192328844722259
 SphereCollider:
   m_ObjectHideFlags: 0
@@ -10131,7 +10146,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &4490828182129421396
 Transform:
   m_ObjectHideFlags: 0
@@ -17120,7 +17135,7 @@ MonoBehaviour:
         defaultLocalDirection: {x: 0, y: 0, z: 0}
         defaultChildDirection: {x: 0, y: 0, z: 0}
     - pin: 0
-      pull: 0
+      pull: 1
       push: 0
       pushParent: 0
       reach: 0.1
@@ -17170,7 +17185,7 @@ MonoBehaviour:
         defaultLocalDirection: {x: 0, y: 0, z: 0}
         defaultChildDirection: {x: 0, y: 0, z: 0}
     - pin: 0
-      pull: 0
+      pull: 1
       push: 0
       pushParent: 0
       reach: 0.1
@@ -17393,7 +17408,7 @@ MonoBehaviour:
       planeBone3: {fileID: 0}
       planeRotationOffset: {x: 0, y: 0, z: 0, w: 1}
     - bone: {fileID: 4619234573278476017}
-      target: {fileID: 1415840085135095431}
+      target: {fileID: 0}
       positionWeight: 1
       rotationWeight: 1
       position: {x: 0, y: 0, z: 0}
@@ -17407,7 +17422,7 @@ MonoBehaviour:
       planeBone3: {fileID: 2717110511392752129}
       planeRotationOffset: {x: 0, y: 0, z: 0, w: 1}
     - bone: {fileID: 2966828890566099599}
-      target: {fileID: 143038681206361137}
+      target: {fileID: 0}
       positionWeight: 1
       rotationWeight: 1
       position: {x: 0, y: 0, z: 0}
