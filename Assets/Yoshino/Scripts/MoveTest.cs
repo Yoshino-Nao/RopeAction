@@ -64,7 +64,8 @@ public class MoveTest : MonoBehaviour
 
     private ObiSolver obiSolver;
     private CameraChanger m_cameraChanger;
-    HookShot m_hookShot;
+    private HookShot m_hookShot;
+    private ObiColliderBase m_hookCol;
     private IKTarget m_ikTarget;
     public float m_lerpTGrabPoint = 0f;
     private GrabPoint m_grabPoint;
@@ -89,7 +90,8 @@ public class MoveTest : MonoBehaviour
         m_tf = transform;
         m_CameraTf = Camera.main.transform;
         m_hookShot = GetComponentInChildren<HookShot>();
-        m_ikTarget = GetComponentInChildren<IKTarget>();
+        m_hookCol = m_hookShot.GetComponent<ObiColliderBase>();
+       m_ikTarget = GetComponentInChildren<IKTarget>();
         m_fullBodyBipedIK = GetComponentInChildren<FullBodyBipedIK>();
         //contactEventDispatcher.onContactEnter
         obiSolver = GetComponentInParent<ObiSolver>();
@@ -132,7 +134,7 @@ public class MoveTest : MonoBehaviour
         m_hookShot.HookShooting();
         //IKのWeightをロープの有無で補間
         //InterpolationIKWeight();
-        RopeRelease();
+        Idle();
         RopeGrabbing();
     }
     // 以下、メイン処理.リジッドボディと絡めるので、FixedUpdate内で処理を行う.
@@ -209,6 +211,7 @@ public class MoveTest : MonoBehaviour
         //m_hookShot.DisabledCollition();
         SetIKWeight(1);
         yield return new WaitUntil(() => LerpGrabPoint());
+        m_hookShot.ConnectToObj(m_hookCol);
         m_isGrabbing = true;
         m_grabPoint.SetParent(m_tf);
         //m_hookShot.GrabRope();
@@ -223,7 +226,7 @@ public class MoveTest : MonoBehaviour
     /// <summary>
     ///　通常状態
     /// </summary>
-    private void RopeRelease()
+    private void Idle()
     {
         if (m_isGrabbing) return;
         if (m_grabPoint != null)
