@@ -82,6 +82,7 @@ public class HookShot : MonoBehaviour
         m_cameraChanger = GetComponentInParent<CameraChanger>();
         m_player = FindObjectOfType<MoveTest>();
         m_childBehaviour = GetComponent<VirtualChildBehaviour>();
+        m_grabMesh.enabled = false;
         // Create both the rope and the solver:	
         //rope = gameObject.AddComponent<ObiRope>();
         Obirope = gameObject.GetComponent<ObiRope>();

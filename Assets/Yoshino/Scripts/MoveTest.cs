@@ -59,15 +59,14 @@ public class MoveTest : MonoBehaviour
     private ObiSolver obiSolver;
     private CameraChanger m_cameraChanger;
     private HookShot m_hookShot;
-    private ObiColliderBase m_hookCol;
     private IKTarget m_ikTarget;
-    public float m_lerpTGrabPoint = 0f;
+    private float m_lerpTGrabPoint = 0f;
     private GrabPoint m_grabPoint;
     public GrabPoint SetGrabPoint
     {
         set { m_grabPoint = value; }
     }
-
+    
     public bool m_isGrabbing = false;
     // 初期化
     void Start()
@@ -84,7 +83,6 @@ public class MoveTest : MonoBehaviour
         m_tf = transform;
         m_CameraTf = Camera.main.transform;
         m_hookShot = GetComponentInChildren<HookShot>();
-        m_hookCol = m_hookShot.GetComponent<ObiColliderBase>();
         m_ikTarget = GetComponentInChildren<IKTarget>();
         m_fullBodyBipedIK = GetComponentInChildren<FullBodyBipedIK>();
         //contactEventDispatcher.onContactEnter
@@ -179,8 +177,9 @@ public class MoveTest : MonoBehaviour
         //
         m_lerpTGrabPoint += Time.deltaTime / m_grabTotalTime;
 
-        m_grabPoint.transform.position = Vector3.Lerp(m_grabPoint.transform.position, m_ikTarget.transform.position, m_lerpTGrabPoint);
+        m_grabPoint.transform.position = Vector3.Lerp(m_grabPoint.transform.position, m_hookShot.transform.position, m_lerpTGrabPoint);
 
+        m_ikTarget.Move(m_grabPoint.transform.position);
         return m_lerpTGrabPoint >= 1;
     }
     public void SetIKWeight(float weight)
@@ -256,6 +255,8 @@ public class MoveTest : MonoBehaviour
         {
             Release();
         }
+
+        //m_ikTarget.Move(m_grabPoint.transform.position);
         m_hookShot.RopeChangeLength();
         //HookShotの方向に向き続ける
         Vector3 Dir = (m_grabPoint.transform.position - m_tf.position).normalized;

@@ -421,7 +421,6 @@ MonoBehaviour:
   m_jumpPower: 3
   m_playerForwardOn2d: {x: 1, y: 0, z: 0}
   m_grabTotalTime: 1
-  m_lerpTGrabPoint: 0
   m_isGrabbing: 0
 --- !u!136 &8040820617923788580
 CapsuleCollider:
@@ -666,6 +665,7 @@ GameObject:
   - component: {fileID: 5565787388318282891}
   - component: {fileID: 4070215290681706183}
   - component: {fileID: 5791297530996084679}
+  - component: {fileID: 5990510737542752799}
   m_Layer: 0
   m_Name: IKTarget
   m_TagString: Untagged
@@ -728,6 +728,20 @@ MonoBehaviour:
   filter: -65535
   m_SourceCollider: {fileID: 4070215290681706183}
   m_DistanceField: {fileID: 0}
+--- !u!114 &5990510737542752799
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 7100288017830719661}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f9ec801f845c2d3468a298fb1671458c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_rightTarget: {fileID: 2754707533659947491}
+  m_leftTarget: {fileID: 2669661729958725667}
 --- !u!1 &9166022135347156104
 GameObject:
   m_ObjectHideFlags: 0
