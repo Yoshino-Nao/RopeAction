@@ -119,7 +119,7 @@ public class HookShot : MonoBehaviour
 	 */
     public void LaunchHook()
     {
-
+        if (AttachmentObj == null) return;
         //このオブジェクトと同じ XY 平面内のシーン内のマウスの位置を取得します。
         //Vector3 mouse = Input.mousePosition;
         //mouse.z = transform.position.z - Camera.main.transform.position.z;
@@ -130,7 +130,7 @@ public class HookShot : MonoBehaviour
         //Vector3 vec = 
 
         // Raycast to see what we hit:
-        if (Physics.Raycast(ray, out hookAttachment))
+        if (Physics.Raycast(ray, out hookAttachment) )
         {
             // We actually hit something, so attach the hook!
             StartCoroutine(AttachHook());
@@ -297,28 +297,14 @@ public class HookShot : MonoBehaviour
     {
         DebugPrint.Print(string.Format("AttachmentObj:{0}", AttachmentObj?.name));
         //右クリックで発射
-        if (Input.GetMouseButtonDown(1) && AttachmentObj)
+        if (Input.GetMouseButtonDown(1))
         {
             if (!Obirope.isLoaded)
                 LaunchHook();
             else
                 DetachHook();
         }
-        //フック発射中
-        if (Obirope.isLoaded)
-        {
-           // m_grabMesh.enabled = true;
-        }
-        //通常
-        else
-        {
-            AttachmentObj = Explosion();
-          //  m_grabMesh.enabled = false;
-            if (m_ui != null)
-            {
-                m_ui.m_attachTf = AttachmentObj?.transform;
-            }
-        }
+
 
     }
     public void RopeChangeLength()
@@ -395,5 +381,16 @@ public class HookShot : MonoBehaviour
         return obj;
 
     }
+    private void Update()
+    {
 
+
+        AttachmentObj = Explosion();
+        //  m_grabMesh.enabled = false;
+        if (m_ui != null)
+        {
+            m_ui.m_attachTf = AttachmentObj?.transform;
+        }
+    }
 }
+

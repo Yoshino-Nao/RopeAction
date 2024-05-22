@@ -217,10 +217,12 @@ public class MoveTest : MonoBehaviour
 
 
         m_isGrabbing = false;
+        Debug.Log("ロープを離しました");
     }
     public IEnumerator Grab()
     {
         m_isGrabbing = true;
+        Debug.Log("ロープを掴みました");
         m_grabPoint.DisableCollider();
         m_lerpTGrabPoint = 0f;
         //m_hookShot.DisabledCollition();
@@ -235,6 +237,7 @@ public class MoveTest : MonoBehaviour
         m_grabPoint.SetUp();
         SetIKWeight(1);
         m_grabPoint.SetParent(m_tf);
+        Debug.Log("ロープを掴みました");
         m_isGrabbing = true;
     }
     /// <summary>
