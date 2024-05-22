@@ -51,6 +51,12 @@ public class HookShot : MonoBehaviour
     {
         get { return AttachmentObj; }
     }
+    [SerializeField] private ObiColliderBase Test;
+    [Button]
+    void ConnectTest()
+    {
+        ConnectToObj(Test);
+    }
 
     //ロープをつけられるオブジェクトまでの一番短い距離
     private float MinLength = 999;

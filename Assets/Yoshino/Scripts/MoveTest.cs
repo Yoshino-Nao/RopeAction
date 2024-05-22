@@ -114,6 +114,7 @@ public class MoveTest : MonoBehaviour
             m_anim.SetFloat("SpeedX", 0);
             m_anim.SetFloat("SpeedY", 0);
         }
+
         //DebugPrint.Print(string.Format("ISMove{0}", m_currentBaseState.fullPathHash== locoState));
         //ジャンプ
         if (Input.GetButtonDown("Jump"))
