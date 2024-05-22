@@ -52,7 +52,7 @@ public class MoveTest : MonoBehaviour
 
     // アニメーター各ステートへの参照
     static int idleState = Animator.StringToHash("Base Layer.Idle");
-    static int locoState = Animator.StringToHash("Base Layer.Locomotion");
+    static int MoveState = Animator.StringToHash("Base Layer.Blend Tree");
     static int jumpState = Animator.StringToHash("Base Layer.Jump");
     static int restState = Animator.StringToHash("Base Layer.Rest");
 
@@ -86,6 +86,7 @@ public class MoveTest : MonoBehaviour
         m_ikTarget = GetComponentInChildren<IKTarget>();
         m_fullBodyBipedIK = GetComponentInChildren<FullBodyBipedIK>();
         //contactEventDispatcher.onContactEnter
+        
         obiSolver = GetComponentInParent<ObiSolver>();
         m_cameraChanger = GetComponent<CameraChanger>();
         SetIKWeight(0);
@@ -97,7 +98,7 @@ public class MoveTest : MonoBehaviour
         m_currentBaseState = m_anim.GetCurrentAnimatorStateInfo(0); // 参照用のステート変数にBase Layer (0)の現在のステートを設定する
         m_rb.useGravity = true;//ジャンプ中に重力を切るので、それ以外は重力の影響を受けるようにする
         m_isGround = FootCollider();
-        m_anim.SetBool("Jump", false);
+        m_anim.SetBool("Ground", m_isGround);
         SetMoveDir();
         //空中では歩行アニメーションをしないようにする処理
         if (m_isGround)
@@ -113,18 +114,30 @@ public class MoveTest : MonoBehaviour
             m_anim.SetFloat("SpeedX", 0);
             m_anim.SetFloat("SpeedY", 0);
         }
+        //DebugPrint.Print(string.Format("ISMove{0}", m_currentBaseState.fullPathHash== locoState));
         //ジャンプ
         if (Input.GetButtonDown("Jump"))
         {
-            //ステート遷移中でなかったらジャンプできる
+            if (m_currentBaseState.fullPathHash == MoveState)
+            {
+                //ステート遷移中でなかったらジャンプできる
+                //if (!m_anim.IsInTransition(0))
+                {
+                    
+                    m_anim.SetBool("Jump", true);     // Animatorにジャンプに切り替えるフラグを送る
+                }
+            }
+        }
+
+        if (m_currentBaseState.fullPathHash == jumpState)
+        {
             if (!m_anim.IsInTransition(0))
             {
-                m_rb.AddForce(Vector3.up * m_jumpPower, ForceMode.Impulse);
-                m_anim.SetBool("Jump", true);     // Animatorにジャンプに切り替えるフラグを送る
+                m_anim.SetBool("Jump", false);
             }
         }
         m_hookShot.HookShooting();
-        DebugPrint.Print(string.Format("{0}", m_ikArmWeight));
+        //DebugPrint.Print(string.Format("{0}", m_ikArmWeight));
 
         if (!m_isGrabbing)
         {
@@ -302,6 +315,9 @@ public class MoveTest : MonoBehaviour
         RaycastHit hit;
         return (Physics.SphereCast(m_tf.position + m_col.center, m_col.radius, -m_tf.up, out hit, m_col.height / 2));
     }
-
+    public void Jump()
+    {
+        m_rb.AddForce(Vector3.up * m_jumpPower, ForceMode.Impulse);
+    }
 }
 

@@ -33,7 +33,6 @@ public class HookShot : MonoBehaviour
     private ObiRopeBlueprint blueprint;
     private ObiRopeCursor cursor;
     ObiConstraints<ObiPinConstraintsBatch> pinConstraints;
-    [SerializeField] private Rope rope;
 
 
     private RaycastHit hookAttachment;
@@ -329,13 +328,14 @@ public class HookShot : MonoBehaviour
 
         if (Input.GetKey(KeyCode.Space))
         {
-            cursor.ChangeLength(Obirope.restLength - hookExtendRetractSpeed * Time.deltaTime);
+            cursor.ChangeLength(Mathf.Clamp(Obirope.restLength - hookExtendRetractSpeed * Time.deltaTime, 1, 20));
         }
         if (Input.GetKey(KeyCode.LeftShift))
         {
-            cursor.ChangeLength(Obirope.restLength + hookExtendRetractSpeed * Time.deltaTime);
+            cursor.ChangeLength(Mathf.Clamp(Obirope.restLength + hookExtendRetractSpeed * Time.deltaTime, 1, 20));
         }
-        cursor.ChangeLength(Obirope.restLength - hookExtendRetractSpeed * Wheel * Time.deltaTime);
+        DebugPrint.Print(string.Format("RopeLength{0}", Obirope.restLength));
+        cursor.ChangeLength(Mathf.Clamp(Obirope.restLength - hookExtendRetractSpeed * Wheel * Time.deltaTime, 1, 20));
     }
     public void Grab()
     {

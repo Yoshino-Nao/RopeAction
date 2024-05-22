@@ -201,7 +201,6 @@ MonoBehaviour:
   particlePoolSize: 100
   m_ui: {fileID: 0}
   m_grabMesh: {fileID: 0}
-  rope: {fileID: 8621595611707492823}
   m_grabPoint: {fileID: 391454940715962082, guid: 7ab3df9c70ace4f4db1377db00d3cf8a, type: 3}
 --- !u!114 &6079209034565447418
 MonoBehaviour:
@@ -418,7 +417,7 @@ MonoBehaviour:
   m_forwardSpeed: 14
   m_backwardSpeed: 2
   m_rotateSpeed: 2
-  m_jumpPower: 3
+  m_jumpPower: 280
   m_playerForwardOn2d: {x: 1, y: 0, z: 0}
   m_grabTotalTime: 1
   m_isGrabbing: 0
