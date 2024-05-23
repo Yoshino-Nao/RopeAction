@@ -38,7 +38,15 @@ public class HookShot : MonoBehaviour
     private RaycastHit hookAttachment;
     //ロープをアタッチしているオブジェクト
     private GameObject AttachmentObj = null;
-
+    public GameObject GetAttachmentObj
+    {
+        get { return AttachmentObj; }
+    }
+    private GameObject m_currentAttachObj;
+    public GameObject GetCurrnetAttachObj
+    {
+        get { return m_currentAttachObj; }
+    }
     private MoveTest m_player;
 
     private VirtualChildBehaviour m_childBehaviour;
@@ -47,10 +55,7 @@ public class HookShot : MonoBehaviour
     [SerializeField] private GrabPoint m_grabPoint;
     private GameObject m_grabObj;
     private bool m_isGrabbing = false;
-    public GameObject GetAttachmentObj
-    {
-        get { return AttachmentObj; }
-    }
+
     [SerializeField] private ObiColliderBase Test;
     [Button]
     void ConnectTest()
@@ -134,9 +139,9 @@ public class HookShot : MonoBehaviour
 
         Ray ray = new Ray(m_tf.position, AttachmentObj.transform.position - transform.position);
         //Vector3 vec = 
-
+        m_currentAttachObj = AttachmentObj;
         // Raycast to see what we hit:
-        if (Physics.Raycast(ray, out hookAttachment) )
+        if (Physics.Raycast(ray, out hookAttachment))
         {
             // We actually hit something, so attach the hook!
             StartCoroutine(AttachHook());

@@ -42,13 +42,13 @@ public class MoveTest : MonoBehaviour
 
     // キャラクターコントローラ（カプセルコライダ）の移動量
     private Vector3 m_moveDir;
+    private Vector3 m_oldPos;
     private bool m_isInputJump;
     // CapsuleColliderで設定されているコライダのHeiht、Centerの初期値を収める変数
     private float m_orgColHight;
     private Vector3 m_orgVectColCenter;
     private Animator m_anim;                          // キャラにアタッチされるアニメーターへの参照
     private AnimatorStateInfo m_currentBaseState;         // base layerで使われる、アニメーターの現在の状態の参照
-
 
     // アニメーター各ステートへの参照
     static int idleState = Animator.StringToHash("Base Layer.Idle");
@@ -66,7 +66,7 @@ public class MoveTest : MonoBehaviour
     {
         set { m_grabPoint = value; }
     }
-    
+
     public bool m_isGrabbing = false;
     // 初期化
     void Start()
@@ -86,7 +86,7 @@ public class MoveTest : MonoBehaviour
         m_ikTarget = GetComponentInChildren<IKTarget>();
         m_fullBodyBipedIK = GetComponentInChildren<FullBodyBipedIK>();
         //contactEventDispatcher.onContactEnter
-        
+
         obiSolver = GetComponentInParent<ObiSolver>();
         m_cameraChanger = GetComponent<CameraChanger>();
         SetIKWeight(0);
@@ -124,7 +124,7 @@ public class MoveTest : MonoBehaviour
                 //ステート遷移中でなかったらジャンプできる
                 //if (!m_anim.IsInTransition(0))
                 {
-                    
+
                     m_anim.SetBool("Jump", true);     // Animatorにジャンプに切り替えるフラグを送る
                 }
             }
@@ -153,20 +153,18 @@ public class MoveTest : MonoBehaviour
     void FixedUpdate()
     {
         ForceMode Mode = ForceMode.Acceleration;
-        //フックを発射中でない時
-        if (!m_hookShot)
+        float Speed = m_forwardSpeed;
+        //ターザン風の移動処理
+        //フックを発射中かつ、空中で、上昇中は移動速度を0にする
+        if (m_isGrabbing && !m_isGround && (m_oldPos.y - m_tf.position.y) <= 0f)
         {
+            Speed = 0f;
+        }
 
-        }
-        //フックを発射中
-        else
-        {
-            Mode = ForceMode.Impulse;
-        }
 
         //キャラクターを移動させる
-        m_rb.AddForce(m_moveDir * m_forwardSpeed, Mode);
-
+        m_rb.AddForce(m_moveDir * Speed, Mode);
+        m_oldPos = m_tf.position;
     }
     private void SetMoveDir()
     {
@@ -257,7 +255,7 @@ public class MoveTest : MonoBehaviour
             }
         }
         //移動中は移動方向へ向く
-        if (m_moveDir.magnitude >= 0.1)
+        if (m_moveDir.magnitude > 0 || Mathf.Abs((m_oldPos - m_tf.position).magnitude) > 0f && m_isGround)
         {
             m_tf.rotation = Quaternion.LookRotation(m_moveDir, Vector3.up);
         }
@@ -276,19 +274,21 @@ public class MoveTest : MonoBehaviour
         //m_ikTarget.Move(m_grabPoint.transform.position);
         m_hookShot.RopeChangeLength();
         //HookShotの方向に向き続ける
-        Vector3 Dir = (m_grabPoint.transform.position - m_tf.position).normalized;
-        Debug.DrawRay(m_tf.position, Dir * 100);
+        Vector3 ToGrabPointDir = (m_grabPoint.transform.position - m_tf.position).normalized;
+        Vector3 ToAttachPointDir = (m_hookShot.GetCurrnetAttachObj.transform.position - m_tf.position).normalized;
+        Debug.DrawRay(m_tf.position, ToGrabPointDir * 100);
         if (m_isGround)
         {
-            Dir = Vector3.ProjectOnPlane(Dir, Vector3.up);
-            m_tf.rotation = Quaternion.LookRotation(Dir, Vector3.up);
+            ToGrabPointDir = Vector3.ProjectOnPlane(ToGrabPointDir, Vector3.up);
+            m_tf.rotation = Quaternion.LookRotation(ToGrabPointDir, Vector3.up);
         }
         else
         {
-            Dir = Vector3.ProjectOnPlane(Dir, Vector3.up);
-            m_tf.rotation = Quaternion.LookRotation(Dir, Vector3.up);
+            //ToAttachPointDir = Vector3.ProjectOnPlane(ToGrabPointDir, Vector3.up);
+            //m_tf.rotation = Quaternion.LookRotation(Dir, Vector3.up);
+            m_moveDir = Vector3.ProjectOnPlane(m_moveDir, ToAttachPointDir);
 
-            //m_tf.rotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(m_moveDir, Dir));
+            m_tf.rotation = Quaternion.RotateTowards(m_tf.rotation, Quaternion.LookRotation(Vector3.ProjectOnPlane(m_moveDir, ToAttachPointDir)), m_rotateSpeed * Time.fixedDeltaTime);
             //Quaternion.LookRotation(Dir, Vector3.up) *
             //m_tf.rotation = Quaternion.LookRotation(Dir) * Quaternion.Euler(m_tf.rotation.x + 90, m_tf.rotation.y, m_tf.rotation.z);
 
