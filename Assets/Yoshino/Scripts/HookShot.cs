@@ -4,10 +4,11 @@ using System.Collections.Generic;
 using UnityEngine;
 using VInspector;
 using System.Linq;
+using Unity.Burst.CompilerServices;
 
 public class HookShot : MonoBehaviour
 {
-    [SerializeField] private float m_langth = 10f;
+    [SerializeField] private float m_length = 10f;
     public ObiSolver solver;
     public ObiCollider character;
     public Material material;
@@ -20,9 +21,7 @@ public class HookShot : MonoBehaviour
     public int particlePoolSize = 100;
 
     private Transform m_tf;
-    private SphereCollider m_col;
-    private Rigidbody m_rb;
-    private CameraChanger m_cameraChanger = null;
+    private Camera m_mainCamera;
     [SerializeField] private UITest m_ui;
     private ObiRope Obirope;
     [SerializeField] private MeshRenderer m_grabMesh;
@@ -38,14 +37,10 @@ public class HookShot : MonoBehaviour
     private RaycastHit hookAttachment;
     //ロープをアタッチしているオブジェクト
     private GameObject AttachmentObj = null;
-    public GameObject GetAttachmentObj
+    private Transform m_currentAttachTf;
+    public Transform GetCurrnetAttachTf
     {
-        get { return AttachmentObj; }
-    }
-    private GameObject m_currentAttachObj;
-    public GameObject GetCurrnetAttachObj
-    {
-        get { return m_currentAttachObj; }
+        get { return m_currentAttachTf; }
     }
     private Rigidbody m_currentAttachRb;
     public Rigidbody GetCurrnetAttachRb
@@ -53,9 +48,6 @@ public class HookShot : MonoBehaviour
         get { return m_currentAttachRb; }
     }
     private MoveTest m_player;
-
-    private VirtualChildBehaviour m_childBehaviour;
-    private bool m_toggle = false;
 
     [SerializeField] private GrabPoint m_grabPoint;
     private GameObject m_grabObj;
@@ -67,8 +59,6 @@ public class HookShot : MonoBehaviour
         ConnectToObj(Test);
     }
 
-    //ロープをつけられるオブジェクトまでの一番短い距離
-    private float MinLength = 999;
 
     public bool GetisLoaded
     {
@@ -91,11 +81,8 @@ public class HookShot : MonoBehaviour
 
 
         m_tf = transform;
-        m_col = GetComponent<SphereCollider>();
-        m_rb = GetComponent<Rigidbody>();
-        m_cameraChanger = GetComponentInParent<CameraChanger>();
+        m_mainCamera = Camera.main;
         m_player = FindObjectOfType<MoveTest>();
-        m_childBehaviour = GetComponent<VirtualChildBehaviour>();
         m_grabMesh.enabled = false;
         // Create both the rope and the solver:	
         //rope = gameObject.AddComponent<ObiRope>();
@@ -141,12 +128,12 @@ public class HookShot : MonoBehaviour
         //Vector3 mouseInScene = Camera.main.ScreenToWorldPoint(mouse);
 
 
-        Ray ray = new Ray(m_tf.position, AttachmentObj.transform.position - transform.position);
+        Ray ray = new Ray(m_tf.position, AttachmentObj.transform.position - m_tf.position);
         //Vector3 vec = 
-        m_currentAttachObj = AttachmentObj;
+        m_currentAttachTf = AttachmentObj.transform;
         m_currentAttachRb = AttachmentObj.GetComponent<Rigidbody>();
         // Raycast to see what we hit:
-        if (Physics.Raycast(ray, out hookAttachment))
+        if (Physics.Raycast(ray, out hookAttachment,float.MaxValue,1<<LayerMask.NameToLayer("Ropeattach")))
         {
             // We actually hit something, so attach the hook!
             StartCoroutine(AttachHook());
@@ -345,56 +332,90 @@ public class HookShot : MonoBehaviour
     }
     public GameObject Explosion()
     {
-        LayerMask layerMask = 1 << LayerMask.NameToLayer("Ropeattach");
+        Vector3 Origin = m_player.transform.position + Vector3.up * 0.1f;
+        LayerMask layerMask = LayerMask.NameToLayer("Ropeattach");
         var hits = Physics.SphereCastAll(
-            m_tf.position,     //中心
-            m_langth,          //半径
+            Origin,     //中心
+            m_length,          //半径
             Vector3.forward,   //方向
             0f,                //長さ
-            layerMask          //レイヤーマスク
+            1 << layerMask          //レイヤーマスク
             ).Select(h => h.transform.gameObject).ToList();
 
-        if (!m_cameraChanger.m_is3DCamera)
+        //if (!m_cameraChanger.m_is3DCamera)
+        //{
+        //    hits = hits.Where(_ =>
+        //     {
+        //         Vector3 Vec = Vector3.ProjectOnPlane(_.transform.position - m_tf.position, Vector3.up);
+        //         Debug.Log(Mathf.Abs(Vector3.SignedAngle(m_tf.forward, Vec, Vector3.up)));
+        //         return 90f >= Mathf.Abs(Vector3.SignedAngle(m_tf.forward, Vec, Vector3.up));
+        //     }).ToList();
+        //}
+        //hits = hits.Where(_ =>
+        //  {
+        //      Vector3 vec = m_mainCamera.WorldToViewportPoint(_.transform.position);
+        //      return
+        //      vec.x > 0 && vec.x < 1 &&
+        //      vec.y > 0 && vec.y < 1;
+
+        //  }).ToList();
+        if (hits.Count > 0)
         {
+            //オブジェクトが画面内かつ、間に障害物がないもののみリストアップする, ~(1 << LayerMask.NameToLayer("Player"))
             hits = hits.Where(_ =>
-             {
-                 Vector3 Vec = Vector3.ProjectOnPlane(_.transform.position - m_tf.position, Vector3.up);
-                 Debug.Log(Mathf.Abs(Vector3.SignedAngle(m_tf.forward, Vec, Vector3.up)));
-                 return 90f >= Mathf.Abs(Vector3.SignedAngle(m_tf.forward, Vec, Vector3.up));
-             }).ToList();
-        }
-
-
-        GameObject obj = null;
-        foreach (var hit in hits)
         {
-            //距離を求める
-            float Length = Vector3.Distance(m_tf.position, hit.transform.position);
-            //attachmentObjとの間にコライダー付きのオブジェクトがあった場合は無視する
-            if (Physics.Raycast(m_tf.position, hit.transform.position - m_tf.position, out RaycastHit hitInfo, m_langth))
+            Vector3 vec = m_mainCamera.WorldToViewportPoint(_.transform.position);
+
+            //Physics.Raycast(m_player.transform.position + Vector3.up, _.transform.position - m_player.transform.position, out RaycastHit hitInfo, m_langth, ~(1) << layerMask);
+            //_ == hitInfo.collider.gameObject &&
+            return
+            vec.x > 0 && vec.x < 1 &&
+              vec.y > 0 && vec.y < 1;
+        }).ToList();
+
+
+
+            GameObject obj = null;
+            float MinLength = float.MaxValue;
+            foreach (var hit in hits)
             {
-                //DebugPrint.Print(string.Format("1{0}", hit));
-                //DebugPrint.Print(string.Format("2{0}", hitInfo.collider.gameObject));
-                if (hit != hitInfo.collider.gameObject)
+                Vector3 ViewPort = m_mainCamera.WorldToViewportPoint(hit.transform.position);
+                //距離を求める
+                float Length = Vector2.Distance(new Vector2(0.5f, 0.5f), new Vector2(ViewPort.x, ViewPort.y));
+                //attachmentObjとの間にコライダー付きのオブジェクトがあった場合は無視する
+                if (Physics.Raycast(Origin, hit.transform.position - Origin, out RaycastHit hitInfo, m_length))
                 {
-                    continue;
+                    //DebugPrint.Print(string.Format("1{0}", hit));
+                    //DebugPrint.Print(string.Format("2{0}", hitInfo.collider.gameObject));
+                    if (hit != hitInfo.collider.gameObject)
+                    {
+                        continue;
+                    }
                 }
-            }
+                if (Length < MinLength)
+                {
+                    MinLength = Length;
+                    obj = hit;
+                }
+                ////距離が短いなら
+                //if (MinLength > Length)
+                //{
+                //    //最短距離を更新
+                //    MinLength = Length;
+                //    //オブジェにエネミーを返す
+                //    obj = hit;
+                //}
 
-            //距離が短いなら
-            if (MinLength > Length)
-            {
-                //最短距離を更新
-                MinLength = Length;
-                //オブジェにエネミーを返す
-                obj = hit;
             }
-
+            return obj;
         }
-        //距離リセット
-        MinLength = 999;
+        else
+        {
+            return null;
+        }
 
-        return obj;
+
+
 
     }
     private void Update()

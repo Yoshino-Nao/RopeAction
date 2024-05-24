@@ -305,7 +305,7 @@ public class MoveTest : MonoBehaviour
         m_hookShot.RopeChangeLength();
         //HookShotの方向に向き続ける
         Vector3 ToGrabPointDir = (m_grabPoint.transform.position - m_tf.position).normalized;
-        Vector3 ToAttachPointDir = (m_hookShot.GetCurrnetAttachObj.transform.position - m_tf.position).normalized;
+        Vector3 ToAttachPointDir = (m_hookShot.GetCurrnetAttachTf.position - m_tf.position).normalized;
         Debug.DrawRay(m_tf.position, ToGrabPointDir * 100);
         if (m_isGround)
         {
