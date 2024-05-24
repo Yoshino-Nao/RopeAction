@@ -59,14 +59,14 @@ public class fallObject : MonoBehaviour
         body = GetComponent<Rigidbody>();
     }
     //è’ìÀÇµÇΩéûÅAobjectîjâÛ
-    void OnCollisionEnter(Collision collision)
-    {
-        if (collision.gameObject.tag == "floor")
-        {
-            if(!body.isKinematic)
-            body.isKinematic = true;
-        }
-    }
+    //void OnCollisionEnter(Collision collision)
+    //{
+    //    if (collision.gameObject.tag == "floor")
+    //    {
+    //        if(!body.isKinematic)
+    //        body.isKinematic = true;
+    //    }
+    //}
     
       
  
