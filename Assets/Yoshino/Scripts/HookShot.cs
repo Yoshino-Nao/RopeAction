@@ -47,6 +47,11 @@ public class HookShot : MonoBehaviour
     {
         get { return m_currentAttachObj; }
     }
+    private Rigidbody m_currentAttachRb;
+    public Rigidbody GetCurrnetAttachRb
+    {
+        get { return m_currentAttachRb; }
+    }
     private MoveTest m_player;
 
     private VirtualChildBehaviour m_childBehaviour;
@@ -139,6 +144,7 @@ public class HookShot : MonoBehaviour
         Ray ray = new Ray(m_tf.position, AttachmentObj.transform.position - transform.position);
         //Vector3 vec = 
         m_currentAttachObj = AttachmentObj;
+        m_currentAttachRb = AttachmentObj.GetComponent<Rigidbody>();
         // Raycast to see what we hit:
         if (Physics.Raycast(ray, out hookAttachment))
         {

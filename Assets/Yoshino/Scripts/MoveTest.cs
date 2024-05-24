@@ -122,7 +122,7 @@ public class MoveTest : MonoBehaviour
         {
             m_isInputJump = true;
 
-            
+
         }
 
         if (m_currentBaseState.fullPathHash == jumpState)
@@ -159,7 +159,13 @@ public class MoveTest : MonoBehaviour
 
         //キャラクターを移動させる
         m_rb.AddForce(m_moveDir * Speed, Mode);
+        //
+        if (!m_cameraChanger.m_is3DCamera)
+        {
+            m_tf.position = new Vector3(m_tf.position.x, m_tf.position.y, 0f);
+        }
         m_oldPos = m_tf.position;
+        
     }
     private void SetMoveDir()
     {
@@ -176,6 +182,7 @@ public class MoveTest : MonoBehaviour
             v = 0f;
             //2Dの場合は左右の入力のみを移動に使用する
             m_moveDir = (m_playerForwardOn2d * h).normalized;
+            
         }
         DebugPrint.Print(string.Format("MoveVec{0}", m_moveDir));
     }
@@ -258,8 +265,8 @@ public class MoveTest : MonoBehaviour
         //移動中は移動方向へ向く|| Mathf.Abs((m_oldPos - m_tf.position).magnitude) > 0f
         if (m_isGround)
         {
-            
-            if(m_moveDir.magnitude > 0)
+
+            if (m_moveDir.magnitude > 0)
             {
                 m_tf.rotation = Quaternion.LookRotation(m_moveDir, Vector3.up);
             }
@@ -267,7 +274,7 @@ public class MoveTest : MonoBehaviour
             {
                 m_tf.rotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(m_tf.forward, Vector3.up), Vector3.up);
             }
-            
+
         }
     }
     /// <summary>
@@ -305,7 +312,7 @@ public class MoveTest : MonoBehaviour
             ToGrabPointDir = Vector3.ProjectOnPlane(ToGrabPointDir, Vector3.up);
             m_tf.rotation = Quaternion.LookRotation(ToGrabPointDir, Vector3.up);
         }
-        else
+        else if (m_hookShot.GetCurrnetAttachRb.isKinematic)
         {
             //ToAttachPointDir = Vector3.ProjectOnPlane(ToGrabPointDir, Vector3.up);
             //m_tf.rotation = Quaternion.LookRotation(Dir, Vector3.up);
