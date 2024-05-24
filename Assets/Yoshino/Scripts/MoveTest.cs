@@ -294,7 +294,7 @@ public class MoveTest : MonoBehaviour
             {
                 m_anim.SetBool("Jump", true);     // Animatorにジャンプに切り替えるフラグを送る
             }
-            else
+            else if(m_hookShot.GetCurrnetAttachRb.isKinematic)
             {
                 m_rb.AddForce(m_tf.forward * m_jumpPower, ForceMode.Impulse);
                 Release();
