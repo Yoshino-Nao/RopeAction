@@ -153,7 +153,6 @@ GameObject:
   - component: {fileID: 5786939304009816303}
   - component: {fileID: 5835025916459105250}
   - component: {fileID: 8605988222060406163}
-  - component: {fileID: 8621595611707492823}
   - component: {fileID: 1392223549655538604}
   m_Layer: 0
   m_Name: Hook
@@ -202,6 +201,7 @@ MonoBehaviour:
   m_ui: {fileID: 0}
   m_grabMesh: {fileID: 0}
   m_grabPoint: {fileID: 391454940715962082, guid: 7ab3df9c70ace4f4db1377db00d3cf8a, type: 3}
+  Test: {fileID: 0}
 --- !u!114 &6079209034565447418
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -330,19 +330,6 @@ MonoBehaviour:
   m_CursorMu: 0
   m_SourceMu: 0
   direction: 0
---- !u!114 &8621595611707492823
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1013003937294432697}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 22f0daf07e3537c4c9dc04bdc86d07ec, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  obiRope: {fileID: 6079209034565447418}
 --- !u!114 &1392223549655538604
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -416,7 +403,7 @@ MonoBehaviour:
   useCurvesHeight: 0.5
   m_forwardSpeed: 14
   m_backwardSpeed: 2
-  m_rotateSpeed: 2
+  m_rotateSpeed: 1500
   m_jumpPower: 280
   m_playerForwardOn2d: {x: 1, y: 0, z: 0}
   m_grabTotalTime: 1
@@ -485,7 +472,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   thickness: 0
   material: {fileID: 0}
-  filter: -65535
+  filter: -131071
   m_SourceCollider: {fileID: 8040820617923788580}
   m_DistanceField: {fileID: 0}
 --- !u!114 &7098942405659791141
