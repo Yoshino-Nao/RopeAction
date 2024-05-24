@@ -15,7 +15,7 @@ public class UITest : MonoBehaviour
     {
 
     }
-    void Update()
+    void LateUpdate()
     {
         if (m_attachTf != null)
         {

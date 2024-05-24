@@ -54,7 +54,6 @@ public class HookShot : MonoBehaviour
 
     [SerializeField] private GrabPoint m_grabPoint;
     private GameObject m_grabObj;
-    private bool m_isGrabbing = false;
 
     [SerializeField] private ObiColliderBase Test;
     [Button]
@@ -292,7 +291,7 @@ public class HookShot : MonoBehaviour
 
     }
 
-    private void DetachHook()
+    public void DetachHook()
     {
         m_grabMesh.enabled = false;
         // Set the rope blueprint to null (automatically removes the previous blueprint from the solver, if any).

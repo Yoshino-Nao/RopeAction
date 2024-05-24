@@ -98,6 +98,7 @@ public class MoveTest : MonoBehaviour
         m_currentBaseState = m_anim.GetCurrentAnimatorStateInfo(0); // 参照用のステート変数にBase Layer (0)の現在のステートを設定する
         m_rb.useGravity = true;//ジャンプ中に重力を切るので、それ以外は重力の影響を受けるようにする
         m_isGround = FootCollider();
+        DebugPrint.Print(string.Format("Ground{0}", m_isGround));
         m_anim.SetBool("Ground", m_isGround);
         SetMoveDir();
         //空中では歩行アニメーションをしないようにする処理
@@ -119,15 +120,9 @@ public class MoveTest : MonoBehaviour
         //ジャンプ
         if (Input.GetButtonDown("Jump"))
         {
-            if (m_currentBaseState.fullPathHash == MoveState)
-            {
-                //ステート遷移中でなかったらジャンプできる
-                //if (!m_anim.IsInTransition(0))
-                {
+            m_isInputJump = true;
 
-                    m_anim.SetBool("Jump", true);     // Animatorにジャンプに切り替えるフラグを送る
-                }
-            }
+            
         }
 
         if (m_currentBaseState.fullPathHash == jumpState)
@@ -254,10 +249,25 @@ public class MoveTest : MonoBehaviour
                 StartCoroutine(Grab());
             }
         }
-        //移動中は移動方向へ向く|| Mathf.Abs((m_oldPos - m_tf.position).magnitude) > 0f
-        if (m_moveDir.magnitude > 0 && m_isGround)
+        //ジャンプ処理
+        if (m_isInputJump && m_currentBaseState.fullPathHash == MoveState)
         {
-            m_tf.rotation = Quaternion.LookRotation(m_moveDir, Vector3.up);
+            m_anim.SetBool("Jump", true);     // Animatorにジャンプに切り替えるフラグを送る
+            m_isInputJump = false;
+        }
+        //移動中は移動方向へ向く|| Mathf.Abs((m_oldPos - m_tf.position).magnitude) > 0f
+        if (m_isGround)
+        {
+            
+            if(m_moveDir.magnitude > 0)
+            {
+                m_tf.rotation = Quaternion.LookRotation(m_moveDir, Vector3.up);
+            }
+            else
+            {
+                m_tf.rotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(m_tf.forward, Vector3.up), Vector3.up);
+            }
+            
         }
     }
     /// <summary>
@@ -270,7 +280,20 @@ public class MoveTest : MonoBehaviour
         {
             Release();
         }
-
+        //ロープジャンプ処理
+        if (m_isInputJump && m_isGrabbing)
+        {
+            if (m_isGround)
+            {
+                m_anim.SetBool("Jump", true);     // Animatorにジャンプに切り替えるフラグを送る
+            }
+            else
+            {
+                m_rb.AddForce(m_tf.forward * m_jumpPower, ForceMode.Impulse);
+                Release();
+            }
+            m_isInputJump = false;
+        }
         //m_ikTarget.Move(m_grabPoint.transform.position);
         m_hookShot.RopeChangeLength();
         //HookShotの方向に向き続ける
@@ -317,7 +340,7 @@ public class MoveTest : MonoBehaviour
     private bool FootCollider()
     {
         RaycastHit hit;
-        return (Physics.SphereCast(m_tf.position + m_col.center, m_col.radius, -m_tf.up, out hit, m_col.height / 2));
+        return (Physics.SphereCast(m_tf.position + m_col.center, m_col.radius, -m_tf.up, out hit, m_col.height / 1.5f));
     }
     public void Jump()
     {
