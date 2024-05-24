@@ -18,7 +18,7 @@ public class MoveTest : MonoBehaviour
     // 後退速度
     [SerializeField] private float m_backwardSpeed = 2.0f;
     // 旋回速度
-    [SerializeField] private float m_rotateSpeed = 2.0f;
+    [SerializeField] private float m_rotateSpeed = 1500.0f;
     // ジャンプ威力
     [SerializeField] private float m_jumpPower = 3.0f;
 
@@ -254,8 +254,8 @@ public class MoveTest : MonoBehaviour
                 StartCoroutine(Grab());
             }
         }
-        //移動中は移動方向へ向く
-        if (m_moveDir.magnitude > 0 || Mathf.Abs((m_oldPos - m_tf.position).magnitude) > 0f && m_isGround)
+        //移動中は移動方向へ向く|| Mathf.Abs((m_oldPos - m_tf.position).magnitude) > 0f
+        if (m_moveDir.magnitude > 0 && m_isGround)
         {
             m_tf.rotation = Quaternion.LookRotation(m_moveDir, Vector3.up);
         }
