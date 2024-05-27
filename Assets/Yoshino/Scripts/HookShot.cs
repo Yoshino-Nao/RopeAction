@@ -35,8 +35,13 @@ public class HookShot : MonoBehaviour
 
 
     private RaycastHit hookAttachment;
-    //ロープをアタッチしているオブジェクト
-    private GameObject AttachmentObj = null;
+    
+    private GameObject m_attachmentTargetObj = null;
+    public ObiColliderBase GetAttachmentTargetObiCol
+    {
+        get { return m_attachmentTargetObj.GetComponent<ObiColliderBase>(); }
+    }
+    //ロープをアタッチしているオブジェクトのコンポーネント
     private Transform m_currentAttachTf;
     public Transform GetCurrnetAttachTf
     {
@@ -47,6 +52,7 @@ public class HookShot : MonoBehaviour
     {
         get { return m_currentAttachRb; }
     }
+    private ObiColliderBase m_currentAttachObiCol;
     private MoveTest m_player;
 
     [SerializeField] private GrabPoint m_grabPoint;
@@ -56,7 +62,7 @@ public class HookShot : MonoBehaviour
     [Button]
     void ConnectTest()
     {
-        ConnectToObj(Test);
+        ConnectCurrentObjToOtherObj(Test);
     }
 
 
@@ -121,17 +127,18 @@ public class HookShot : MonoBehaviour
 	 */
     public void LaunchHook()
     {
-        if (AttachmentObj == null) return;
+        if (m_attachmentTargetObj == null) return;
         //このオブジェクトと同じ XY 平面内のシーン内のマウスの位置を取得します。
         //Vector3 mouse = Input.mousePosition;
         //mouse.z = transform.position.z - Camera.main.transform.position.z;
         //Vector3 mouseInScene = Camera.main.ScreenToWorldPoint(mouse);
 
 
-        Ray ray = new Ray(m_tf.position, AttachmentObj.transform.position - m_tf.position);
+        Ray ray = new Ray(m_tf.position, m_attachmentTargetObj.transform.position - m_tf.position);
         //Vector3 vec = 
-        m_currentAttachTf = AttachmentObj.transform;
-        m_currentAttachRb = AttachmentObj.GetComponent<Rigidbody>();
+        m_currentAttachTf = m_attachmentTargetObj.transform;
+        m_currentAttachRb = m_attachmentTargetObj.GetComponent<Rigidbody>();
+        m_currentAttachObiCol = m_attachmentTargetObj.GetComponent<ObiColliderBase>();
         // Raycast to see what we hit:
         if (Physics.Raycast(ray, out hookAttachment,float.MaxValue,1<<LayerMask.NameToLayer("Ropeattach")))
         {
@@ -251,13 +258,15 @@ public class HookShot : MonoBehaviour
     /// <summary>
     /// ロープとオブジェクトを繋ぐ
     /// </summary>
-    public void ConnectToObj(ObiColliderBase collider)
+    public void ConnectCurrentObjToOtherObj(ObiColliderBase collider)
     {
+        if (m_currentAttachObiCol == null) return;
+
         pinConstraints = Obirope.GetConstraintsByType(Oni.ConstraintType.Pin) as ObiConstraints<ObiPinConstraintsBatch>;
         pinConstraints.Clear();
         var batch = new ObiPinConstraintsBatch();
         batch.AddConstraint(Obirope.elements[0].particle1, collider, Vector3.zero, Quaternion.identity, 0, 0, float.PositiveInfinity);
-        batch.AddConstraint(Obirope.elements[Obirope.elements.Count - 1].particle2, hookAttachment.collider.GetComponent<ObiColliderBase>(),
+        batch.AddConstraint(Obirope.elements[Obirope.elements.Count - 1].particle2, m_currentAttachObiCol.GetComponent<ObiColliderBase>(),
                                                           hookAttachment.collider.transform.InverseTransformPoint(hookAttachment.point), Quaternion.identity, 0, 0, float.PositiveInfinity);
         batch.activeConstraintCount = 2;
         pinConstraints.AddBatch(batch);
@@ -298,7 +307,7 @@ public class HookShot : MonoBehaviour
     }
     public void HookShooting()
     {
-        DebugPrint.Print(string.Format("AttachmentObj:{0}", AttachmentObj?.name));
+        DebugPrint.Print(string.Format("AttachmentObj:{0}", m_attachmentTargetObj?.name));
         //右クリックで発射
         if (Input.GetMouseButtonDown(1))
         {
@@ -422,11 +431,15 @@ public class HookShot : MonoBehaviour
     {
 
 
-        AttachmentObj = Explosion();
+        m_attachmentTargetObj = Explosion();
+        if (m_currentAttachObiCol != null)
+        {
+            DebugPrint.Print(string.Format("{0}", m_currentAttachObiCol.name));
+        }
         //  m_grabMesh.enabled = false;
         if (m_ui != null)
         {
-            m_ui.m_attachTf = AttachmentObj?.transform;
+            m_ui.m_attachTf = m_attachmentTargetObj?.transform;
         }
     }
 }

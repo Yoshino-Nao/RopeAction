@@ -210,7 +210,7 @@ public class MoveTest : MonoBehaviour
     public void Release()
     {
         m_hookShot.SetGrabMeshRendererEnabled = false;
-        m_hookShot.ConnectToObj(m_grabPoint.GetObiCol);
+        m_hookShot.ConnectCurrentObjToOtherObj(m_grabPoint.GetObiCol);
         //IKを解除し物理演算を開始
         SetIKWeight(0);
         m_grabPoint.SetParent(null);
@@ -220,6 +220,7 @@ public class MoveTest : MonoBehaviour
         m_isGrabbing = false;
         Debug.Log("ロープを離しました");
     }
+
     public IEnumerator Grab()
     {
         m_isGrabbing = true;
@@ -241,6 +242,8 @@ public class MoveTest : MonoBehaviour
         Debug.Log("ロープを掴みました");
         m_isGrabbing = true;
     }
+
+    
     /// <summary>
     ///　通常状態
     /// </summary>
@@ -286,6 +289,11 @@ public class MoveTest : MonoBehaviour
         if (Input.GetKeyDown(KeyCode.V))
         {
             Release();
+        }
+        if (Input.GetKeyDown(KeyCode.E))
+        {
+            Release();
+            m_hookShot.ConnectCurrentObjToOtherObj(m_hookShot.GetAttachmentTargetObiCol);
         }
         //ロープジャンプ処理
         if (m_isInputJump && m_isGrabbing)
