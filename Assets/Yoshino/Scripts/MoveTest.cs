@@ -57,7 +57,6 @@ public class MoveTest : MonoBehaviour
     static int restState = Animator.StringToHash("Base Layer.Rest");
 
     private ObiSolver obiSolver;
-    private CameraChanger m_cameraChanger;
     private HookShot m_hookShot;
     private IKTarget m_ikTarget;
     private float m_lerpTGrabPoint = 0f;
@@ -88,7 +87,6 @@ public class MoveTest : MonoBehaviour
         //contactEventDispatcher.onContactEnter
 
         obiSolver = GetComponentInParent<ObiSolver>();
-        m_cameraChanger = GetComponent<CameraChanger>();
         SetIKWeight(0);
     }
 
@@ -160,7 +158,7 @@ public class MoveTest : MonoBehaviour
         //キャラクターを移動させる
         m_rb.AddForce(m_moveDir * Speed, Mode);
         //
-        if (!m_cameraChanger.m_is3DCamera)
+        if (!CameraChanger.ms_instance.m_is3DCamera)
         {
             m_tf.position = new Vector3(m_tf.position.x, m_tf.position.y, 0f);
         }
@@ -171,7 +169,7 @@ public class MoveTest : MonoBehaviour
     {
         float h = Input.GetAxis("Horizontal");              // 入力デバイスの水平軸をhで定義
         float v = Input.GetAxis("Vertical");                // 入力デバイスの垂直軸をvで定義
-        if (m_cameraChanger.m_is3DCamera)
+        if (CameraChanger.ms_instance.m_is3DCamera)
         {
             //3Dの場合はカメラに依存する
             Vector3 Forward = Vector3.Scale(m_CameraTf.forward, new Vector3(1, 0, 1)).normalized;
@@ -181,7 +179,7 @@ public class MoveTest : MonoBehaviour
         {
             v = 0f;
             //2Dの場合は左右の入力のみを移動に使用する
-            m_moveDir = (m_playerForwardOn2d * h).normalized;
+            m_moveDir = (m_playerForwardOn2d * h);
             
         }
         DebugPrint.Print(string.Format("MoveVec{0}", m_moveDir));
