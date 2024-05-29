@@ -5,6 +5,7 @@ using UnityEngine;
 using VInspector;
 using System.Linq;
 using Unity.Burst.CompilerServices;
+using Unity.VisualScripting;
 
 public class HookShot : MonoBehaviour
 {
@@ -25,17 +26,13 @@ public class HookShot : MonoBehaviour
     [SerializeField] private UITest m_ui;
     private ObiRope Obirope;
     [SerializeField] private MeshRenderer m_grabMesh;
-    public bool SetGrabMeshRendererEnabled
-    {
-        set { m_grabMesh.enabled = value; }
-    }
     private ObiRopeBlueprint blueprint;
     private ObiRopeCursor cursor;
     ObiConstraints<ObiPinConstraintsBatch> pinConstraints;
-
+    [HideInInspector] public ObiStitcher m_obiStitcher;
 
     private RaycastHit hookAttachment;
-    
+
     private GameObject m_attachmentTargetObj = null;
     public ObiColliderBase GetAttachmentTargetObiCol
     {
@@ -113,7 +110,7 @@ public class HookShot : MonoBehaviour
         cursor = Obirope.gameObject.GetComponent<ObiRopeCursor>();
         //cursor.cursorMu = 0;
         //cursor.direction = true;
-
+        m_obiStitcher = m_tf.parent.GetComponentInChildren<ObiStitcher>();
 
     }
 
@@ -140,7 +137,7 @@ public class HookShot : MonoBehaviour
         m_currentAttachRb = m_attachmentTargetObj.GetComponent<Rigidbody>();
         m_currentAttachObiCol = m_attachmentTargetObj.GetComponent<ObiColliderBase>();
         // Raycast to see what we hit:
-        if (Physics.Raycast(ray, out hookAttachment,float.MaxValue,1<<LayerMask.NameToLayer("Ropeattach")))
+        if (Physics.Raycast(ray, out hookAttachment, float.MaxValue, 1 << LayerMask.NameToLayer("Ropeattach")))
         {
             // We actually hit something, so attach the hook!
             StartCoroutine(AttachHook());
@@ -272,9 +269,9 @@ public class HookShot : MonoBehaviour
         pinConstraints.AddBatch(batch);
         Obirope.SetConstraintsDirty(Oni.ConstraintType.Pin);
     }
+
     public void PlayerGrabs()
     {
-        m_grabMesh.enabled = true;
         pinConstraints = Obirope.GetConstraintsByType(Oni.ConstraintType.Pin) as ObiConstraints<ObiPinConstraintsBatch>;
         pinConstraints.Clear();
         var batch = new ObiPinConstraintsBatch();
@@ -295,7 +292,7 @@ public class HookShot : MonoBehaviour
 
     public void DetachHook()
     {
-        m_grabMesh.enabled = false;
+        SetGrabMesh(false);
         // Set the rope blueprint to null (automatically removes the previous blueprint from the solver, if any).
         Obirope.ropeBlueprint = null;
         Obirope.GetComponent<MeshRenderer>().enabled = false;
@@ -335,9 +332,10 @@ public class HookShot : MonoBehaviour
         DebugPrint.Print(string.Format("RopeLength{0}", Obirope.restLength));
         cursor.ChangeLength(Mathf.Clamp(Obirope.restLength - hookExtendRetractSpeed * Wheel * Time.deltaTime, 1, 20));
     }
-    public void Grab()
+    public void SetGrabMesh(bool isEnabled)
     {
-
+        m_grabMesh.enabled = isEnabled;
+        m_obiStitcher.enabled = isEnabled;
     }
     public GameObject Explosion()
     {

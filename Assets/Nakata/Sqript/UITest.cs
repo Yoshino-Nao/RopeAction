@@ -6,14 +6,14 @@ using UnityEngine.UI;
 public class UITest : MonoBehaviour
 {
     //帯をつけられるオブジェクト
-    public Transform m_attachTf;
-    public GameObject m_Canvas;
-    public RectTransform rectTf;
-    public Image image;
+    [HideInInspector] public Transform m_attachTf;
+    private RectTransform rectTf;
+    private Image image;
     Vector3 view;
     void Start()
     {
-
+        rectTf = GetComponent<RectTransform>();
+        image = GetComponent<Image>();
     }
     void LateUpdate()
     {

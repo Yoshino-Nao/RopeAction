@@ -3,6 +3,9 @@ using nn.hid;
 using UnityEngine.Assertions.Must;
 using UnityEngine.UI;
 
+/// <summary>
+/// 任天堂Switch開発用コントロールシステム
+/// </summary>
 public class MPFT_NTD_MMControlSystem : MonoBehaviour
 {
     public Text DebugText;
