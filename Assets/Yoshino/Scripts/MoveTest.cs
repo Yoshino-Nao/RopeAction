@@ -163,7 +163,7 @@ public class MoveTest : MonoBehaviour
             m_tf.position = new Vector3(m_tf.position.x, m_tf.position.y, 0f);
         }
         m_oldPos = m_tf.position;
-
+        
     }
     private void SetMoveDir()
     {
@@ -180,7 +180,7 @@ public class MoveTest : MonoBehaviour
             v = 0f;
             //2Dの場合は左右の入力のみを移動に使用する
             m_moveDir = (m_playerForwardOn2d * h);
-
+            
         }
         DebugPrint.Print(string.Format("MoveVec{0}", m_moveDir));
     }
@@ -207,7 +207,7 @@ public class MoveTest : MonoBehaviour
     /// </summary>
     public void Release()
     {
-        m_hookShot.SetGrabMesh(false);
+        m_hookShot.SetGrabMeshRendererEnabled = false;
         m_hookShot.ConnectCurrentObjToOtherObj(m_grabPoint.GetObiCol);
         //IKを解除し物理演算を開始
         SetIKWeight(0);
@@ -227,7 +227,6 @@ public class MoveTest : MonoBehaviour
         m_lerpTGrabPoint = 0f;
         //m_hookShot.DisabledCollition();
         SetIKWeight(1);
-        m_hookShot.SetGrabMesh(true);
         yield return new WaitUntil(() => LerpGrabPoint());
         m_hookShot.PlayerGrabs();
         m_grabPoint.SetParent(m_tf);
@@ -242,7 +241,7 @@ public class MoveTest : MonoBehaviour
         m_isGrabbing = true;
     }
 
-
+    
     /// <summary>
     ///　通常状態
     /// </summary>
@@ -301,7 +300,7 @@ public class MoveTest : MonoBehaviour
             {
                 m_anim.SetBool("Jump", true);     // Animatorにジャンプに切り替えるフラグを送る
             }
-            else if (m_hookShot.GetCurrnetAttachRb.isKinematic)
+            else if(m_hookShot.GetCurrnetAttachRb.isKinematic)
             {
                 m_rb.AddForce(m_tf.forward * m_jumpPower, ForceMode.Impulse);
                 Release();
