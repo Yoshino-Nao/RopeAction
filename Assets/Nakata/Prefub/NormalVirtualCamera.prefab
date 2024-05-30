@@ -180,8 +180,10 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 40b743c7457643e48805768907d4ad9e, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_mode: 0
+  m_mode: 1
   m_defOffset: {x: 0, y: 1.5, z: -7}
-  m_comMoveSpeed: 3
-  m_moveToDefSpeed: 1
-  m_maxLength: 10
+  m_comMoveSpeed: 1
+  m_moveToDefSpeed: 0.25
+  m_maxLength: 3
+  m_isOnlyRotation: 0
+  m_isMoveDefault: 1

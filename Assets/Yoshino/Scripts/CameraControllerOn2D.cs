@@ -12,11 +12,14 @@ public class CameraController2D : MonoBehaviour
         KeyArrow
     }
     [SerializeField] private eInputMode m_mode = eInputMode.Mouse;
-    [SerializeField] private Vector3 m_defOffset;
-    [SerializeField] private float m_comMoveSpeed = 3;
-    [SerializeField] private float m_moveToDefSpeed;
+    [SerializeField] private Vector3 m_defOffset = new Vector3(0, 1.5f, -7);
+    [SerializeField] private float m_comMoveSpeed = 1;
+    [SerializeField] private float m_moveToDefSpeed = 0.25f;
     [SerializeField] private float m_maxLength = 3;
-    [SerializeField] bool test;
+    //カメラの角度のみを動かす
+    [SerializeField] bool m_isOnlyRotation = false;
+    //操作していない場合、カメラの位置をデフォルトに戻そうとする
+    [SerializeField] bool m_isMoveDefault = true;
     // Start is called before the first frame update
     void Start()
     {
@@ -48,13 +51,13 @@ public class CameraController2D : MonoBehaviour
         ////入力がない場合は初期位置に補間する
         if (Value.magnitude > 0)
         {
-            if (test)
+            if (!m_isOnlyRotation)
             {
                 m_transposer.m_FollowOffset += Value * m_comMoveSpeed;
             }
             m_composer.m_TrackedObjectOffset += Value * m_comMoveSpeed;
         }
-        else
+        else if (m_isMoveDefault)
         {
             m_transposer.m_FollowOffset = Vector3.MoveTowards(m_transposer.m_FollowOffset, m_defOffset, m_moveToDefSpeed);
             m_composer.m_TrackedObjectOffset = Vector3.MoveTowards(m_composer.m_TrackedObjectOffset, new Vector3(0, m_defOffset.y, 0), m_moveToDefSpeed);
