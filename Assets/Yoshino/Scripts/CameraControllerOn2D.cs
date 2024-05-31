@@ -21,7 +21,6 @@ public class CameraController2D : MonoBehaviour
     [SerializeField] bool m_isOnlyRotation = false;
     //操作していない場合、カメラの位置をデフォルトに戻そうとする
     [SerializeField] bool m_isMoveDefault = true;
-
     private float m_povSpeedDef;
     // Start is called before the first frame update
     void Start()
@@ -51,12 +50,17 @@ public class CameraController2D : MonoBehaviour
             m_pov.m_VerticalAxis.m_InputAxisName = "Mouse Y";
 
         }
-        else
+        else 
         {
             h = Input.GetAxis("HorizontalArrow");
             v = Input.GetAxis("VerticalArrow");
             m_pov.m_HorizontalAxis.m_InputAxisName = "HorizontalArrow";
             m_pov.m_VerticalAxis.m_InputAxisName = "VerticalArrow";
+        }
+        if(MPFT_NTD_MMControlSystem.ms_instance!= null)
+        {
+            h = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.R_Analog_X;
+            v = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.R_Analog_Y;
         }
         Vector3 Value = new Vector3(h, v, 0);
 

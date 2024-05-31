@@ -55,7 +55,6 @@ public class MoveTest : MonoBehaviour
     static int MoveState = Animator.StringToHash("Base Layer.Blend Tree");
     static int jumpState = Animator.StringToHash("Base Layer.Jump");
     static int restState = Animator.StringToHash("Base Layer.Rest");
-    private MPFT_NTD_MMControlSystem m_switchInput;
     private ObiSolver obiSolver;
     private HookShot m_hookShot;
     private IKTarget m_ikTarget;
@@ -85,7 +84,6 @@ public class MoveTest : MonoBehaviour
         m_ikTarget = GetComponentInChildren<IKTarget>();
         m_fullBodyBipedIK = GetComponentInChildren<FullBodyBipedIK>();
         //contactEventDispatcher.onContactEnter
-        m_switchInput = FindObjectOfType<MPFT_NTD_MMControlSystem>();
         obiSolver = GetComponentInParent<ObiSolver>();
         SetIKWeight(0);
     }
@@ -116,11 +114,9 @@ public class MoveTest : MonoBehaviour
 
         //DebugPrint.Print(string.Format("ISMove{0}", m_currentBaseState.fullPathHash== locoState));
         //ジャンプ
-        if (Input.GetButtonDown("Jump"))
+        if (Input.GetButtonDown("Jump") || MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.B)
         {
             m_isInputJump = true;
-
-
         }
 
         if (m_currentBaseState.fullPathHash == jumpState)
@@ -169,9 +165,10 @@ public class MoveTest : MonoBehaviour
     {
         float h = Input.GetAxis("Horizontal");              // 入力デバイスの水平軸をhで定義
         float v = Input.GetAxis("Vertical");                // 入力デバイスの垂直軸をvで定義
-        if (m_switchInput != null)
+        if (MPFT_NTD_MMControlSystem.ms_instance != null)
         {
-
+            h = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.L_Analog_X;
+            v = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.L_Analog_Y;
         }
         if (CameraChanger.ms_instance.m_is3DCamera)
         {
@@ -289,11 +286,11 @@ public class MoveTest : MonoBehaviour
     private void RopeGrabbing()
     {
         if (!m_isGrabbing) return;
-        if (Input.GetKeyDown(KeyCode.V))
+        if (Input.GetKeyDown(KeyCode.V) || MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.MM_TR)
         {
             Release();
         }
-        if (Input.GetKeyDown(KeyCode.E))
+        if (Input.GetKeyDown(KeyCode.E) || MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.MM_TL)
         {
             Release();
             m_hookShot.ConnectCurrentObjToOtherObj(m_hookShot.GetAttachmentTargetObiCol);

@@ -2,12 +2,13 @@
 using nn.hid;
 using UnityEngine.Assertions.Must;
 using UnityEngine.UI;
+using Unity.VisualScripting;
 
 public class MPFT_NTD_MMControlSystem : MonoBehaviour
 {
     public Text DebugText;
     public string DebugMes;
-
+    public static MPFT_NTD_MMControlSystem ms_instance;
     /// <summary>
     /// ハンドヘルドプレイパッド
     /// </summary>
@@ -86,6 +87,16 @@ public class MPFT_NTD_MMControlSystem : MonoBehaviour
     // Start is called before the first frame update
     void Start()
     {
+        if (ms_instance == null)
+        {
+            ms_instance = this;
+        }
+        else
+        {
+            Destroy(gameObject);
+        }
+
+
         ///パッド初期化
         Npad.Initialize();
         ///パッドサポートタイプは、id群
