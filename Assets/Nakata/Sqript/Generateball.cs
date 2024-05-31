@@ -7,17 +7,22 @@ public class Generateball : MonoBehaviour
     [SerializeField, Header("時間経過で出すボール")]
     private GameObject ball;
 
-    //[SerializeField, Header("ボールの生成場所")]
-    //private GameObject spawnpoint;
+    [SerializeField, Header("生成する時間")]
+    private float count;
 
-    //[SerializeField, Header("生成タイム")]
-    //private float timer;
+    //現在の時間
+    private float NowTimer;
 
-    //static float time = 0;
-
-
-    public void Generate()
+    private void Update()
     {
-        Instantiate(ball, transform.position, transform.rotation);
+        if(NowTimer > count)
+        {
+            Instantiate(ball, transform.position, transform.rotation);
+            NowTimer = 0;
+        }
+        else
+        {
+            NowTimer += Time.deltaTime;
+        }
     }
 }
