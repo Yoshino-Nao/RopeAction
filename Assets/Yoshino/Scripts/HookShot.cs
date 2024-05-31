@@ -320,17 +320,18 @@ public class HookShot : MonoBehaviour
     {
         if (!Obirope.isLoaded) return;
         float Wheel = Input.GetAxis("Mouse ScrollWheel");
-
+        float max = 20f;
+        float min = 0.5f;
         if (Input.GetKey(KeyCode.Space))
         {
-            cursor.ChangeLength(Mathf.Clamp(Obirope.restLength - hookExtendRetractSpeed * Time.deltaTime, 1, 20));
+            cursor.ChangeLength(Mathf.Clamp(Obirope.restLength - hookExtendRetractSpeed * Time.deltaTime, min, max));
         }
         if (Input.GetKey(KeyCode.LeftShift))
         {
-            cursor.ChangeLength(Mathf.Clamp(Obirope.restLength + hookExtendRetractSpeed * Time.deltaTime, 1, 20));
+            cursor.ChangeLength(Mathf.Clamp(Obirope.restLength + hookExtendRetractSpeed * Time.deltaTime, min, max));
         }
         DebugPrint.Print(string.Format("RopeLength{0}", Obirope.restLength));
-        cursor.ChangeLength(Mathf.Clamp(Obirope.restLength - hookExtendRetractSpeed * Wheel * Time.deltaTime, 1, 20));
+        cursor.ChangeLength(Mathf.Clamp(Obirope.restLength - hookExtendRetractSpeed * Wheel * Time.deltaTime, min, max));
     }
     public void SetGrabMesh(bool isEnabled)
     {
