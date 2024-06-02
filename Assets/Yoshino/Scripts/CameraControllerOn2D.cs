@@ -57,11 +57,11 @@ public class CameraController2D : MonoBehaviour
             m_pov.m_HorizontalAxis.m_InputAxisName = "HorizontalArrow";
             m_pov.m_VerticalAxis.m_InputAxisName = "VerticalArrow";
         }
-        if(MPFT_NTD_MMControlSystem.ms_instance!= null)
-        {
-            h = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.R_Analog_X;
-            v = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.R_Analog_Y;
-        }
+        //if(MPFT_NTD_MMControlSystem.ms_instance!= null)
+        //{
+        //    h = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.R_Analog_X;
+        //    v = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.R_Analog_Y;
+        //}
         Vector3 Value = new Vector3(h, v, 0);
 
         ////ì¸óÕÇ™Ç»Ç¢èÍçáÇÕèâä˙à íuÇ…ï‚ä‘Ç∑ÇÈ

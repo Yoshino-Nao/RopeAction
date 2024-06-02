@@ -30,6 +30,8 @@ public class MoveTest : MonoBehaviour
     private CapsuleCollider m_col;
     private Rigidbody m_rb;
     private Transform m_tf;
+    private PhysicMaterial m_physicMaterial;
+    //カメラのTransform
     private Transform m_CameraTf;
     private bool m_isGround;
     public bool GetIsGround
@@ -47,6 +49,7 @@ public class MoveTest : MonoBehaviour
     // CapsuleColliderで設定されているコライダのHeiht、Centerの初期値を収める変数
     private float m_orgColHight;
     private Vector3 m_orgVectColCenter;
+    private RaycastHit m_groundHit;
     private Animator m_anim;                          // キャラにアタッチされるアニメーターへの参照
     private AnimatorStateInfo m_currentBaseState;         // base layerで使われる、アニメーターの現在の状態の参照
 
@@ -54,8 +57,8 @@ public class MoveTest : MonoBehaviour
     static int idleState = Animator.StringToHash("Base Layer.Idle");
     static int MoveState = Animator.StringToHash("Base Layer.Blend Tree");
     static int jumpState = Animator.StringToHash("Base Layer.Jump");
+    static int fallState = Animator.StringToHash("Base Layer.Fall");
     static int restState = Animator.StringToHash("Base Layer.Rest");
-    private ObiSolver obiSolver;
     private HookShot m_hookShot;
     private IKTarget m_ikTarget;
     private float m_lerpTGrabPoint = 0f;
@@ -74,6 +77,9 @@ public class MoveTest : MonoBehaviour
         // CapsuleColliderコンポーネントを取得する（カプセル型コリジョン）
         m_col = GetComponent<CapsuleCollider>();
         m_rb = GetComponent<Rigidbody>();
+        m_physicMaterial = new PhysicMaterial();
+        m_col.material = m_physicMaterial;
+
         //メインカメラを取得する
         // CapsuleColliderコンポーネントのHeight、Centerの初期値を保存する
         m_orgColHight = m_col.height;
@@ -84,7 +90,6 @@ public class MoveTest : MonoBehaviour
         m_ikTarget = GetComponentInChildren<IKTarget>();
         m_fullBodyBipedIK = GetComponentInChildren<FullBodyBipedIK>();
         //contactEventDispatcher.onContactEnter
-        obiSolver = GetComponentInParent<ObiSolver>();
         SetIKWeight(0);
     }
 
@@ -93,7 +98,6 @@ public class MoveTest : MonoBehaviour
         m_anim.speed = m_animSpeed;                             // Animatorのモーション再生速度に animSpeedを設定する
         m_currentBaseState = m_anim.GetCurrentAnimatorStateInfo(0); // 参照用のステート変数にBase Layer (0)の現在のステートを設定する
         m_rb.useGravity = true;//ジャンプ中に重力を切るので、それ以外は重力の影響を受けるようにする
-        m_isGround = FootCollider();
         DebugPrint.Print(string.Format("Ground{0}", m_isGround));
         m_anim.SetBool("Ground", m_isGround);
         SetMoveDir();
@@ -112,13 +116,21 @@ public class MoveTest : MonoBehaviour
             m_anim.SetFloat("SpeedY", 0);
         }
 
+        DebugPrint.Print(string.Format("normal{0}", m_groundHit.normal));
         //DebugPrint.Print(string.Format("ISMove{0}", m_currentBaseState.fullPathHash== locoState));
         //ジャンプ
-        if (Input.GetButtonDown("Jump") || MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.B)
+        if (Input.GetButtonDown("Jump"))
         {
-            m_isInputJump = true;
-        }
+            if (m_currentBaseState.fullPathHash != jumpState || m_currentBaseState.fullPathHash != fallState)
+            {
+                m_isInputJump = true;
 
+            }
+        }
+        //if (MPFT_NTD_MMControlSystem.ms_instance != null&& MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.B)
+        //{
+        //    m_isInputJump = true;
+        //}
         if (m_currentBaseState.fullPathHash == jumpState)
         {
             if (!m_anim.IsInTransition(0))
@@ -143,6 +155,11 @@ public class MoveTest : MonoBehaviour
     {
         ForceMode Mode = ForceMode.Acceleration;
         float Speed = m_forwardSpeed;
+        m_isGround = FootCollider();
+        if (!m_isGround)
+        {
+            //m_physicMaterial
+        }
         //ターザン風の移動処理
         //フックを発射中かつ、空中で、上昇中は移動速度を0にする
         if (m_isGrabbing && !m_isGround && (m_oldPos.y - m_tf.position.y) <= 0f)
@@ -150,9 +167,8 @@ public class MoveTest : MonoBehaviour
             Speed = 0f;
         }
 
-
         //キャラクターを移動させる
-        m_rb.AddForce(m_moveDir * Speed, Mode);
+        m_rb.AddForce(Vector3.ProjectOnPlane(m_moveDir, m_groundHit.normal) * Speed, Mode);
         //
         if (!CameraChanger.ms_instance.m_is3DCamera)
         {
@@ -165,11 +181,11 @@ public class MoveTest : MonoBehaviour
     {
         float h = Input.GetAxis("Horizontal");              // 入力デバイスの水平軸をhで定義
         float v = Input.GetAxis("Vertical");                // 入力デバイスの垂直軸をvで定義
-        if (MPFT_NTD_MMControlSystem.ms_instance != null)
-        {
-            h = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.L_Analog_X;
-            v = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.L_Analog_Y;
-        }
+        //if (MPFT_NTD_MMControlSystem.ms_instance != null)
+        //{
+        //    h = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.L_Analog_X;
+        //    v = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.L_Analog_Y;
+        //}
         if (CameraChanger.ms_instance.m_is3DCamera)
         {
             //3Dの場合はカメラに依存する
@@ -286,15 +302,24 @@ public class MoveTest : MonoBehaviour
     private void RopeGrabbing()
     {
         if (!m_isGrabbing) return;
-        if (Input.GetKeyDown(KeyCode.V) || MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.MM_TR)
+        if (Input.GetKeyDown(KeyCode.V))
         {
             Release();
         }
-        if (Input.GetKeyDown(KeyCode.E) || MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.MM_TL)
+        //if (MPFT_NTD_MMControlSystem.ms_instance != null&& MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.MM_TR)
+        //{
+        //    Release();
+        //}
+        if (Input.GetKeyDown(KeyCode.E))
         {
             Release();
             m_hookShot.ConnectCurrentObjToOtherObj(m_hookShot.GetAttachmentTargetObiCol);
         }
+        //if (MPFT_NTD_MMControlSystem.ms_instance != null && || MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.MM_TL)
+        //{
+        //    Release();
+        //    m_hookShot.ConnectCurrentObjToOtherObj(m_hookShot.GetAttachmentTargetObiCol);
+        //}
         //ロープジャンプ処理
         if (m_isInputJump && m_isGrabbing)
         {
@@ -354,8 +379,7 @@ public class MoveTest : MonoBehaviour
     }
     private bool FootCollider()
     {
-        RaycastHit hit;
-        return (Physics.SphereCast(m_tf.position + m_col.center, m_col.radius, -m_tf.up, out hit, m_col.height / 1.5f));
+        return (Physics.SphereCast(m_tf.position + m_col.center, m_col.radius, -m_tf.up, out m_groundHit, m_col.height / 1.5f));
     }
     public void Jump()
     {

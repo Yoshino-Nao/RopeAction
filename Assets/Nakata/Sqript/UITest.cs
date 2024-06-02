@@ -7,13 +7,13 @@ public class UITest : MonoBehaviour
 {
     //帯をつけられるオブジェクト
     public Transform m_attachTf;
-    public GameObject m_Canvas;
-    public RectTransform rectTf;
-    public Image image;
+    private RectTransform rectTf;
+    private Image image;
     Vector3 view;
     void Start()
     {
-
+        rectTf = GetComponentInParent<RectTransform>();
+        image = GetComponentInParent<Image>();
     }
     void LateUpdate()
     {
