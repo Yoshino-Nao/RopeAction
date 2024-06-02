@@ -34,6 +34,7 @@ public class MoveTest : MonoBehaviour
     //カメラのTransform
     private Transform m_CameraTf;
     private bool m_isGround;
+    private bool m_oldIsGround;
     public bool GetIsGround
     {
         get { return m_isGround; }
@@ -78,6 +79,8 @@ public class MoveTest : MonoBehaviour
         m_col = GetComponent<CapsuleCollider>();
         m_rb = GetComponent<Rigidbody>();
         m_physicMaterial = new PhysicMaterial();
+        PhysicMaterialSetUp(true);
+        m_physicMaterial.frictionCombine = PhysicMaterialCombine.Minimum;
         m_col.material = m_physicMaterial;
 
         //メインカメラを取得する
@@ -156,9 +159,10 @@ public class MoveTest : MonoBehaviour
         ForceMode Mode = ForceMode.Acceleration;
         float Speed = m_forwardSpeed;
         m_isGround = FootCollider();
-        if (!m_isGround)
+        //接地した瞬間、または宙に浮いた瞬間の処理
+        if (m_isGround != m_oldIsGround)
         {
-            //m_physicMaterial
+            PhysicMaterialSetUp(m_isGround);
         }
         //ターザン風の移動処理
         //フックを発射中かつ、空中で、上昇中は移動速度を0にする
@@ -175,7 +179,7 @@ public class MoveTest : MonoBehaviour
             m_tf.position = new Vector3(m_tf.position.x, m_tf.position.y, 0f);
         }
         m_oldPos = m_tf.position;
-
+        m_oldIsGround = m_isGround;
     }
     private void SetMoveDir()
     {
@@ -194,7 +198,6 @@ public class MoveTest : MonoBehaviour
         }
         else
         {
-            v = 0f;
             //2Dの場合は左右の入力のみを移動に使用する
             m_moveDir = (m_playerForwardOn2d * h);
 
@@ -379,7 +382,22 @@ public class MoveTest : MonoBehaviour
     }
     private bool FootCollider()
     {
-        return (Physics.SphereCast(m_tf.position + m_col.center, m_col.radius, -m_tf.up, out m_groundHit, m_col.height / 1.5f));
+        return (Physics.SphereCast(m_tf.position + m_col.center, m_col.radius, -m_tf.up, out m_groundHit, m_col.height / 1.5f, 1 << LayerMask.NameToLayer("Ground")));
+    }
+    private void PhysicMaterialSetUp(bool IsGround)
+    {
+        //接地中は摩擦力を１に
+        if (IsGround)
+        {
+            m_physicMaterial.dynamicFriction = 1;
+            m_physicMaterial.staticFriction = 1;
+        }
+        //空中では摩擦力を0にして、壁に当たっているとき空中で留まることを防ぐ
+        else
+        {
+            m_physicMaterial.dynamicFriction = 0;
+            m_physicMaterial.staticFriction = 0;
+        }
     }
     public void Jump()
     {
