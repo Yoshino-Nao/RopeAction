@@ -14,7 +14,7 @@ public class Enemy1 : MonoBehaviour
     private float Timer;
     private float nowTimer;
 
-    void Update()
+    void FixedUpdate()
     {
         if(Timer > nowTimer)
         {

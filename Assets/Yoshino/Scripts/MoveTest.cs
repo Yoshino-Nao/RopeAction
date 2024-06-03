@@ -79,7 +79,7 @@ public class MoveTest : MonoBehaviour
         m_col = GetComponent<CapsuleCollider>();
         m_rb = GetComponent<Rigidbody>();
         m_physicMaterial = new PhysicMaterial();
-        PhysicMaterialSetUp(true);
+        LandingAndJumpSetUp(true);
         m_physicMaterial.frictionCombine = PhysicMaterialCombine.Minimum;
         m_col.material = m_physicMaterial;
 
@@ -100,7 +100,6 @@ public class MoveTest : MonoBehaviour
     {
         m_anim.speed = m_animSpeed;                             // Animatorのモーション再生速度に animSpeedを設定する
         m_currentBaseState = m_anim.GetCurrentAnimatorStateInfo(0); // 参照用のステート変数にBase Layer (0)の現在のステートを設定する
-        m_rb.useGravity = true;//ジャンプ中に重力を切るので、それ以外は重力の影響を受けるようにする
         DebugPrint.Print(string.Format("Ground{0}", m_isGround));
         m_anim.SetBool("Ground", m_isGround);
         SetMoveDir();
@@ -119,7 +118,6 @@ public class MoveTest : MonoBehaviour
             m_anim.SetFloat("SpeedY", 0);
         }
 
-        DebugPrint.Print(string.Format("normal{0}", m_groundHit.normal));
         //DebugPrint.Print(string.Format("ISMove{0}", m_currentBaseState.fullPathHash== locoState));
         //ジャンプ
         if (Input.GetButtonDown("Jump"))
@@ -162,7 +160,7 @@ public class MoveTest : MonoBehaviour
         //接地した瞬間、または宙に浮いた瞬間の処理
         if (m_isGround != m_oldIsGround)
         {
-            PhysicMaterialSetUp(m_isGround);
+            LandingAndJumpSetUp(m_isGround);
         }
         //ターザン風の移動処理
         //フックを発射中かつ、空中で、上昇中は移動速度を0にする
@@ -172,7 +170,30 @@ public class MoveTest : MonoBehaviour
         }
 
         //キャラクターを移動させる
-        m_rb.AddForce(Vector3.ProjectOnPlane(m_moveDir, m_groundHit.normal) * Speed, Mode);
+        Vector3 Normal;
+        if (m_isGround)
+        {
+            Normal = m_groundHit.normal;
+
+            float h = Input.GetAxisRaw("Horizontal");
+            float v = Input.GetAxisRaw("Vertical");
+            //入力がないときは、
+            if (h == 0 && v == 0)
+            {
+                m_rb.velocity = Vector3.MoveTowards(m_rb.velocity, Vector3.zero, 0.5f);
+            }
+            else
+            {
+                m_rb.drag = 1;
+            }
+
+        }
+        else
+        {
+            Normal = Vector3.up;
+        }
+        m_rb.AddForce(Vector3.ProjectOnPlane(m_moveDir, Normal) * Speed, Mode);
+
         //
         if (!CameraChanger.ms_instance.m_is3DCamera)
         {
@@ -185,11 +206,12 @@ public class MoveTest : MonoBehaviour
     {
         float h = Input.GetAxis("Horizontal");              // 入力デバイスの水平軸をhで定義
         float v = Input.GetAxis("Vertical");                // 入力デバイスの垂直軸をvで定義
-        //if (MPFT_NTD_MMControlSystem.ms_instance != null)
-        //{
-        //    h = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.L_Analog_X;
-        //    v = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.L_Analog_Y;
-        //}
+                                                            //if (MPFT_NTD_MMControlSystem.ms_instance != null)
+                                                            //{
+                                                            //    h = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.L_Analog_X;
+                                                            //    v = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.L_Analog_Y;
+                                                            //}
+
         if (CameraChanger.ms_instance.m_is3DCamera)
         {
             //3Dの場合はカメラに依存する
@@ -202,6 +224,7 @@ public class MoveTest : MonoBehaviour
             m_moveDir = (m_playerForwardOn2d * h);
 
         }
+
         DebugPrint.Print(string.Format("MoveVec{0}", m_moveDir));
     }
     public bool LerpGrabPoint()
@@ -384,19 +407,24 @@ public class MoveTest : MonoBehaviour
     {
         return (Physics.SphereCast(m_tf.position + m_col.center, m_col.radius, -m_tf.up, out m_groundHit, m_col.height / 1.5f, 1 << LayerMask.NameToLayer("Ground")));
     }
-    private void PhysicMaterialSetUp(bool IsGround)
+    private void LandingAndJumpSetUp(bool IsGround)
     {
-        //接地中は摩擦力を１に
         if (IsGround)
         {
+            //接地中は摩擦力を１に
             m_physicMaterial.dynamicFriction = 1;
             m_physicMaterial.staticFriction = 1;
+            //重力を無効化
+            m_rb.useGravity = false;
         }
-        //空中では摩擦力を0にして、壁に当たっているとき空中で留まることを防ぐ
         else
         {
+
+            //空中では摩擦力を0にして、壁に当たっているとき空中で留まることを防ぐ
             m_physicMaterial.dynamicFriction = 0;
             m_physicMaterial.staticFriction = 0;
+            //重力を有効化
+            m_rb.useGravity = true;
         }
     }
     public void Jump()
