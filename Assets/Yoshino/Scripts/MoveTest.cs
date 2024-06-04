@@ -82,7 +82,7 @@ public class MoveTest : MonoBehaviour
         LandingAndJumpSetUp(true);
         m_physicMaterial.frictionCombine = PhysicMaterialCombine.Minimum;
         m_col.material = m_physicMaterial;
-
+        m_isGround = m_oldIsGround = true;
         //メインカメラを取得する
         // CapsuleColliderコンポーネントのHeight、Centerの初期値を保存する
         m_orgColHight = m_col.height;
