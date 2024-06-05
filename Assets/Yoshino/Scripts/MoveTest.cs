@@ -128,10 +128,10 @@ public class MoveTest : MonoBehaviour
 
             }
         }
-        //if (MPFT_NTD_MMControlSystem.ms_instance != null&& MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.B)
-        //{
-        //    m_isInputJump = true;
-        //}
+        if (MPFT_NTD_MMControlSystem.ms_instance != null && MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.B)
+        {
+            m_isInputJump = true;
+        }
         if (m_currentBaseState.fullPathHash == jumpState)
         {
             if (!m_anim.IsInTransition(0))
@@ -155,6 +155,8 @@ public class MoveTest : MonoBehaviour
     void FixedUpdate()
     {
         ForceMode Mode = ForceMode.Acceleration;
+
+        Vector3 MoveDir = m_moveDir;
         float Speed = m_forwardSpeed;
         m_isGround = FootCollider();
         //接地した瞬間、または宙に浮いた瞬間の処理
@@ -163,10 +165,31 @@ public class MoveTest : MonoBehaviour
             LandingAndJumpSetUp(m_isGround);
         }
         //ターザン風の移動処理
-        //フックを発射中かつ、空中で、上昇中は移動速度を0にする
-        if (m_isGrabbing && !m_isGround && (m_oldPos.y - m_tf.position.y) <= 0f)
+        //ロープを発射中かつ、
+        if (m_isGrabbing)
         {
-            Speed = 0f;
+            if (m_isGround)
+            {
+
+            }
+            else
+            {
+                ////空中で上昇中は移動速度を0にする
+                if ((m_oldPos.y - m_tf.position.y) <= 0f)
+                {
+                    Speed = 0f;
+                }
+                //下降中は移動方向をプレイヤーの正面にする
+                else
+                {
+                    MoveDir = m_tf.forward;
+                }
+            }
+        }
+        //通常状態
+        else
+        {
+
         }
 
         //キャラクターを移動させる
@@ -175,16 +198,16 @@ public class MoveTest : MonoBehaviour
         {
             Normal = m_groundHit.normal;
 
+            //移動の入力がないときは、速度を落とす
             float h = Input.GetAxisRaw("Horizontal");
             float v = Input.GetAxisRaw("Vertical");
-            //入力がないときは、
             if (h == 0 && v == 0)
             {
                 m_rb.velocity = Vector3.MoveTowards(m_rb.velocity, Vector3.zero, 0.5f);
             }
             else
             {
-                m_rb.drag = 1;
+                m_rb.drag = 0;
             }
 
         }
@@ -192,8 +215,8 @@ public class MoveTest : MonoBehaviour
         {
             Normal = Vector3.up;
         }
-        m_rb.AddForce(Vector3.ProjectOnPlane(m_moveDir, Normal) * Speed, Mode);
-
+        m_rb.AddForce(Vector3.ProjectOnPlane(MoveDir, Normal) * Speed, Mode);
+        DebugPrint.Print(string.Format("Normal{0}", Normal));
         //
         if (!CameraChanger.ms_instance.m_is3DCamera)
         {
@@ -206,11 +229,11 @@ public class MoveTest : MonoBehaviour
     {
         float h = Input.GetAxis("Horizontal");              // 入力デバイスの水平軸をhで定義
         float v = Input.GetAxis("Vertical");                // 入力デバイスの垂直軸をvで定義
-                                                            //if (MPFT_NTD_MMControlSystem.ms_instance != null)
-                                                            //{
-                                                            //    h = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.L_Analog_X;
-                                                            //    v = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.L_Analog_Y;
-                                                            //}
+        if (MPFT_NTD_MMControlSystem.ms_instance != null)
+        {
+            h = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.L_Analog_X;
+            v = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.L_Analog_Y;
+        }
 
         if (CameraChanger.ms_instance.m_is3DCamera)
         {
@@ -322,6 +345,10 @@ public class MoveTest : MonoBehaviour
 
         }
     }
+    private void IdleFixed()
+    {
+
+    }
     /// <summary>
     /// ロープを掴んだ状態
     /// </summary>
@@ -332,20 +359,20 @@ public class MoveTest : MonoBehaviour
         {
             Release();
         }
-        //if (MPFT_NTD_MMControlSystem.ms_instance != null&& MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.MM_TR)
-        //{
-        //    Release();
-        //}
+        if (MPFT_NTD_MMControlSystem.ms_instance != null && MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.MM_TR)
+        {
+            Release();
+        }
         if (Input.GetKeyDown(KeyCode.E))
         {
             Release();
             m_hookShot.ConnectCurrentObjToOtherObj(m_hookShot.GetAttachmentTargetObiCol);
         }
-        //if (MPFT_NTD_MMControlSystem.ms_instance != null && || MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.MM_TL)
-        //{
-        //    Release();
-        //    m_hookShot.ConnectCurrentObjToOtherObj(m_hookShot.GetAttachmentTargetObiCol);
-        //}
+        if (MPFT_NTD_MMControlSystem.ms_instance != null && MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.MM_TL)
+        {
+            Release();
+            m_hookShot.ConnectCurrentObjToOtherObj(m_hookShot.GetAttachmentTargetObiCol);
+        }
         //ロープジャンプ処理
         if (m_isInputJump && m_isGrabbing)
         {
@@ -362,9 +389,9 @@ public class MoveTest : MonoBehaviour
         }
         //m_ikTarget.Move(m_grabPoint.transform.position);
         m_hookShot.RopeChangeLength();
-        //HookShotの方向に向き続ける
+        //ロープが当たっているオブジェクトの方向に向き続ける
         Vector3 ToGrabPointDir = (m_grabPoint.transform.position - m_tf.position).normalized;
-        Vector3 ToAttachPointDir = (m_hookShot.GetCurrnetAttachTf.position - m_tf.position).normalized;
+        Vector3 ToAttachPointDir = (m_hookShot.GetCurrnetAttachTf.position - m_tf.position + new Vector3(0, 0, m_hookShot.transform.localPosition.z)).normalized;
         Debug.DrawRay(m_tf.position, ToGrabPointDir * 100);
         if (m_isGround)
         {

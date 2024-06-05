@@ -17,6 +17,7 @@ public class CameraController2D : MonoBehaviour
     [SerializeField] private float m_camRotateAccelTime = 0.5f;
     [SerializeField] private float m_moveToDefSpeed = 0.25f;
     [SerializeField] private float m_maxLength = 3;
+    [SerializeField] private float m_mexAngle = 30f;
     //カメラの角度のみを動かす
     [SerializeField] bool m_isOnlyRotation = false;
     //操作していない場合、カメラの位置をデフォルトに戻そうとする
@@ -28,9 +29,10 @@ public class CameraController2D : MonoBehaviour
         m_virtualCamera = GetComponent<CinemachineVirtualCamera>();
         m_transposer = m_virtualCamera.GetCinemachineComponent<CinemachineTransposer>();
         m_pov = m_virtualCamera.GetCinemachineComponent<CinemachinePOV>();
-        //初期値
+        //初期値を設定する
         m_transposer.m_FollowOffset = m_defOffset;
-        //m_pov.m_HorizontalAxis.m_MaxValue = m_maxLength * 10;
+        m_pov.m_HorizontalAxis.m_MaxValue = m_pov.m_VerticalAxis.m_MaxValue = m_mexAngle;
+        m_pov.m_HorizontalAxis.m_MinValue = m_pov.m_VerticalAxis.m_MinValue = -m_mexAngle;
         m_pov.m_VerticalAxis.m_AccelTime = m_pov.m_HorizontalAxis.m_AccelTime = m_comMoveSpeed * 10;
 
         m_povSpeedDef = m_pov.m_HorizontalAxis.m_MaxSpeed;
@@ -50,18 +52,18 @@ public class CameraController2D : MonoBehaviour
             m_pov.m_VerticalAxis.m_InputAxisName = "Mouse Y";
 
         }
-        else 
+        else
         {
             h = Input.GetAxis("HorizontalArrow");
             v = Input.GetAxis("VerticalArrow");
             m_pov.m_HorizontalAxis.m_InputAxisName = "HorizontalArrow";
             m_pov.m_VerticalAxis.m_InputAxisName = "VerticalArrow";
         }
-        //if(MPFT_NTD_MMControlSystem.ms_instance!= null)
-        //{
-        //    h = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.R_Analog_X;
-        //    v = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.R_Analog_Y;
-        //}
+        if (MPFT_NTD_MMControlSystem.ms_instance != null)
+        {
+            h = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.R_Analog_X;
+            v = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.R_Analog_Y;
+        }
         Vector3 Value = new Vector3(h, v, 0);
 
         ////入力がない場合は初期位置に補間する
@@ -95,13 +97,6 @@ public class CameraController2D : MonoBehaviour
             Vector2 ClampVec = Vector2.ClampMagnitude(
                 pos - new Vector2(m_defOffset.x, m_defOffset.y), m_maxLength);
             m_transposer.m_FollowOffset = new Vector3(ClampVec.x, ClampVec.y + m_defOffset.y, m_defOffset.z);
-        }
-        {
-            //Vector2 pos = new Vector2(m_pov.m_TrackedObjectOffset.x, m_pov.m_TrackedObjectOffset.y);
-            //Vector2 ClampVec = Vector2.ClampMagnitude(
-            //     pos - new Vector2(0, m_defOffset.y), test);
-            //DebugPrint.Print(string.Format("pos{0}Clamp{1}", pos, ClampVec));
-            //m_pov.m_TrackedObjectOffset = new Vector3(ClampVec.x, ClampVec.y + m_defOffset.y, 0);
         }
     }
 }
