@@ -9,7 +9,7 @@ public class Gimmick1 : MonoBehaviour
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.name == "ball(Clone)")
+        if (collision.gameObject.tag == "ball")
         {
             m_Door.SetActive(false);
         }
