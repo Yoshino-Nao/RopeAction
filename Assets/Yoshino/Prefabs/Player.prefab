@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2754707533659947491}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Hand_R
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -44,7 +44,7 @@ GameObject:
   - component: {fileID: 7254639524555111234}
   - component: {fileID: 546079971389556749}
   - component: {fileID: 3478084084827441645}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Sphere
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -154,7 +154,7 @@ GameObject:
   - component: {fileID: 5835025916459105250}
   - component: {fileID: 8605988222060406163}
   - component: {fileID: 1392223549655538604}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Hook
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -189,7 +189,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 00df7e596986e6b4fa64193dd9a208d4, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_langth: 10
+  m_length: 10
   solver: {fileID: 0}
   character: {fileID: 7239771145696449547}
   material: {fileID: 2100000, guid: 44ab0cc40b59345718856f6e1c1225f3, type: 2}
@@ -200,6 +200,7 @@ MonoBehaviour:
   particlePoolSize: 100
   m_ui: {fileID: 0}
   m_grabMesh: {fileID: 0}
+  m_obiStitcher: {fileID: 0}
   m_grabPoint: {fileID: 391454940715962082, guid: 7ab3df9c70ace4f4db1377db00d3cf8a, type: 3}
   Test: {fileID: 0}
 --- !u!114 &6079209034565447418
@@ -225,7 +226,7 @@ MonoBehaviour:
   tearResistanceMultiplier: 1000
   tearRate: 1
   _distanceConstraintsEnabled: 1
-  _stretchingScale: 1
+  _stretchingScale: 0.5
   _stretchCompliance: 0
   _maxCompression: 0
   _bendConstraintsEnabled: 1
@@ -361,7 +362,7 @@ GameObject:
   - component: {fileID: 7239771145696449547}
   - component: {fileID: 7098942405659791141}
   - component: {fileID: 6828508615260912144}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Player
   m_TagString: Player
   m_Icon: {fileID: 0}
@@ -401,8 +402,9 @@ MonoBehaviour:
   m_lookSmoother: 3
   useCurves: 0
   useCurvesHeight: 0.5
-  m_forwardSpeed: 14
+  m_forwardSpeed: 7
   m_backwardSpeed: 2
+  m_maxSpeed: 20
   m_rotateSpeed: 1500
   m_jumpPower: 280
   m_playerForwardOn2d: {x: 1, y: 0, z: 0}
@@ -453,7 +455,7 @@ Rigidbody:
     m_Bits: 0
   m_ImplicitCom: 1
   m_ImplicitTensor: 1
-  m_UseGravity: 1
+  m_UseGravity: 0
   m_IsKinematic: 0
   m_Interpolate: 0
   m_Constraints: 112
@@ -500,6 +502,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d687f278a45eb5344a069837a317dbbf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  m_defaultMode: 1
   virtualCamera2D: {fileID: 0}
   virtualCamera3D: {fileID: 0}
   m_is3DCamera: 1
@@ -515,7 +518,7 @@ GameObject:
   - component: {fileID: 5896979387958414483}
   - component: {fileID: 1724939714402811975}
   - component: {fileID: 1474967826504486436}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Sphere
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -617,7 +620,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2669661729958725667}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Hand_L
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -652,7 +655,7 @@ GameObject:
   - component: {fileID: 4070215290681706183}
   - component: {fileID: 5791297530996084679}
   - component: {fileID: 5990510737542752799}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: IKTarget
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -739,7 +742,7 @@ GameObject:
   - component: {fileID: 5875548455791529739}
   - component: {fileID: 1540633854343983139}
   - component: {fileID: 8157744698290506862}
-  m_Layer: 0
+  m_Layer: 7
   m_Name: Sphere
   m_TagString: Untagged
   m_Icon: {fileID: 0}

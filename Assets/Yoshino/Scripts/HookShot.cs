@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using UnityEngine;
 using VInspector;
 using System.Linq;
-using Unity.Burst.CompilerServices;
-using Unity.VisualScripting;
 
 public class HookShot : MonoBehaviour
 {

@@ -1,0 +1,411 @@
+using RootMotion.FinalIK;
+using System.Collections;
+using System.Collections.Generic;
+using UnityEngine;
+using IceMilkTea.StateMachine;
+public class Player : MonoBehaviour
+{
+    private ImtStateMachine<Player, StateEvent> stateMachine;
+    private class MyState : ImtStateMachine<Player, StateEvent>.State { }
+    public enum StateEvent
+    {
+        Idle,
+        Ground,
+        Air,
+        RopeLaunchOnGround,
+        RopeLaunchOnAir,
+    }
+    [SerializeField] private float m_animSpeed = 1.5f;              // アニメーション再生速度設定
+    [SerializeField] private float m_lookSmoother = 3.0f;           // a smoothing setting for camera motion
+    [SerializeField] private bool useCurves = true;               // Mecanimでカーブ調整を使うか設定する
+                                                                  // このスイッチが入っていないとカーブは使われない
+    [SerializeField] private float useCurvesHeight = 0.5f;        // カーブ補正の有効高さ（地面をすり抜けやすい時には大きくする）
+
+    // 以下キャラクターコントローラ用パラメタ
+    // 前進速度
+    [SerializeField] private float m_forwardSpeed = 7.0f;
+    // 後退速度
+    [SerializeField] private float m_backwardSpeed = 2.0f;
+    //最高速度
+    [SerializeField] private float m_maxSpeed = 20f;
+    // 旋回速度
+    [SerializeField] private float m_rotateSpeed = 1500.0f;
+    // ジャンプ威力
+    [SerializeField] private float m_jumpPower = 280f;
+
+    [SerializeField] Vector3 m_playerForwardOn2d = Vector3.right;
+
+    [SerializeField] private float m_grabTotalTime = 1f;
+    //プレイヤーが持っているコンポーネント
+    private Transform m_tf => transform;
+    private CapsuleCollider m_capsuleCol;
+    private Rigidbody m_rb;
+    private PhysicMaterial m_physicMaterial;
+
+    //キャラクターモデルが持っているコンポーネント
+    private FullBodyBipedIK m_fullBodyBipedIK;
+    private float m_ikArmWeight = 0;
+
+    //アニメーション関係
+    private Animator m_anim;
+    private AnimatorStateInfo m_currentBaseState;
+    static int idleState = Animator.StringToHash("Base Layer.Idle");
+    static int MoveState = Animator.StringToHash("Base Layer.Blend Tree");
+    static int jumpState = Animator.StringToHash("Base Layer.Jump");
+    static int fallState = Animator.StringToHash("Base Layer.Fall");
+    static int restState = Animator.StringToHash("Base Layer.Rest");
+
+    //移動に使用する
+    private Vector3 m_moveDir;
+    private Vector3 m_moveVec;
+    private float m_moveSpeed;
+    private Vector3 m_inputMoveDir;
+    private Vector3 m_normal;
+    private Vector3 m_oldPos;
+
+    //接地判定で使用する
+    private bool m_isGround;
+    public bool GetIsGround { get { return m_isGround; } }
+    private bool m_oldIsGround;
+    private float m_orgColHight;
+    private Vector3 m_orgVectColCenter;
+    private RaycastHit m_groundHit;
+
+    //
+    //カメラのTransform
+    private Transform m_CameraTf;
+
+    //ロープ発射関係
+    private HookShot m_hookShot;
+    private IKTarget m_ikTarget;
+    private float m_lerpTGrabPoint = 0f;
+    private GrabPoint m_grabPoint;
+    public GrabPoint SetGrabPoint
+    {
+        set { m_grabPoint = value; }
+    }
+
+    public bool m_isGrabbing = false;
+
+    #region 移動関係
+
+    private void SetMoveDir()
+    {
+        float h;
+        float v;
+        m_inputMoveDir = Vector3.zero;
+        if (MPFT_NTD_MMControlSystem.ms_instance != null)
+        {
+            h = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.L_Analog_X;
+            v = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.L_Analog_Y;
+        }
+        else
+        {
+            h = Input.GetAxis("Horizontal");              // 入力デバイスの水平軸をhで定義
+            v = Input.GetAxis("Vertical");                // 入力デバイスの垂直軸をvで定義
+
+            m_inputMoveDir = new Vector3(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+        }
+        //カメラが2Dか3Dか判定
+        if (CameraChanger.ms_instance.m_is3DCamera)
+        {
+            //3Dの場合はカメラに依存する
+            Vector3 Forward = Vector3.Scale(m_CameraTf.forward, new Vector3(1, 0, 1)).normalized;
+            m_moveDir = (Forward * v + m_CameraTf.right * h);
+        }
+        else
+        {
+            //2Dの場合は左右の入力のみを移動に使用する
+            m_moveDir = (m_playerForwardOn2d * h);
+
+        }
+
+        DebugPrint.Print(string.Format("MoveVec{0}", m_moveDir));
+    }
+    private void MoveOnGround()
+    {
+        //アニメーション
+        Vector3 Vec = m_tf.InverseTransformDirection(m_moveDir);
+        //DebugPrint.Print(string.Format("AnimVec{0}", Vec));
+        // Animator側で設定している"Speed"パラメタを渡す
+        m_anim.SetFloat("SpeedX", Vec.x);
+        m_anim.SetFloat("SpeedY", Vec.z);
+
+        //移動入力があるか
+        if (m_inputMoveDir.magnitude > 0)
+        {
+            //あれば移動用ベクトルを設定
+            m_moveVec = m_moveDir;
+            m_normal = m_groundHit.normal;
+        }
+        else
+        {
+            //なければ移動用ベクトルを0にする
+            m_moveVec = Vector3.zero;
+        }
+        //移動方向に回転する処理
+        if (m_moveDir.magnitude > 0)
+        {
+            m_tf.rotation = Quaternion.LookRotation(m_moveDir, Vector3.up);
+        }
+        else
+        {
+            m_tf.rotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(m_tf.forward, Vector3.up), Vector3.up);
+        }
+    }
+
+
+    #endregion
+
+    private void Launch()
+    {
+        m_hookShot.LaunchHook();
+    }
+    public void GrabPointSetUp()
+    {
+        m_grabPoint.SetUp();
+        SetIKWeight(1);
+        m_grabPoint.SetParent(m_tf);
+        Debug.Log("ロープを掴みました");
+        m_isGrabbing = true;
+    }
+
+    private bool FootCollider()
+    {
+        return (Physics.SphereCast(m_tf.position + m_capsuleCol.center, m_capsuleCol.radius, -m_tf.up, out m_groundHit, m_capsuleCol.height / 1.5f, 1 << LayerMask.NameToLayer("Ground")));
+    }
+    private void LandingAndJumpSetUp(bool IsGround)
+    {
+        if (IsGround)
+        {
+            //接地中は摩擦力を１に
+            m_physicMaterial.dynamicFriction = 1;
+            m_physicMaterial.staticFriction = 1;
+            //重力を無効化
+            m_rb.useGravity = false;
+        }
+        else
+        {
+
+            //空中では摩擦力を0にして、壁に当たっているとき空中で留まることを防ぐ
+            m_physicMaterial.dynamicFriction = 0;
+            m_physicMaterial.staticFriction = 0;
+            //重力を有効化
+            m_rb.useGravity = true;
+        }
+    }
+    public void Jump()
+    {
+        m_rb.AddForce(Vector3.up * m_jumpPower, ForceMode.Impulse);
+        Debug.Log("Jump");
+    }
+    public bool LerpGrabPoint()
+    {
+        //
+        m_lerpTGrabPoint += Time.deltaTime / m_grabTotalTime;
+
+        m_grabPoint.transform.position = Vector3.Lerp(m_grabPoint.transform.position, m_hookShot.transform.position, m_lerpTGrabPoint);
+
+        m_ikTarget.Move(m_grabPoint.transform.position);
+        return m_lerpTGrabPoint >= 1;
+    }
+    public void SetIKWeight(float weight)
+    {
+        m_ikArmWeight = weight;
+        m_fullBodyBipedIK.solver.leftHandEffector.positionWeight = m_ikArmWeight;
+        m_fullBodyBipedIK.solver.leftHandEffector.rotationWeight = m_ikArmWeight;
+        m_fullBodyBipedIK.solver.rightHandEffector.positionWeight = m_ikArmWeight;
+        m_fullBodyBipedIK.solver.rightHandEffector.rotationWeight = m_ikArmWeight;
+    }
+    public IEnumerator Grab()
+    {
+        m_isGrabbing = true;
+        Debug.Log("ロープを掴みました");
+        m_grabPoint.DisableCollider();
+        m_lerpTGrabPoint = 0f;
+        //m_hookShot.DisabledCollition();
+        SetIKWeight(1);
+        m_hookShot.SetGrabMesh(true);
+        yield return new WaitUntil(() => LerpGrabPoint());
+        m_hookShot.PlayerGrabs();
+        m_grabPoint.SetParent(m_tf);
+        //m_hookShot.GrabRope();
+    }
+
+    private void Awake()
+    {
+        m_capsuleCol = GetComponent<CapsuleCollider>();
+        m_orgColHight = m_capsuleCol.height;
+        m_orgVectColCenter = m_capsuleCol.center;
+
+        m_rb = GetComponent<Rigidbody>();
+        m_physicMaterial = new PhysicMaterial();
+
+        m_physicMaterial.frictionCombine = PhysicMaterialCombine.Minimum;
+        m_capsuleCol.material = m_physicMaterial;
+        m_isGround = m_oldIsGround = true;
+
+        m_CameraTf = Camera.main.transform;
+        m_anim = GetComponentInChildren<Animator>();
+        m_hookShot = GetComponentInChildren<HookShot>();
+        m_ikTarget = GetComponentInChildren<IKTarget>();
+        m_fullBodyBipedIK = GetComponentInChildren<FullBodyBipedIK>();
+
+        stateMachine = new ImtStateMachine<Player, StateEvent>(this);
+
+        stateMachine.AddTransition<GroundState, AirState>(StateEvent.Air);
+        stateMachine.AddTransition<AirState, GroundState>(StateEvent.Ground);
+
+
+        stateMachine.SetStartState<GroundState>();
+    }
+
+    // Start is called before the first frame update
+    void Start()
+    {
+        m_currentBaseState = m_anim.GetCurrentAnimatorStateInfo(0);
+
+
+
+
+
+
+
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        m_isGround = FootCollider();
+        SetMoveDir();
+
+        m_anim.SetBool("Ground", m_isGround);
+
+        //m_hookShot.HookShooting();
+        DebugPrint.Print(string.Format("CurrentStateName:{0}", stateMachine.CurrentStateName));
+        stateMachine.Update();
+    }
+    private void FixedUpdate()
+    {
+        //if (m_isGround != m_oldIsGround)
+        //{
+        //    LandingAndJumpSetUp(m_isGround);
+        //}
+        m_rb.AddForce(Vector3.ProjectOnPlane(m_moveVec, m_normal) * m_forwardSpeed, ForceMode.Acceleration);
+    }
+    private class GroundState : MyState
+    {
+        protected internal override void Enter()
+        {
+            base.Enter();
+            Debug.Log(stateMachine.CurrentStateName);
+            Context.LandingAndJumpSetUp(true);
+            Context.m_anim.SetBool("Jump", false);
+        }
+        protected internal override void Update()
+        {
+            base.Update();
+            //状態遷移
+            if (!Context.m_isGround)
+            {
+                stateMachine.SendEvent(StateEvent.Air);
+            }
+
+            if (Context.m_isGrabbing)
+            {
+                stateMachine.SendEvent(StateEvent.RopeLaunchOnGround);
+            }
+
+            DebugPrint.Print(string.Format("Test"));
+
+            //移動処理
+            Context.MoveOnGround();
+
+            //手の位置の制御
+            if (Context.m_grabPoint != null)
+            {
+                float dist = Vector3.Distance(Context.m_tf.position, Context.m_grabPoint.transform.position);
+                float length = 2f;
+                if (Input.GetKeyDown(KeyCode.V) && dist <= length)
+                {
+                    Context.StartCoroutine(Context.Grab());
+                }
+            }
+
+            if (Input.GetMouseButtonDown(1))
+            {
+                Context.Launch();
+            }
+
+            //ジャンプ
+            if (Input.GetButtonDown("Jump"))
+            {
+                if (Context.m_currentBaseState.fullPathHash == MoveState && !Context.m_anim.IsInTransition(0))
+                {
+                    Context.m_anim.SetBool("Jump", true);
+                }
+            }
+
+
+        }
+
+
+    }
+    private class AirState : MyState
+    {
+        protected internal override void Enter()
+        {
+            base.Enter();
+            Debug.Log(stateMachine.CurrentStateName);
+            Context.LandingAndJumpSetUp(false);
+
+        }
+        protected internal override void Update()
+        {
+            base.Update();
+            if (Context.m_isGround)
+            {
+                stateMachine.SendEvent(StateEvent.Ground);
+            }
+
+        }
+        protected internal override void Exit()
+        {
+            base.Exit();
+        }
+    }
+    private class RopeLaunchOnGround : MyState
+    {
+        protected internal override void Enter()
+        {
+            base.Enter();
+
+            Debug.Log(stateMachine.CurrentStateName);
+        }
+        protected internal override void Update()
+        {
+            base.Update();
+
+            Context.MoveOnGround();
+        }
+        protected internal override void Exit()
+        {
+            base.Exit();
+        }
+    }
+    private class RopeLaunchOnAir : MyState
+    {
+        protected internal override void Enter()
+        {
+            base.Enter();
+        }
+        protected internal override void Update()
+        {
+            base.Update();
+        }
+        protected internal override void Exit()
+        {
+            base.Exit();
+        }
+    }
+}

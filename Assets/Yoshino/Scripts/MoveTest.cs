@@ -17,6 +17,8 @@ public class MoveTest : MonoBehaviour
     [SerializeField] private float m_forwardSpeed = 7.0f;
     // 後退速度
     [SerializeField] private float m_backwardSpeed = 2.0f;
+    //最高速度
+    [SerializeField] private float m_maxSpeed = 5f;
     // 旋回速度
     [SerializeField] private float m_rotateSpeed = 1500.0f;
     // ジャンプ威力
@@ -209,14 +211,19 @@ public class MoveTest : MonoBehaviour
             {
                 m_rb.drag = 0;
             }
-
         }
         else
         {
             Normal = Vector3.up;
         }
+        
         m_rb.AddForce(Vector3.ProjectOnPlane(MoveDir, Normal) * Speed, Mode);
-        DebugPrint.Print(string.Format("Normal{0}", Normal));
+        //最高速度
+        if (m_rb.velocity.magnitude >= m_maxSpeed)
+        {
+            m_rb.velocity = m_rb.velocity.normalized * m_maxSpeed;
+        }
+        DebugPrint.Print(string.Format("Velocity{0}", m_rb.velocity.magnitude));
         //
         if (!CameraChanger.ms_instance.m_is3DCamera)
         {
