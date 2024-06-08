@@ -5,7 +5,7 @@ using UnityEngine.Rendering;
 
 public class GoalOpen : MonoBehaviour
 {
-    Vector3 defaultY;　//初期Y座標
+    Vector3 GoalY;　//初期Y座標
     Vector3 moveY;     //true時の動くY座標
     float speed = 1f;
     float MaxSpeed;  //動くスピード
@@ -15,8 +15,8 @@ public class GoalOpen : MonoBehaviour
     void Start()
     {
         MaxSpeed = speed * Time.deltaTime;
-        defaultY = transform.position;
-        moveY = new Vector3(transform.position.x, transform.position.y - 5f, transform.position.z);
+        GoalY = transform.position;
+        moveY = new Vector3(transform.position.x, transform.position.y - 10f, transform.position.z);
     }
 
     // Update is called once per frame
@@ -28,7 +28,7 @@ public class GoalOpen : MonoBehaviour
         }
         else if (!isMove)
         {
-            transform.position = Vector3.MoveTowards(transform.position, defaultY, MaxSpeed);
+            transform.position = Vector3.MoveTowards(transform.position, GoalY, MaxSpeed);
         }
     }
 }
