@@ -16,7 +16,7 @@ public class Title : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetMouseButtonDown(1))
+        if (Input.anyKeyDown)
         {
             if (TitleCanvas.enabled == true)
             {
