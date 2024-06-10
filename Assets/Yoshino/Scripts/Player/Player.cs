@@ -12,8 +12,8 @@ public class Player : MonoBehaviour
         Idle,
         Ground,
         Air,
-        RopeLaunchOnGround,
-        RopeLaunchOnAir,
+        GrabbingRopeOnGround,
+        GrabbingRopeOnAir,
     }
     [SerializeField] private float m_animSpeed = 1.5f;              // アニメーション再生速度設定
     [SerializeField] private float m_lookSmoother = 3.0f;           // a smoothing setting for camera motion
@@ -250,6 +250,7 @@ public class Player : MonoBehaviour
         m_hookShot = GetComponentInChildren<HookShot>();
         m_ikTarget = GetComponentInChildren<IKTarget>();
         m_fullBodyBipedIK = GetComponentInChildren<FullBodyBipedIK>();
+        
 
         stateMachine = new ImtStateMachine<Player, StateEvent>(this);
 
@@ -264,7 +265,6 @@ public class Player : MonoBehaviour
     void Start()
     {
         m_currentBaseState = m_anim.GetCurrentAnimatorStateInfo(0);
-
 
 
 
@@ -300,6 +300,8 @@ public class Player : MonoBehaviour
             base.Enter();
             Debug.Log(stateMachine.CurrentStateName);
             Context.LandingAndJumpSetUp(true);
+
+            Context.SetIKWeight(0);
             Context.m_anim.SetBool("Jump", false);
         }
         protected internal override void Update()
@@ -313,7 +315,7 @@ public class Player : MonoBehaviour
 
             if (Context.m_isGrabbing)
             {
-                stateMachine.SendEvent(StateEvent.RopeLaunchOnGround);
+                stateMachine.SendEvent(StateEvent.GrabbingRopeOnGround);
             }
 
             DebugPrint.Print(string.Format("Test"));
@@ -358,7 +360,6 @@ public class Player : MonoBehaviour
             base.Enter();
             Debug.Log(stateMachine.CurrentStateName);
             Context.LandingAndJumpSetUp(false);
-
         }
         protected internal override void Update()
         {
@@ -367,6 +368,10 @@ public class Player : MonoBehaviour
             {
                 stateMachine.SendEvent(StateEvent.Ground);
             }
+            if (Context.m_isGrabbing)
+            {
+                stateMachine.SendEvent(StateEvent.GrabbingRopeOnAir);
+            }
 
         }
         protected internal override void Exit()
@@ -374,7 +379,7 @@ public class Player : MonoBehaviour
             base.Exit();
         }
     }
-    private class RopeLaunchOnGround : MyState
+    private class GrabbingRopeOnGround : MyState
     {
         protected internal override void Enter()
         {
@@ -393,7 +398,7 @@ public class Player : MonoBehaviour
             base.Exit();
         }
     }
-    private class RopeLaunchOnAir : MyState
+    private class GrabbingRopeOnAir : MyState
     {
         protected internal override void Enter()
         {
