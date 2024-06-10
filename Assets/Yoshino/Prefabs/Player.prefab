@@ -154,6 +154,7 @@ GameObject:
   - component: {fileID: 5835025916459105250}
   - component: {fileID: 8605988222060406163}
   - component: {fileID: 1392223549655538604}
+  - component: {fileID: 1662064228945748633}
   m_Layer: 7
   m_Name: Hook
   m_TagString: Untagged
@@ -202,6 +203,7 @@ MonoBehaviour:
   m_grabMesh: {fileID: 0}
   m_obiStitcher: {fileID: 0}
   m_grabPoint: {fileID: 391454940715962082, guid: 7ab3df9c70ace4f4db1377db00d3cf8a, type: 3}
+  m_particleAttachment: {fileID: 1662064228945748633}
   Test: {fileID: 0}
 --- !u!114 &6079209034565447418
 MonoBehaviour:
@@ -226,12 +228,12 @@ MonoBehaviour:
   tearResistanceMultiplier: 1000
   tearRate: 1
   _distanceConstraintsEnabled: 1
-  _stretchingScale: 0.5
+  _stretchingScale: 1
   _stretchCompliance: 0
   _maxCompression: 0
   _bendConstraintsEnabled: 1
   _bendCompliance: 0
-  _maxBending: 0.02
+  _maxBending: 0.05
   _plasticYield: 0
   _plasticCreep: 0
 --- !u!23 &9049338502372709359
@@ -328,8 +330,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8285ac97113f74d449053378d0e3a56b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_CursorMu: 0
-  m_SourceMu: 0
+  m_CursorMu: 0.95
+  m_SourceMu: 0.95
   direction: 0
 --- !u!114 &1392223549655538604
 MonoBehaviour:
@@ -347,6 +349,25 @@ MonoBehaviour:
   shader: {fileID: 4800000, guid: 801733041f66b49e1b3c2101471db877, type: 3}
   particleColor: {r: 1, g: 1, b: 1, a: 1}
   radiusScale: 1
+--- !u!114 &1662064228945748633
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1013003937294432697}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4d03c9194b7ab4aaba4dfa5afec22c69, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Actor: {fileID: 6079209034565447418}
+  m_Target: {fileID: 3259156906742741579}
+  m_ParticleGroup: {fileID: 0}
+  m_AttachmentType: 0
+  m_ConstrainOrientation: 0
+  m_Compliance: 0
+  m_BreakThreshold: Infinity
 --- !u!1 &1378640060110036352
 GameObject:
   m_ObjectHideFlags: 0
@@ -377,7 +398,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1378640060110036352}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -404,7 +425,7 @@ MonoBehaviour:
   useCurvesHeight: 0.5
   m_forwardSpeed: 7
   m_backwardSpeed: 2
-  m_maxSpeed: 20
+  m_maxSpeed: 5
   m_rotateSpeed: 1500
   m_jumpPower: 280
   m_playerForwardOn2d: {x: 1, y: 0, z: 0}
@@ -474,7 +495,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   thickness: 0
   material: {fileID: 0}
-  filter: -131071
+  filter: 1
   m_SourceCollider: {fileID: 8040820617923788580}
   m_DistanceField: {fileID: 0}
 --- !u!114 &7098942405659791141
@@ -502,9 +523,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d687f278a45eb5344a069837a317dbbf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_defaultMode: 1
-  virtualCamera2D: {fileID: 0}
-  virtualCamera3D: {fileID: 0}
+  m_defaultMode: 0
+  virtualCamera2D: {fileID: 2431068409928057260, guid: 4aade0c8d82ab854fbdfed806bb43f94, type: 3}
+  virtualCamera3D: {fileID: 3764008784692320060, guid: 15f663e215c8e8f41acdd94eb420a044, type: 3}
   m_is3DCamera: 1
 --- !u!1 &3202526183075516977
 GameObject:

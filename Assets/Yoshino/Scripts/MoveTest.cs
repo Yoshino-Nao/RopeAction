@@ -218,6 +218,7 @@ public class MoveTest : MonoBehaviour
         }
         
         m_rb.AddForce(Vector3.ProjectOnPlane(MoveDir, Normal) * Speed, Mode);
+        //m_rb.velocity = Vector3.ProjectOnPlane(MoveDir, Normal) * Speed;
         //最高速度
         if (m_rb.velocity.magnitude >= m_maxSpeed)
         {

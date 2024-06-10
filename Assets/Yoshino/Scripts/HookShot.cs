@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using VInspector;
 using System.Linq;
+using Unity.VisualScripting;
 
 public class HookShot : MonoBehaviour
 {
@@ -52,7 +53,7 @@ public class HookShot : MonoBehaviour
 
     [SerializeField] private GrabPoint m_grabPoint;
     private GameObject m_grabObj;
-
+    [SerializeField] private ObiParticleAttachment m_particleAttachment;
     [SerializeField] private ObiColliderBase Test;
     [Button]
     void ConnectTest()
@@ -109,7 +110,7 @@ public class HookShot : MonoBehaviour
         //cursor.cursorMu = 0;
         //cursor.direction = true;
         m_obiStitcher = m_tf.parent.GetComponentInChildren<ObiStitcher>();
-
+        m_particleAttachment = GetComponent<ObiParticleAttachment>();
     }
 
     private void OnDestroy()
@@ -137,13 +138,21 @@ public class HookShot : MonoBehaviour
         // Raycast to see what we hit:
         if (Physics.Raycast(ray, out hookAttachment, float.MaxValue, 1 << LayerMask.NameToLayer("Ropeattach")))
         {
-            // We actually hit something, so attach the hook!
-            StartCoroutine(AttachHook());
+            if (hookAttachment.rigidbody.isKinematic)
+            {
+                // We actually hit something, so attach the hook!
+                StartCoroutine(AttachHookForKinematic());
+            }
+            else
+            {
+                StartCoroutine(AttachHookForNotKinematic());
+            }
+
         }
 
     }
 
-    private IEnumerator AttachHook()
+    private IEnumerator AttachHookForKinematic()
     {
         //1フレーム待つ
         yield return null;
@@ -156,13 +165,15 @@ public class HookShot : MonoBehaviour
         //ロープ パスを手順に従って生成します (時間の経過とともに延長するため、短いセグメントのみ)。
         int filter = ObiUtils.MakeFilter(ObiUtils.CollideWithEverything, 0);
         blueprint.path.Clear();
-        blueprint.path.AddControlPoint(Vector3.zero, Vector3.zero, Vector3.zero, Vector3.up, 0.1f, 0.1f, 1, filter, Color.white, "Hook start");
+        float mass = 0.1f;
+
+        blueprint.path.AddControlPoint(Vector3.zero, Vector3.zero, Vector3.zero, Vector3.up, mass, 0.1f, 1, filter, Color.white, "Hook start");
         //int Count = 10;
         //for (int i = 0; i < Count; i++)
         //{
         //    blueprint.path.AddControlPoint(localHit.normalized * 0.5f * i, Vector3.zero, Vector3.zero, Vector3.up, 0.1f, 0.1f, 1, filter, Color.white, "Hook " + i.ToString());
         //}
-        blueprint.path.AddControlPoint(localHit.normalized * 0.5f, Vector3.zero, Vector3.zero, Vector3.up, 0.1f, 0.1f, 1, filter, Color.white, "Hook end");
+        blueprint.path.AddControlPoint(localHit.normalized * 0.5f, Vector3.zero, Vector3.zero, Vector3.up, mass, 0.1f, 1, filter, Color.white, "Hook end");
         blueprint.path.FlushEvents();
 
         //ロープのパーティクル表現を生成します (完了するまで待ちます)。
@@ -245,6 +256,75 @@ public class HookShot : MonoBehaviour
         //ConnectToObj(m_player.GetComponent<ObiColliderBase>());
         //StartCoroutine(m_player.Grab());
     }
+    private IEnumerator AttachHookForNotKinematic()
+    {
+        //1フレーム待つ
+        yield return null;
+
+        //Pin Constraintsをクリア
+        pinConstraints = Obirope.GetConstraintsByType(Oni.ConstraintType.Pin) as ObiConstraints<ObiPinConstraintsBatch>;
+        pinConstraints.Clear();
+        //ヒットした地点の座標をローカルの座標に変換
+        Vector3 localHit = Obirope.transform.InverseTransformPoint(hookAttachment.point);
+        //ロープ パスを手順に従って生成します (時間の経過とともに延長するため、短いセグメントのみ)。
+        int filterEverything = ObiUtils.MakeFilter(ObiUtils.CollideWithEverything, 0);
+        int filterNothing = ObiUtils.MakeFilter(ObiUtils.CollideWithNothing, 0);
+
+        blueprint.path.Clear();
+        float mass = 0.1f;
+
+        blueprint.path.AddControlPoint(Vector3.zero, Vector3.zero, Vector3.zero, Vector3.up, mass, 0.1f, 1, filterNothing, Color.white, "Hook start");
+        blueprint.path.AddControlPoint(localHit - localHit.normalized, Vector3.zero, Vector3.zero, Vector3.up, mass, 0.1f, 1, filterEverything, Color.white, "Hook end 1");
+
+        blueprint.path.AddControlPoint(localHit, Vector3.zero, Vector3.zero, Vector3.up, mass, 0.1f, 1, filterNothing, Color.white, "Hook end 2");
+        blueprint.path.FlushEvents();
+
+        //ロープのパーティクル表現を生成します (完了するまで待ちます)。
+        yield return blueprint.Generate();
+
+        //ブループリントを設定します(これにより、パーティクル/コンストレイントがソルバーに追加され、それらのシミュレーションが開始されます)。
+        Obirope.ropeBlueprint = blueprint;
+
+        //1フレーム待ちます
+        //yield return null;
+
+        Obirope.GetComponent<MeshRenderer>().enabled = true;
+        m_grabObj = Instantiate(m_grabPoint.gameObject, m_tf.position, Quaternion.identity, solver.transform);
+        m_player.SetGrabPoint = m_grabObj.GetComponent<GrabPoint>();
+        m_player.GrabPointSetUp();
+
+        m_particleAttachment.target = m_grabObj.transform;
+        m_particleAttachment.particleGroup = blueprint.groups[0];
+        m_particleAttachment.attachmentType = ObiParticleAttachment.AttachmentType.Static;
+        //var target = m_tf.AddComponent<ObiParticleAttachment>();
+        //target.target = hookAttachment.transform;
+        //target.particleGroup = blueprint.groups[1];
+        //target.attachmentType = ObiParticleAttachment.AttachmentType.Dynamic;
+        var target2 = m_tf.AddComponent<ObiParticleAttachment>();
+        target2.target = hookAttachment.transform;
+        target2.particleGroup = blueprint.groups[2];
+        target2.attachmentType = ObiParticleAttachment.AttachmentType.Dynamic;
+
+        //m_obiRigidbody.kinematicForParticles = true;
+        //ロープの両端をピンで固定します (これにより、キャラクターとロープの間の双方向のインタラクションが可能になります)。
+        //var batch = new ObiPinConstraintsBatch();
+        //batch.AddConstraint(Obirope.elements[0].particle1, character, m_tf.localPosition, Quaternion.identity, 0, 0, float.PositiveInfinity);
+        //batch.AddConstraint(Obirope.elements[Obirope.elements.Count - 1].particle2, hookAttachment.collider.GetComponent<ObiColliderBase>(),
+        //                                                  hookAttachment.collider.transform.InverseTransformPoint(hookAttachment.point), Quaternion.identity, 0, 0, float.PositiveInfinity);
+
+        //ObiColliderBase obiCollider = m_grabObj.GetComponent<ObiColliderBase>();
+        //batch.AddConstraint(Obirope.elements[0].particle1, obiCollider, Vector3.zero, Quaternion.identity, 0, 0, float.PositiveInfinity);
+        //batch.AddConstraint(Obirope.elements[Obirope.elements.Count - 1].particle2, hookAttachment.collider.GetComponent<ObiColliderBase>(),
+        //                                                  hookAttachment.collider.transform.InverseTransformPoint(hookAttachment.point), Quaternion.identity, 0, 0, float.PositiveInfinity);
+
+        //batch.activeConstraintCount = 2;
+        //pinConstraints.AddBatch(batch);
+        //Obirope.SetConstraintsDirty(Oni.ConstraintType.Pin);
+        //GrabPointを生成しロープをGrabPointと繋ぐ
+        
+        //ConnectToObj(m_player.GetComponent<ObiColliderBase>());
+        //StartCoroutine(m_player.Grab());
+    }
     public void ClearPinConstraints()
     {
         //pinConstraints = Obirope.GetConstraintsByType(Oni.ConstraintType.Pin) as ObiConstraints<ObiPinConstraintsBatch>;
@@ -270,15 +350,34 @@ public class HookShot : MonoBehaviour
 
     public void PlayerGrabs()
     {
-        pinConstraints = Obirope.GetConstraintsByType(Oni.ConstraintType.Pin) as ObiConstraints<ObiPinConstraintsBatch>;
-        pinConstraints.Clear();
-        var batch = new ObiPinConstraintsBatch();
-        batch.AddConstraint(Obirope.elements[0].particle1, character, m_tf.localPosition, Quaternion.identity, 0, 0, float.PositiveInfinity);
-        batch.AddConstraint(Obirope.elements[Obirope.elements.Count - 1].particle2, hookAttachment.collider.GetComponent<ObiColliderBase>(),
-                                                          hookAttachment.collider.transform.InverseTransformPoint(hookAttachment.point), Quaternion.identity, 0, 0, float.PositiveInfinity);
-        batch.activeConstraintCount = 2;
-        pinConstraints.AddBatch(batch);
-        Obirope.SetConstraintsDirty(Oni.ConstraintType.Pin);
+        if (hookAttachment.rigidbody.isKinematic)
+        {
+            pinConstraints = Obirope.GetConstraintsByType(Oni.ConstraintType.Pin) as ObiConstraints<ObiPinConstraintsBatch>;
+            pinConstraints.Clear();
+            var batch = new ObiPinConstraintsBatch();
+            batch.AddConstraint(Obirope.elements[0].particle1, character, m_tf.localPosition, Quaternion.identity, 0, 0, float.PositiveInfinity);
+            batch.AddConstraint(Obirope.elements[Obirope.elements.Count - 1].particle2, hookAttachment.collider.GetComponent<ObiColliderBase>(),
+                                                              hookAttachment.collider.transform.InverseTransformPoint(hookAttachment.point), Quaternion.identity, 0, 0, float.PositiveInfinity);
+
+            batch.activeConstraintCount = 2;
+            pinConstraints.AddBatch(batch);
+            Obirope.SetConstraintsDirty(Oni.ConstraintType.Pin);
+        }
+        else
+        {
+            
+            //m_particleAttachment1.target = m_tf;
+            //m_particleAttachment1.particleGroup = blueprint.groups[0];
+            //m_particleAttachment1.attachmentType = ObiParticleAttachment.AttachmentType.Static;
+            //m_particleAttachment1.compliance = 1;
+            //var target = m_tf.AddComponent<ObiParticleAttachment>();
+            //target.target = hookAttachment.transform;
+            //target.particleGroup = blueprint.groups[1];
+            //target.attachmentType = ObiParticleAttachment.AttachmentType.Dynamic;
+            //target.compliance = 1;
+        }
+
+
     }
     /// <summary>
     /// Hookの当たり判定をなくす

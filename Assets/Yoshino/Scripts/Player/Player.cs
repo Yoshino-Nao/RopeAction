@@ -94,12 +94,12 @@ public class Player : MonoBehaviour
         float h;
         float v;
         m_inputMoveDir = Vector3.zero;
-        if (MPFT_NTD_MMControlSystem.ms_instance != null)
-        {
-            h = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.L_Analog_X;
-            v = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.L_Analog_Y;
-        }
-        else
+        //if (MPFT_NTD_MMControlSystem.ms_instance != null)
+        //{
+        //    h = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.L_Analog_X;
+        //    v = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.L_Analog_Y;
+        //}
+        //else
         {
             h = Input.GetAxis("Horizontal");              // 入力デバイスの水平軸をhで定義
             v = Input.GetAxis("Vertical");                // 入力デバイスの垂直軸をvで定義

@@ -14,7 +14,7 @@ public class CameraChanger : MonoBehaviour
     [SerializeField] eDefaultMode m_defaultMode;
     [SerializeField, Header("2Dカメラ")]
     private CinemachineVirtualCamera virtualCamera2D = null;
-
+    MoveTest m_player;
     [SerializeField, Header("3Dカメラ")]
     private CinemachineFreeLook virtualCamera3D = null;
     [Button]
@@ -34,6 +34,8 @@ public class CameraChanger : MonoBehaviour
             //プレイヤーを２人出さないかぎり使わない
             Destroy(gameObject);
         }
+        m_player = FindAnyObjectByType<MoveTest>();
+        CameraSetUp();
         if (m_defaultMode == eDefaultMode._3D)
         {
             Set3DCamera();
@@ -69,5 +71,10 @@ public class CameraChanger : MonoBehaviour
         virtualCamera2D.Priority = 1;
         virtualCamera3D.Priority = 0;
         m_is3DCamera = false;
+    }
+    private void CameraSetUp()
+    {
+        virtualCamera2D.Follow = virtualCamera3D.Follow = m_player.transform;
+        virtualCamera2D.LookAt = virtualCamera3D.LookAt = m_player.transform;
     }
 }
