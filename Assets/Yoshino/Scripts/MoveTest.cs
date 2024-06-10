@@ -130,10 +130,7 @@ public class MoveTest : MonoBehaviour
 
             }
         }
-        if (MPFT_NTD_MMControlSystem.ms_instance != null && MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.B)
-        {
-            m_isInputJump = true;
-        }
+        
         if (m_currentBaseState.fullPathHash == jumpState)
         {
             if (!m_anim.IsInTransition(0))
@@ -237,12 +234,7 @@ public class MoveTest : MonoBehaviour
     {
         float h = Input.GetAxis("Horizontal");              // 入力デバイスの水平軸をhで定義
         float v = Input.GetAxis("Vertical");                // 入力デバイスの垂直軸をvで定義
-        if (MPFT_NTD_MMControlSystem.ms_instance != null)
-        {
-            h = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.L_Analog_X;
-            v = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.L_Analog_Y;
-        }
-
+        
         if (CameraChanger.ms_instance.m_is3DCamera)
         {
             //3Dの場合はカメラに依存する
@@ -367,20 +359,13 @@ public class MoveTest : MonoBehaviour
         {
             Release();
         }
-        if (MPFT_NTD_MMControlSystem.ms_instance != null && MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.MM_TR)
-        {
-            Release();
-        }
+        
         if (Input.GetKeyDown(KeyCode.E))
         {
             Release();
             m_hookShot.ConnectCurrentObjToOtherObj(m_hookShot.GetAttachmentTargetObiCol);
         }
-        if (MPFT_NTD_MMControlSystem.ms_instance != null && MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.MM_TL)
-        {
-            Release();
-            m_hookShot.ConnectCurrentObjToOtherObj(m_hookShot.GetAttachmentTargetObiCol);
-        }
+        
         //ロープジャンプ処理
         if (m_isInputJump && m_isGrabbing)
         {
