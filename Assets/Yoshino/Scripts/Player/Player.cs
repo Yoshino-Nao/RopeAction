@@ -122,14 +122,17 @@ public class Player : MonoBehaviour
 
         DebugPrint.Print(string.Format("MoveVec{0}", m_moveDir));
     }
-    private void MoveOnGround()
+    private void Move()
     {
         //アニメーション
         Vector3 Vec = m_tf.InverseTransformDirection(m_moveDir);
         //DebugPrint.Print(string.Format("AnimVec{0}", Vec));
         // Animator側で設定している"Speed"パラメタを渡す
-        m_anim.SetFloat("SpeedX", Vec.x);
-        m_anim.SetFloat("SpeedY", Vec.z);
+        if (m_isGround)
+        {
+            m_anim.SetFloat("SpeedX", Vec.x);
+            m_anim.SetFloat("SpeedY", Vec.z);
+        }
 
         //移動入力があるか
         if (m_inputMoveDir.magnitude > 0)
@@ -143,23 +146,67 @@ public class Player : MonoBehaviour
             //なければ移動用ベクトルを0にする
             m_moveVec = Vector3.zero;
         }
-        //移動方向に回転する処理
-        if (m_moveDir.magnitude > 0)
+        if (!m_isGrabbing)
         {
-            m_tf.rotation = Quaternion.LookRotation(m_moveDir, Vector3.up);
-        }
-        else
-        {
-            m_tf.rotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(m_tf.forward, Vector3.up), Vector3.up);
+            //移動方向に回転する処理
+            if (m_moveDir.magnitude > 0)
+            {
+                m_tf.rotation = Quaternion.LookRotation(m_moveDir, Vector3.up);
+            }
+            else
+            {
+                m_tf.rotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(m_tf.forward, Vector3.up), Vector3.up);
+            }
         }
     }
-
-
+    private void Jump()
+    {
+        if (m_currentBaseState.fullPathHash == MoveState && !m_anim.IsInTransition(0))
+        {
+            m_anim.SetBool("Jump", true);
+        }
+    }
+    public void AddJumpPow()
+    {
+        m_rb.AddForce(Vector3.up * m_jumpPower, ForceMode.Impulse);
+        m_anim.SetBool("Jump", false);
+        Debug.Log("Jump");
+    }
+    private void RopeJump()
+    {
+        if (m_hookShot.GetCurrnetAttachRb.isKinematic)
+        {
+            m_rb.AddForce(m_tf.forward * m_jumpPower, ForceMode.Impulse);
+            Release();
+        }
+    }
     #endregion
-
+    #region ロープ関係
     private void Launch()
     {
         m_hookShot.LaunchHook();
+    }
+    private void Detach()
+    {
+        m_hookShot.DetachHook();
+    }
+    public void Release()
+    {
+        m_hookShot.SetGrabMesh(false);
+        m_hookShot.ConnectCurrentObjToOtherObj(m_grabPoint.GetObiCol);
+        //IKを解除し物理演算を開始
+        SetIKWeight(0);
+        m_grabPoint.SetParent(null);
+        m_grabPoint.EnablePhysics();
+
+
+        m_isGrabbing = false;
+        Debug.Log("ロープを離しました");
+    }
+    private void Conntect()
+    {
+        Release();
+        m_hookShot.ConnectCurrentObjToOtherObj(m_hookShot.GetAttachmentTargetObiCol);
     }
     public void GrabPointSetUp()
     {
@@ -169,7 +216,43 @@ public class Player : MonoBehaviour
         Debug.Log("ロープを掴みました");
         m_isGrabbing = true;
     }
+    private void RopeGrabbingOnGround()
+    {
+        m_hookShot.RopeChangeLength();
 
+        //ロープが当たっているオブジェクトの方向に向き続ける
+        Vector3 ToGrabPointDir = (m_hookShot.GetCurrnetAttachTf.position - m_tf.position).normalized;
+        // ToAttachPointDir = (m_hookShot.GetCurrnetAttachTf.position - m_tf.position + new Vector3(0, 0, m_hookShot.transform.localPosition.z)).normalized;
+        Debug.DrawRay(m_tf.position, ToGrabPointDir * 100);
+
+        ToGrabPointDir = Vector3.ProjectOnPlane(ToGrabPointDir, Vector3.up);
+        m_tf.rotation = Quaternion.LookRotation(ToGrabPointDir, Vector3.up);
+
+
+    }
+    private void RopeGrabbingOnAir()
+    {
+        m_hookShot.RopeChangeLength();
+
+        //ロープが当たっているオブジェクトの方向に向き続ける
+        Vector3 ToGrabPointDir = (m_grabPoint.transform.position - m_tf.position).normalized;
+        Vector3 ToAttachPointDir = (m_hookShot.GetCurrnetAttachTf.position - m_tf.position + new Vector3(0, 0, m_hookShot.transform.localPosition.z)).normalized;
+        Debug.DrawRay(m_tf.position, ToGrabPointDir * 100);
+        if (m_hookShot.GetCurrnetAttachRb.isKinematic)
+        {
+            if (m_moveDir.magnitude > 0)
+            {
+                m_moveDir = Vector3.ProjectOnPlane(m_moveDir, ToAttachPointDir);
+                m_tf.rotation = Quaternion.RotateTowards(m_tf.rotation, Quaternion.LookRotation(Vector3.ProjectOnPlane(m_moveDir, ToAttachPointDir)), m_rotateSpeed * Time.fixedDeltaTime);
+            }
+            else
+            {
+                m_tf.rotation = Quaternion.RotateTowards(m_tf.rotation, Quaternion.LookRotation(Vector3.ProjectOnPlane(m_tf.forward, Vector3.up)), m_rotateSpeed * Time.fixedDeltaTime);
+            }
+           
+        }
+    }
+    #endregion
     private bool FootCollider()
     {
         return (Physics.SphereCast(m_tf.position + m_capsuleCol.center, m_capsuleCol.radius, -m_tf.up, out m_groundHit, m_capsuleCol.height / 1.5f, 1 << LayerMask.NameToLayer("Ground")));
@@ -194,11 +277,7 @@ public class Player : MonoBehaviour
             m_rb.useGravity = true;
         }
     }
-    public void Jump()
-    {
-        m_rb.AddForce(Vector3.up * m_jumpPower, ForceMode.Impulse);
-        Debug.Log("Jump");
-    }
+    
     public bool LerpGrabPoint()
     {
         //
@@ -250,13 +329,18 @@ public class Player : MonoBehaviour
         m_hookShot = GetComponentInChildren<HookShot>();
         m_ikTarget = GetComponentInChildren<IKTarget>();
         m_fullBodyBipedIK = GetComponentInChildren<FullBodyBipedIK>();
-        
+
 
         stateMachine = new ImtStateMachine<Player, StateEvent>(this);
 
         stateMachine.AddTransition<GroundState, AirState>(StateEvent.Air);
+        stateMachine.AddTransition<GroundState, GrabbingRopeOnGround>(StateEvent.GrabbingRopeOnGround);
         stateMachine.AddTransition<AirState, GroundState>(StateEvent.Ground);
-
+        stateMachine.AddTransition<AirState, GrabbingRopeOnAir>(StateEvent.GrabbingRopeOnAir);
+        stateMachine.AddTransition<GrabbingRopeOnGround, GroundState>(StateEvent.Ground);
+        stateMachine.AddTransition<GrabbingRopeOnGround, GrabbingRopeOnAir>(StateEvent.GrabbingRopeOnAir);
+        stateMachine.AddTransition<GrabbingRopeOnAir, AirState>(StateEvent.Air);
+        stateMachine.AddTransition<GrabbingRopeOnAir, GrabbingRopeOnGround>(StateEvent.GrabbingRopeOnGround);
 
         stateMachine.SetStartState<GroundState>();
     }
@@ -321,7 +405,7 @@ public class Player : MonoBehaviour
             DebugPrint.Print(string.Format("Test"));
 
             //移動処理
-            Context.MoveOnGround();
+            Context.Move();
 
             //手の位置の制御
             if (Context.m_grabPoint != null)
@@ -333,25 +417,25 @@ public class Player : MonoBehaviour
                     Context.StartCoroutine(Context.Grab());
                 }
             }
-
+            //ロープ発射
             if (Input.GetMouseButtonDown(1))
             {
                 Context.Launch();
             }
+            
+
+
 
             //ジャンプ
             if (Input.GetButtonDown("Jump"))
             {
-                if (Context.m_currentBaseState.fullPathHash == MoveState && !Context.m_anim.IsInTransition(0))
-                {
-                    Context.m_anim.SetBool("Jump", true);
-                }
+               Context.Jump();
             }
 
 
         }
 
-
+        
     }
     private class AirState : MyState
     {
@@ -373,6 +457,13 @@ public class Player : MonoBehaviour
                 stateMachine.SendEvent(StateEvent.GrabbingRopeOnAir);
             }
 
+            
+
+            Context.Move();
+            if (Input.GetMouseButtonDown(1))
+            {
+                Context.Launch();
+            }
         }
         protected internal override void Exit()
         {
@@ -386,12 +477,38 @@ public class Player : MonoBehaviour
             base.Enter();
 
             Debug.Log(stateMachine.CurrentStateName);
+            Context.LandingAndJumpSetUp(true);
         }
         protected internal override void Update()
         {
             base.Update();
+            if(!Context.m_isGround)
+            {
+                stateMachine.SendEvent(StateEvent.GrabbingRopeOnAir);
+            }
+            if (!Context.m_isGrabbing)
+            {
+                stateMachine.SendEvent(StateEvent.Ground);
+            }
 
-            Context.MoveOnGround();
+            Context.Move();
+            Context.RopeGrabbingOnGround();
+
+            //ジャンプ
+            if (Input.GetButtonDown("Jump"))
+            {
+                Context.Jump();
+            }
+            //ロープを離す
+            if (Input.GetKeyDown(KeyCode.V))
+            {
+                Context.Release();
+            }
+            //ロープを解除
+            if (Input.GetMouseButtonDown(1))
+            {
+                Context.Detach();
+            }
         }
         protected internal override void Exit()
         {
@@ -403,10 +520,32 @@ public class Player : MonoBehaviour
         protected internal override void Enter()
         {
             base.Enter();
+            Debug.Log(stateMachine.CurrentStateName);
+            Context.LandingAndJumpSetUp(false);
         }
         protected internal override void Update()
         {
             base.Update();
+            if (Context.m_isGround)
+            {
+                stateMachine.SendEvent(StateEvent.GrabbingRopeOnGround);
+            }
+            if (!Context.m_isGrabbing)
+            {
+                stateMachine.SendEvent(StateEvent.Air);
+            }
+            Context.Move();
+            Context.RopeGrabbingOnAir();
+
+            if (Input.GetButtonDown("Jump"))
+            {
+                Context.RopeJump();
+            }
+
+            if (Input.GetMouseButtonDown(1))
+            {
+                Context.Detach();
+            }
         }
         protected internal override void Exit()
         {

@@ -377,7 +377,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3259156906742741579}
-  - component: {fileID: 4709172445567255957}
+  - component: {fileID: 3602940252276104128}
   - component: {fileID: 8040820617923788580}
   - component: {fileID: 7640724244135529038}
   - component: {fileID: 7239771145696449547}
@@ -407,7 +407,7 @@ Transform:
   - {fileID: 3734674886007099302}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &4709172445567255957
+--- !u!114 &3602940252276104128
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -416,7 +416,7 @@ MonoBehaviour:
   m_GameObject: {fileID: 1378640060110036352}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: a09a224893c3e084ebfed5c42d15cfb5, type: 3}
+  m_Script: {fileID: 11500000, guid: 6adf2c87b0853ab40a4047b157a720c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
   m_animSpeed: 1.5
@@ -425,7 +425,7 @@ MonoBehaviour:
   useCurvesHeight: 0.5
   m_forwardSpeed: 7
   m_backwardSpeed: 2
-  m_maxSpeed: 5
+  m_maxSpeed: 20
   m_rotateSpeed: 1500
   m_jumpPower: 280
   m_playerForwardOn2d: {x: 1, y: 0, z: 0}
