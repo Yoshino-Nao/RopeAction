@@ -128,15 +128,20 @@ public class HookShot : MonoBehaviour
         // Raycast to see what we hit:
         if (Physics.Raycast(ray, out hookAttachment, float.MaxValue, 1 << LayerMask.NameToLayer("Ropeattach")))
         {
-            if (hookAttachment.rigidbody.isKinematic)
+            if (GetisLoaded)
             {
-                // We actually hit something, so attach the hook!
-                StartCoroutine(AttachHookForKinematic());
+                DetachHook();
             }
-            else
-            {
-                StartCoroutine(AttachHookForNotKinematic());
-            }
+            StartCoroutine(AttachHookForKinematic());
+            //if (hookAttachment.rigidbody.isKinematic)
+            //{
+            //    // We actually hit something, so attach the hook!
+                
+            //}
+            //else
+            //{
+            //    StartCoroutine(AttachHookForNotKinematic());
+            //}
 
         }
 
