@@ -355,16 +355,16 @@ MonoBehaviour:
   - {x: 0, y: 0, z: 0}
   angularVelocities: []
   invMasses:
-  - 10
-  - 9.999999
-  - 9.999999
-  - 10.000001
-  - 10.000001
-  - 10
-  - 10
-  - 10
-  - 10
-  - 10
+  - 100000
+  - 100000
+  - 100000
+  - 100000
+  - 100000
+  - 100000
+  - 100000
+  - 100000
+  - 100000
+  - 100000
   - 0
   - 0
   - 0
@@ -1357,7 +1357,7 @@ MonoBehaviour:
     - Bottom
     m_Points:
       data:
-      - tangentMode: 0
+      - tangentMode: 2
         inTangent: {x: 0, y: 0, z: 0}
         position: {x: 0, y: 0, z: 0}
         outTangent: {x: 0, y: 0, z: 0}
@@ -1379,8 +1379,8 @@ MonoBehaviour:
       - 1
     m_Masses:
       data:
-      - 0.1
-      - 0.1
+      - 0
+      - 0
     m_RotationalMasses:
       data:
       - 1
