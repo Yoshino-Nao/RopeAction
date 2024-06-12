@@ -5,12 +5,20 @@ using UnityEngine.SceneManagement;
 
 public class ReStart : MonoBehaviour
 {
-    [SerializeField] private string m_sceneName;
+    //初期座標
+    public Vector3 SRPosition;
+    public GameObject player;
+    void Start()
+    {
+        //プレイヤーの初期座標取得
+        SRPosition = player.transform.position;
+    }
     private void OnCollisionEnter(Collision collision)
     {
         if(collision.gameObject.tag== "Player")
         {
-            SceneManager.LoadScene(m_sceneName);
+            //SceneManager.LoadScene(m_sceneName);
+            player.transform.position = SRPosition;
         }
     }
 }
