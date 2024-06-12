@@ -229,26 +229,10 @@ public class HookShot : MonoBehaviour
         //ロープが配置された時点でシミュレーションが引き継がれるように質量を復元します。
         for (int i = 0; i < m_rope.activeParticleCount; ++i)
             solver.invMasses[m_rope.solverIndices[i]] = 10; // 1/0.1 = 10
+
         PlayerGrabs();
-        //ロープの両端をピンで固定します (これにより、キャラクターとロープの間の双方向のインタラクションが可能になります)。
-        //var batch = new ObiPinConstraintsBatch();
-        //batch.AddConstraint(Obirope.elements[0].particle1, character, m_tf.localPosition, Quaternion.identity, 0, 0, float.PositiveInfinity);
-        //batch.AddConstraint(Obirope.elements[Obirope.elements.Count - 1].particle2, hookAttachment.collider.GetComponent<ObiColliderBase>(),
-        //                                                  hookAttachment.collider.transform.InverseTransformPoint(hookAttachment.point), Quaternion.identity, 0, 0, float.PositiveInfinity);
-
-        //ObiColliderBase obiCollider = m_grabObj.GetComponent<ObiColliderBase>();
-        //batch.AddConstraint(Obirope.elements[0].particle1, obiCollider, Vector3.zero, Quaternion.identity, 0, 0, float.PositiveInfinity);
-        //batch.AddConstraint(Obirope.elements[Obirope.elements.Count - 1].particle2, hookAttachment.collider.GetComponent<ObiColliderBase>(),
-        //                                                  hookAttachment.collider.transform.InverseTransformPoint(hookAttachment.point), Quaternion.identity, 0, 0, float.PositiveInfinity);
-
-        //batch.activeConstraintCount = 2;
-        //pinConstraints.AddBatch(batch);
-        //Obirope.SetConstraintsDirty(Oni.ConstraintType.Pin);
-        //GrabPointを生成しロープをGrabPointと繋ぐ
         m_grabObj.SetActive(true);
         m_player.GrabPointSetUp();
-        //ConnectToObj(m_player.GetComponent<ObiColliderBase>());
-        //StartCoroutine(m_player.Grab());
     }
     private IEnumerator AttachHookForNotKinematic()
     {
@@ -290,7 +274,7 @@ public class HookShot : MonoBehaviour
         m_particleAttachment.target = m_grabObj.transform;
         m_particleAttachment.particleGroup = blueprint.groups[0];
         m_particleAttachment.attachmentType = ObiParticleAttachment.AttachmentType.Static;
-      
+
         var target2 = m_tf.AddComponent<ObiParticleAttachment>();
         target2.target = hookAttachment.transform;
         target2.particleGroup = blueprint.groups[2];
@@ -321,33 +305,28 @@ public class HookShot : MonoBehaviour
 
     public void PlayerGrabs()
     {
-        if (hookAttachment.rigidbody.isKinematic)
-        {
-            pinConstraints = m_rope.GetConstraintsByType(Oni.ConstraintType.Pin) as ObiConstraints<ObiPinConstraintsBatch>;
-            pinConstraints.Clear();
-            var batch = new ObiPinConstraintsBatch();
-            batch.AddConstraint(m_rope.elements[0].particle1, character, m_tf.localPosition, Quaternion.identity, 0, 0, float.PositiveInfinity);
-            batch.AddConstraint(m_rope.elements[m_rope.elements.Count - 1].particle2, hookAttachment.collider.GetComponent<ObiColliderBase>(),
-                                                              hookAttachment.collider.transform.InverseTransformPoint(hookAttachment.point), Quaternion.identity, 0, 0, float.PositiveInfinity);
 
-            batch.activeConstraintCount = 2;
-            pinConstraints.AddBatch(batch);
-            m_rope.SetConstraintsDirty(Oni.ConstraintType.Pin);
-        }
-        else
-        {
+        pinConstraints = m_rope.GetConstraintsByType(Oni.ConstraintType.Pin) as ObiConstraints<ObiPinConstraintsBatch>;
+        pinConstraints.Clear();
+        var batch = new ObiPinConstraintsBatch();
+        batch.AddConstraint(
+            m_rope.elements[0].particle1, 
+            character,
+            m_tf.localPosition, 
+            Quaternion.identity,
+            0, 0, float.PositiveInfinity
+            );
+        batch.AddConstraint(
+            m_rope.elements[m_rope.elements.Count - 1].particle2, 
+            hookAttachment.collider.GetComponent<ObiColliderBase>(),
+            hookAttachment.collider.transform.InverseTransformPoint(hookAttachment.point), 
+            Quaternion.identity, 
+            0, 0, float.PositiveInfinity
+            );
 
-            //m_particleAttachment1.target = m_tf;
-            //m_particleAttachment1.particleGroup = blueprint.groups[0];
-            //m_particleAttachment1.attachmentType = ObiParticleAttachment.AttachmentType.Static;
-            //m_particleAttachment1.compliance = 1;
-            //var target = m_tf.AddComponent<ObiParticleAttachment>();
-            //target.target = hookAttachment.transform;
-            //target.particleGroup = blueprint.groups[1];
-            //target.attachmentType = ObiParticleAttachment.AttachmentType.Dynamic;
-            //target.compliance = 1;
-        }
-
+        batch.activeConstraintCount = 2;
+        pinConstraints.AddBatch(batch);
+        m_rope.SetConstraintsDirty(Oni.ConstraintType.Pin);
         SetGrabMesh(true);
     }
     /// <summary>
