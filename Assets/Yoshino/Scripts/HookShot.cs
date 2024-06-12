@@ -119,11 +119,6 @@ public class HookShot : MonoBehaviour
     public void LaunchHook()
     {
         if (m_attachmentTargetObj == null) return;
-        //このオブジェクトと同じ XY 平面内のシーン内のマウスの位置を取得します。
-        //Vector3 mouse = Input.mousePosition;
-        //mouse.z = transform.position.z - Camera.main.transform.position.z;
-        //Vector3 mouseInScene = Camera.main.ScreenToWorldPoint(mouse);
-
 
         Ray ray = new Ray(m_tf.position, m_attachmentTargetObj.transform.position - m_tf.position);
         //Vector3 vec = 
@@ -155,19 +150,15 @@ public class HookShot : MonoBehaviour
         //Pin Constraintsをクリア
         pinConstraints = m_rope.GetConstraintsByType(Oni.ConstraintType.Pin) as ObiConstraints<ObiPinConstraintsBatch>;
         pinConstraints.Clear();
+
         //ヒットした地点の座標をローカルの座標に変換
         Vector3 localHit = m_rope.transform.InverseTransformPoint(hookAttachment.point);
+
         //ロープ パスを手順に従って生成します (時間の経過とともに延長するため、短いセグメントのみ)。
         int filter = ObiUtils.MakeFilter(ObiUtils.CollideWithEverything, 0);
         blueprint.path.Clear();
         float mass = 0.1f;
-
         blueprint.path.AddControlPoint(Vector3.zero, Vector3.zero, Vector3.zero, Vector3.up, mass, 0.1f, 1, filter, Color.white, "Hook start");
-        //int Count = 10;
-        //for (int i = 0; i < Count; i++)
-        //{
-        //    blueprint.path.AddControlPoint(localHit.normalized * 0.5f * i, Vector3.zero, Vector3.zero, Vector3.up, 0.1f, 0.1f, 1, filter, Color.white, "Hook " + i.ToString());
-        //}
         blueprint.path.AddControlPoint(localHit.normalized * 0.5f, Vector3.zero, Vector3.zero, Vector3.up, mass, 0.1f, 1, filter, Color.white, "Hook end");
         blueprint.path.FlushEvents();
 
@@ -182,11 +173,13 @@ public class HookShot : MonoBehaviour
 
         m_rope.GetComponent<MeshRenderer>().enabled = true;
 
-
-
         //ロープを伸ばすときに位置を上書きするので、質量をゼロに設定します。
         for (int i = 0; i < m_rope.activeParticleCount; ++i)
             solver.invMasses[m_rope.solverIndices[i]] = 0;
+
+
+
+
         float currentLength = 0;
 
         //最後のパーティクルがヒットした地点まで到達していない間、ロープを延長します。
@@ -280,11 +273,6 @@ public class HookShot : MonoBehaviour
         target2.particleGroup = blueprint.groups[2];
         target2.attachmentType = ObiParticleAttachment.AttachmentType.Dynamic;
     }
-    public void ClearPinConstraints()
-    {
-        //pinConstraints = Obirope.GetConstraintsByType(Oni.ConstraintType.Pin) as ObiConstraints<ObiPinConstraintsBatch>;
-        //pinConstraints.Clear();
-    }
     /// <summary>
     /// ロープとオブジェクトを繋ぐ
     /// </summary>
@@ -295,9 +283,20 @@ public class HookShot : MonoBehaviour
         pinConstraints = m_rope.GetConstraintsByType(Oni.ConstraintType.Pin) as ObiConstraints<ObiPinConstraintsBatch>;
         pinConstraints.Clear();
         var batch = new ObiPinConstraintsBatch();
-        batch.AddConstraint(m_rope.elements[0].particle1, collider, Vector3.zero, Quaternion.identity, 0, 0, float.PositiveInfinity);
-        batch.AddConstraint(m_rope.elements[m_rope.elements.Count - 1].particle2, m_currentAttachObiCol.GetComponent<ObiColliderBase>(),
-                                                          hookAttachment.collider.transform.InverseTransformPoint(hookAttachment.point), Quaternion.identity, 0, 0, float.PositiveInfinity);
+        batch.AddConstraint(
+            m_rope.elements[0].particle1,
+            collider,
+            Vector3.zero,
+            Quaternion.identity,
+            0, 0, float.PositiveInfinity
+            );
+        batch.AddConstraint(
+            m_rope.elements[m_rope.elements.Count - 1].particle2,
+            m_currentAttachObiCol.GetComponent<ObiColliderBase>(),
+            hookAttachment.collider.transform.InverseTransformPoint(hookAttachment.point),
+            Quaternion.identity,
+            0, 0, float.PositiveInfinity
+            );
         batch.activeConstraintCount = 2;
         pinConstraints.AddBatch(batch);
         m_rope.SetConstraintsDirty(Oni.ConstraintType.Pin);
@@ -305,22 +304,21 @@ public class HookShot : MonoBehaviour
 
     public void PlayerGrabs()
     {
-
         pinConstraints = m_rope.GetConstraintsByType(Oni.ConstraintType.Pin) as ObiConstraints<ObiPinConstraintsBatch>;
         pinConstraints.Clear();
         var batch = new ObiPinConstraintsBatch();
         batch.AddConstraint(
-            m_rope.elements[0].particle1, 
+            m_rope.elements[0].particle1,
             character,
-            m_tf.localPosition, 
+            m_tf.localPosition,
             Quaternion.identity,
             0, 0, float.PositiveInfinity
             );
         batch.AddConstraint(
-            m_rope.elements[m_rope.elements.Count - 1].particle2, 
+            m_rope.elements[m_rope.elements.Count - 1].particle2,
             hookAttachment.collider.GetComponent<ObiColliderBase>(),
-            hookAttachment.collider.transform.InverseTransformPoint(hookAttachment.point), 
-            Quaternion.identity, 
+            hookAttachment.collider.transform.InverseTransformPoint(hookAttachment.point),
+            Quaternion.identity,
             0, 0, float.PositiveInfinity
             );
 
@@ -352,7 +350,7 @@ public class HookShot : MonoBehaviour
     public void HookShooting()
     {
         DebugPrint.Print(string.Format("AttachmentObj:{0}", m_attachmentTargetObj?.name));
-        //右クリックで発射
+        //右クリックで発射、解除
         if (Input.GetMouseButtonDown(1))
         {
             if (!m_rope.isLoaded)
@@ -369,15 +367,18 @@ public class HookShot : MonoBehaviour
         float Wheel = Input.GetAxis("Mouse ScrollWheel");
         float max = 20f;
         float min = 0.5f;
+        //スペースキーで長さを縮小
         if (Input.GetKey(KeyCode.Space))
         {
             cursor.ChangeLength(Mathf.Clamp(m_rope.restLength - hookExtendRetractSpeed * Time.deltaTime, min, max));
         }
+        //シフトキーで長さを延長
         if (Input.GetKey(KeyCode.LeftShift))
         {
             cursor.ChangeLength(Mathf.Clamp(m_rope.restLength + hookExtendRetractSpeed * Time.deltaTime, min, max));
         }
         DebugPrint.Print(string.Format("RopeLength{0}", m_rope.restLength));
+        //マウスホイールで長さを変更
         cursor.ChangeLength(Mathf.Clamp(m_rope.restLength - hookExtendRetractSpeed * Wheel * Time.deltaTime, min, max));
     }
     public void SetGrabMesh(bool isEnabled)
@@ -385,8 +386,10 @@ public class HookShot : MonoBehaviour
         m_grabMesh.enabled = isEnabled;
         if (isEnabled)
         {
+
             m_obiStitcher.Actor1 = m_rope;
         }
+
         m_obiStitcher.enabled = isEnabled;
     }
     public GameObject Explosion()

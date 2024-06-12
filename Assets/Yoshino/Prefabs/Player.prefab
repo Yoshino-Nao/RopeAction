@@ -330,9 +330,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 8285ac97113f74d449053378d0e3a56b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_CursorMu: 0.95
-  m_SourceMu: 0.95
-  direction: 0
+  m_CursorMu: 0
+  m_SourceMu: 0
+  direction: 1
 --- !u!114 &1392223549655538604
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -398,7 +398,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1378640060110036352}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -523,9 +523,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d687f278a45eb5344a069837a317dbbf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_defaultMode: 0
-  virtualCamera2D: {fileID: 2431068409928057260, guid: 4aade0c8d82ab854fbdfed806bb43f94, type: 3}
-  virtualCamera3D: {fileID: 3764008784692320060, guid: 15f663e215c8e8f41acdd94eb420a044, type: 3}
+  m_defaultMode: 1
+  virtualCamera2D: {fileID: 0}
+  virtualCamera3D: {fileID: 0}
   m_is3DCamera: 1
 --- !u!1 &3202526183075516977
 GameObject:
