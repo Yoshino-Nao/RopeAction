@@ -1,6 +1,7 @@
 using Obi;
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 
 public class SetChildOnHit : MonoBehaviour
@@ -20,6 +21,13 @@ public class SetChildOnHit : MonoBehaviour
             collision.transform.parent = transform;
         }
     }
+    private void OnCollisionStay(Collision collision)
+    {
+        if (collision.collider.tag == "Player")
+        {
+            collision.transform.parent = transform;
+        }
+    }
     private void OnCollisionExit(Collision collision)
     {
         if (collision.collider.tag == "Player")
@@ -27,4 +35,5 @@ public class SetChildOnHit : MonoBehaviour
             collision.transform.parent = m_obiSolver.transform;
         }
     }
+
 }

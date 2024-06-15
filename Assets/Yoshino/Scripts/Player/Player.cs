@@ -86,6 +86,8 @@ public class Player : MonoBehaviour
     }
 
     public bool m_isGrabbing = false;
+    [SerializeField] private Transform m_grabPos;
+    [SerializeField] private Transform m_hookTf;
 
     #region 移動関係
 
@@ -94,12 +96,12 @@ public class Player : MonoBehaviour
         float h;
         float v;
         m_inputMoveDir = Vector3.zero;
-        //if (MPFT_NTD_MMControlSystem.ms_instance != null)
-        //{
-        //    h = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.L_Analog_X;
-        //    v = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.L_Analog_Y;
-        //}
-        //else
+        if (MPFT_NTD_MMControlSystem.ms_instance != null)
+        {
+            h = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.L_Analog_X;
+            v = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.L_Analog_Y;
+        }
+        else
         {
             h = Input.GetAxis("Horizontal");              // 入力デバイスの水平軸をhで定義
             v = Input.GetAxis("Vertical");                // 入力デバイスの垂直軸をvで定義
@@ -249,7 +251,7 @@ public class Player : MonoBehaviour
             {
                 m_tf.rotation = Quaternion.RotateTowards(m_tf.rotation, Quaternion.LookRotation(Vector3.ProjectOnPlane(m_tf.forward, Vector3.up)), m_rotateSpeed * Time.fixedDeltaTime);
             }
-           
+
         }
     }
     #endregion
@@ -277,13 +279,17 @@ public class Player : MonoBehaviour
             m_rb.useGravity = true;
         }
     }
-    
+
     public bool LerpGrabPoint()
     {
         //
         m_lerpTGrabPoint += Time.deltaTime / m_grabTotalTime;
 
-        m_grabPoint.transform.position = Vector3.Lerp(m_grabPoint.transform.position, m_hookShot.transform.position, m_lerpTGrabPoint);
+        m_grabPoint.transform.position = Vector3.Lerp(
+            m_grabPoint.transform.position, 
+            m_hookShot.transform.position, 
+            m_lerpTGrabPoint
+            );
 
         m_ikTarget.Move(m_grabPoint.transform.position);
         return m_lerpTGrabPoint >= 1;
@@ -352,7 +358,7 @@ public class Player : MonoBehaviour
 
 
 
-
+        
 
 
     }
@@ -422,20 +428,26 @@ public class Player : MonoBehaviour
             {
                 Context.Launch();
             }
-            
+            if(MPFT_NTD_MMControlSystem.ms_instance!=null&& MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.MM_TR)
+            {
+                Context.Launch();
+            }
 
 
 
             //ジャンプ
             if (Input.GetButtonDown("Jump"))
             {
-               Context.Jump();
+                Context.Jump();
             }
-
+            if (MPFT_NTD_MMControlSystem.ms_instance != null && MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.B)
+            {
+                Context.Jump();
+            }
 
         }
 
-        
+
     }
     private class AirState : MyState
     {
@@ -457,10 +469,14 @@ public class Player : MonoBehaviour
                 stateMachine.SendEvent(StateEvent.GrabbingRopeOnAir);
             }
 
-            
+
 
             Context.Move();
             if (Input.GetMouseButtonDown(1))
+            {
+                Context.Launch();
+            }
+            if (MPFT_NTD_MMControlSystem.ms_instance != null && MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.MM_TR)
             {
                 Context.Launch();
             }
@@ -482,7 +498,7 @@ public class Player : MonoBehaviour
         protected internal override void Update()
         {
             base.Update();
-            if(!Context.m_isGround)
+            if (!Context.m_isGround)
             {
                 stateMachine.SendEvent(StateEvent.GrabbingRopeOnAir);
             }
@@ -490,7 +506,6 @@ public class Player : MonoBehaviour
             {
                 stateMachine.SendEvent(StateEvent.Ground);
             }
-
             Context.Move();
             Context.RopeGrabbingOnGround();
 
@@ -499,13 +514,25 @@ public class Player : MonoBehaviour
             {
                 Context.Jump();
             }
+            if (MPFT_NTD_MMControlSystem.ms_instance != null && MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.B)
+            {
+                Context.Jump();
+            }
             //ロープを離す
             if (Input.GetKeyDown(KeyCode.V))
             {
                 Context.Release();
             }
+            if (MPFT_NTD_MMControlSystem.ms_instance != null && MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.B)
+            {
+                Context.Jump();
+            }
             //ロープを解除
             if (Input.GetMouseButtonDown(1))
+            {
+                Context.Detach();
+            }
+            if (MPFT_NTD_MMControlSystem.ms_instance != null && MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.MM_TR)
             {
                 Context.Detach();
             }
@@ -541,8 +568,16 @@ public class Player : MonoBehaviour
             {
                 Context.RopeJump();
             }
+            if (MPFT_NTD_MMControlSystem.ms_instance != null && MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.B)
+            {
+                Context.Jump();
+            }
 
             if (Input.GetMouseButtonDown(1))
+            {
+                Context.Detach();
+            }
+            if (MPFT_NTD_MMControlSystem.ms_instance != null && MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.MM_TR)
             {
                 Context.Detach();
             }

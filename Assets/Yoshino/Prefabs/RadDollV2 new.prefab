@@ -1718,7 +1718,8 @@ GameObject:
   - component: {fileID: 5351052167441779688}
   - component: {fileID: 605915876425933463}
   - component: {fileID: 6823372669855928767}
-  - component: {fileID: 4395742239762295019}
+  - component: {fileID: 5536610675162457858}
+  - component: {fileID: 6109227511541133555}
   m_Layer: 7
   m_Name: Obi Rope Grab
   m_TagString: Untagged
@@ -1735,7 +1736,7 @@ Transform:
   m_GameObject: {fileID: 1100243953117853751}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: 0}
+  m_LocalPosition: {x: 0, y: 1.1, z: 0.15}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1757,51 +1758,51 @@ MonoBehaviour:
   m_CollisionMaterial: {fileID: 0}
   m_SurfaceCollisions: 0
   m_SelfCollisions: 0
-  restLength_: 0.8001406
+  restLength_: 0.81041104
   elements:
   - particle1: 0
     particle2: 1
-    restLength: 0.08820544
+    restLength: 0.08005949
     constraintForce: 0
     tearResistance: 1
   - particle1: 1
     particle2: 2
-    restLength: 0.08910458
+    restLength: 0.08035151
     constraintForce: 0
     tearResistance: 1
   - particle1: 2
     particle2: 3
-    restLength: 0.089283854
+    restLength: 0.092846125
     constraintForce: 0
     tearResistance: 1
   - particle1: 3
     particle2: 4
-    restLength: 0.088927165
+    restLength: 0.09256077
     constraintForce: 0
     tearResistance: 1
   - particle1: 4
     particle2: 5
-    restLength: 0.08909871
+    restLength: 0.09305897
     constraintForce: 0
     tearResistance: 1
   - particle1: 5
     particle2: 6
-    restLength: 0.088927075
+    restLength: 0.09306806
     constraintForce: 0
     tearResistance: 1
   - particle1: 6
     particle2: 7
-    restLength: 0.08928396
+    restLength: 0.09305912
     constraintForce: 0
     tearResistance: 1
   - particle1: 7
     particle2: 8
-    restLength: 0.08910452
+    restLength: 0.09256077
     constraintForce: 0
     tearResistance: 1
   - particle1: 8
     particle2: 9
-    restLength: 0.08820534
+    restLength: 0.092846215
     constraintForce: 0
     tearResistance: 1
   m_RopeBlueprint: {fileID: 11400000, guid: 290255ba995bd334dae154db9bfaa627, type: 2}
@@ -1906,7 +1907,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1100243953117853751}
-  m_Enabled: 0
+  m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4d03c9194b7ab4aaba4dfa5afec22c69, type: 3}
   m_Name: 
@@ -1918,7 +1919,26 @@ MonoBehaviour:
   m_ConstrainOrientation: 0
   m_Compliance: 0
   m_BreakThreshold: Infinity
---- !u!114 &4395742239762295019
+--- !u!114 &5536610675162457858
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1100243953117853751}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4d03c9194b7ab4aaba4dfa5afec22c69, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  m_Actor: {fileID: 5942700624574505219}
+  m_Target: {fileID: 7970322316079251290}
+  m_ParticleGroup: {fileID: -2666753395082600857, guid: 290255ba995bd334dae154db9bfaa627, type: 2}
+  m_AttachmentType: 0
+  m_ConstrainOrientation: 0
+  m_Compliance: 0
+  m_BreakThreshold: Infinity
+--- !u!114 &6109227511541133555
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -1938,17 +1958,13 @@ MonoBehaviour:
   actor1: {fileID: 0}
   actor2: {fileID: 5942700624574505219}
   particleIndices:
-    serializedContents: 700000000b000000700000000b000000
+    serializedContents: 
     m_AlignBytes: 16
   stiffnesses:
-    serializedContents:
-    - 0
-    - 0
+    serializedContents: []
     m_AlignBytes: 16
   lambdas:
-    serializedContents:
-    - -0.0051802443
-    - -0.0051802443
+    serializedContents: []
     m_AlignBytes: 16
 --- !u!1 &1103112249862841540
 GameObject:
@@ -5413,7 +5429,7 @@ Transform:
   m_GameObject: {fileID: 2517573769603134870}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 1, z: 0}
+  m_LocalPosition: {x: 0, y: 1.1, z: 0.15}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:

@@ -8,7 +8,7 @@ public class IKTarget : MonoBehaviour
     private Transform m_tf => transform;
     private void Awake()
     {
-        var IK = m_tf.parent.GetComponentInChildren<FullBodyBipedIK>();
+        var IK = FindObjectOfType<FullBodyBipedIK>();
         IK.solver.rightHandEffector.target = m_rightTarget;
         IK.solver.leftHandEffector.target = m_leftTarget;
     }

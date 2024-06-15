@@ -4,40 +4,36 @@ using System.Collections.Generic;
 using UnityEngine;
 using VInspector;
 using System.Linq;
-using Unity.VisualScripting;
-
-public class HookShot : MonoBehaviour
+public class HookShot2 : MonoBehaviour
 {
     [SerializeField] private float m_length = 10f;
-    public ObiSolver solver;
-    public ObiCollider character;
-    public Material material;
-    public ObiRopeSection section;
-
+    [SerializeField] private ObiSolver solver;
+    [SerializeField] private ObiCollider character;
+    [SerializeField] private Material material;
+    [SerializeField] private ObiRopeSection section;
     [Range(0, 1)]
-    public float hookResolution = 0.5f;
-    public float hookExtendRetractSpeed = 2;
-    public float hookShootSpeed = 30;
-    public int particlePoolSize = 100;
+    [SerializeField] private float hookResolution = 0.5f;
+    [SerializeField] private float hookExtendRetractSpeed = 2;
+    [SerializeField] private float hookShootSpeed = 30;
+    [SerializeField] private int particlePoolSize = 100;
 
     private Transform m_tf;
+
     private Camera m_mainCamera;
-    [SerializeField] private UITest m_ui;
     private ObiRope m_rope;
-    [SerializeField] private MeshRenderer m_grabMesh;
     private ObiRopeBlueprint blueprint;
     private ObiRopeCursor cursor;
-    ObiConstraints<ObiPinConstraintsBatch> pinConstraints;
+    private ObiConstraints<ObiPinConstraintsBatch> pinConstraints;
     [HideInInspector] public ObiStitcher m_obiStitcher;
 
     private RaycastHit hookAttachment;
 
-    private GameObject m_attachmentTargetObj = null;
+    [SerializeField] private GameObject m_attachmentTargetObj = null;
     public ObiColliderBase GetAttachmentTargetObiCol
     {
         get { return m_attachmentTargetObj.GetComponent<ObiColliderBase>(); }
     }
-    //ãƒ­ãƒ¼ãƒ—ã‚’ã‚¢ã‚¿ãƒƒãƒã—ã¦ã„ã‚‹ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã®ã‚³ãƒ³ãƒãƒ¼ãƒãƒ³ãƒˆ
+    //ƒ[ƒv‚ğƒAƒ^ƒbƒ`‚µ‚Ä‚¢‚éƒIƒuƒWƒFƒNƒg‚ÌƒRƒ“ƒ|[ƒlƒ“ƒg
     private Transform m_currentAttachTf;
     public Transform GetCurrnetAttachTf
     {
@@ -50,15 +46,11 @@ public class HookShot : MonoBehaviour
     }
     private ObiColliderBase m_currentAttachObiCol;
     private Player m_player;
-
-    [SerializeField] private GrabPoint m_grabPoint;
-    private GameObject m_grabObj;
-    [SerializeField] private ObiParticleAttachment m_particleAttachment;
-    [SerializeField] private ObiColliderBase Test;
+    private CapsuleCollider m_playerCol;
     [Button]
-    void ConnectTest()
+    void test()
     {
-        ConnectCurrentObjToOtherObj(Test);
+        LaunchHook();
     }
 
 
@@ -85,10 +77,12 @@ public class HookShot : MonoBehaviour
         m_tf = transform;
         m_mainCamera = Camera.main;
         m_player = FindObjectOfType<Player>();
-        m_grabMesh.enabled = false;
+        m_playerCol = m_player.GetComponent<CapsuleCollider>();
+
         // Create both the rope and the solver:	
         //rope = gameObject.AddComponent<ObiRope>();
         m_rope = gameObject.GetComponent<ObiRope>();
+
 
         // Setup a blueprint for the rope:
         blueprint = ScriptableObject.CreateInstance<ObiRopeBlueprint>();
@@ -102,19 +96,18 @@ public class HookShot : MonoBehaviour
         cursor = m_rope.gameObject.GetComponent<ObiRopeCursor>();
         //cursor.cursorMu = 0;
         //cursor.direction = true;
-        m_obiStitcher = m_tf.parent.GetComponentInChildren<ObiStitcher>();
-        m_particleAttachment = GetComponent<ObiParticleAttachment>();
-        m_grabObj = Instantiate(m_grabPoint.gameObject, m_tf.position, Quaternion.identity, solver.transform);
-        m_player.SetGrabPoint = m_grabObj.GetComponent<GrabPoint>();
-    }
 
+
+        //m_grabObj.transform.position = m_tf.position;
+        //m_grabPoint.SetParent(m_tf);
+    }
     private void OnDestroy()
     {
         DestroyImmediate(blueprint);
     }
 
     /**
-	 * ã‚·ãƒ¼ãƒ³ã«å¯¾ã—ã¦ãƒ¬ã‚¤ã‚­ãƒ£ã‚¹ãƒˆã—ã¦ã€ãƒ•ãƒƒã‚¯ã‚’ä½•ã‹ã«å–ã‚Šä»˜ã‘ã‚‰ã‚Œã‚‹ã‹ã©ã†ã‹ã‚’ç¢ºèªã—ã¾ã™ã€‚
+	 * ƒV[ƒ“‚É‘Î‚µ‚ÄƒŒƒCƒLƒƒƒXƒg‚µ‚ÄAƒtƒbƒN‚ğ‰½‚©‚Éæ‚è•t‚¯‚ç‚ê‚é‚©‚Ç‚¤‚©‚ğŠm”F‚µ‚Ü‚·B
 	 */
     public void LaunchHook()
     {
@@ -132,11 +125,11 @@ public class HookShot : MonoBehaviour
             {
                 DetachHook();
             }
-            StartCoroutine(AttachHookForKinematic());
+            StartCoroutine(AttachHookForKinematic(m_currentAttachObiCol));
             //if (hookAttachment.rigidbody.isKinematic)
             //{
             //    // We actually hit something, so attach the hook!
-                
+
             //}
             //else
             //{
@@ -147,71 +140,72 @@ public class HookShot : MonoBehaviour
 
     }
 
-    private IEnumerator AttachHookForKinematic()
+    private IEnumerator AttachHookForKinematic(ObiColliderBase Target)
     {
-        //1ãƒ•ãƒ¬ãƒ¼ãƒ å¾…ã¤
+        Transform TargetTf = Target.transform;
+        //1ƒtƒŒ[ƒ€‘Ò‚Â
         yield return null;
 
-        //Pin Constraintsã‚’ã‚¯ãƒªã‚¢
+        //Pin Constraints‚ğƒNƒŠƒA
         pinConstraints = m_rope.GetConstraintsByType(Oni.ConstraintType.Pin) as ObiConstraints<ObiPinConstraintsBatch>;
         pinConstraints.Clear();
 
-        //ãƒ’ãƒƒãƒˆã—ãŸåœ°ç‚¹ã®åº§æ¨™ã‚’ãƒ­ãƒ¼ã‚«ãƒ«ã®åº§æ¨™ã«å¤‰æ›
-        Vector3 localHit = m_rope.transform.InverseTransformPoint(hookAttachment.point);
-
-        //ãƒ­ãƒ¼ãƒ— ãƒ‘ã‚¹ã‚’æ‰‹é †ã«å¾“ã£ã¦ç”Ÿæˆã—ã¾ã™ (æ™‚é–“ã®çµŒéã¨ã¨ã‚‚ã«å»¶é•·ã™ã‚‹ãŸã‚ã€çŸ­ã„ã‚»ã‚°ãƒ¡ãƒ³ãƒˆã®ã¿)ã€‚
+        //ƒqƒbƒg‚µ‚½’n“_‚ÌÀ•W‚ğƒ[ƒJƒ‹‚ÌÀ•W‚É•ÏŠ·
+        Vector3 localHit = m_tf.transform.InverseTransformPoint(TargetTf.position);
+        //ƒ[ƒv ƒpƒX‚ğè‡‚É]‚Á‚Ä¶¬‚µ‚Ü‚· (ŠÔ‚ÌŒo‰ß‚Æ‚Æ‚à‚É‰„’·‚·‚é‚½‚ßA’Z‚¢ƒZƒOƒƒ“ƒg‚Ì‚İ)B
         int filter = ObiUtils.MakeFilter(ObiUtils.CollideWithEverything, 0);
         blueprint.path.Clear();
         float mass = 0.1f;
+
         blueprint.path.AddControlPoint(Vector3.zero, Vector3.zero, Vector3.zero, Vector3.up, mass, 0.1f, 1, filter, Color.white, "Hook start");
+        //blueprint.path.AddControlPoint(localHit.normalized * 0.1f, Vector3.zero, Vector3.zero, Vector3.up, mass, 0.1f, 1, filter, Color.white, "Hook mid");
         blueprint.path.AddControlPoint(localHit.normalized * 0.5f, Vector3.zero, Vector3.zero, Vector3.up, mass, 0.1f, 1, filter, Color.white, "Hook end");
         blueprint.path.FlushEvents();
 
-        //ãƒ­ãƒ¼ãƒ—ã®ãƒ‘ãƒ¼ãƒ†ã‚£ã‚¯ãƒ«è¡¨ç¾ã‚’ç”Ÿæˆã—ã¾ã™ (å®Œäº†ã™ã‚‹ã¾ã§å¾…ã¡ã¾ã™)ã€‚
+        //ƒ[ƒv‚Ìƒp[ƒeƒBƒNƒ‹•\Œ»‚ğ¶¬‚µ‚Ü‚· (Š®—¹‚·‚é‚Ü‚Å‘Ò‚¿‚Ü‚·)B
         yield return blueprint.Generate();
 
-        //ãƒ–ãƒ«ãƒ¼ãƒ—ãƒªãƒ³ãƒˆã‚’è¨­å®šã—ã¾ã™(ã“ã‚Œã«ã‚ˆã‚Šã€ãƒ‘ãƒ¼ãƒ†ã‚£ã‚¯ãƒ«/ã‚³ãƒ³ã‚¹ãƒˆãƒ¬ã‚¤ãƒ³ãƒˆãŒã‚½ãƒ«ãƒãƒ¼ã«è¿½åŠ ã•ã‚Œã€ãã‚Œã‚‰ã®ã‚·ãƒŸãƒ¥ãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³ãŒé–‹å§‹ã•ã‚Œã¾ã™)ã€‚
+        //ƒuƒ‹[ƒvƒŠƒ“ƒg‚ğİ’è‚µ‚Ü‚·(‚±‚ê‚É‚æ‚èAƒp[ƒeƒBƒNƒ‹/ƒRƒ“ƒXƒgƒŒƒCƒ“ƒg‚ªƒ\ƒ‹ƒo[‚É’Ç‰Á‚³‚êA‚»‚ê‚ç‚ÌƒVƒ~ƒ…ƒŒ[ƒVƒ‡ƒ“‚ªŠJn‚³‚ê‚Ü‚·)B
         m_rope.ropeBlueprint = blueprint;
 
-        //1ãƒ•ãƒ¬ãƒ¼ãƒ å¾…ã¡ã¾ã™
+        //1ƒtƒŒ[ƒ€‘Ò‚¿‚Ü‚·
         yield return null;
 
         m_rope.GetComponent<MeshRenderer>().enabled = true;
 
-        //ãƒ­ãƒ¼ãƒ—ã‚’ä¼¸ã°ã™ã¨ãã«ä½ç½®ã‚’ä¸Šæ›¸ãã™ã‚‹ã®ã§ã€è³ªé‡ã‚’ã‚¼ãƒ­ã«è¨­å®šã—ã¾ã™ã€‚
+        //ƒ[ƒv‚ğL‚Î‚·‚Æ‚«‚ÉˆÊ’u‚ğã‘‚«‚·‚é‚Ì‚ÅA¿—Ê‚ğƒ[ƒ‚Éİ’è‚µ‚Ü‚·B
         for (int i = 0; i < m_rope.activeParticleCount; ++i)
             solver.invMasses[m_rope.solverIndices[i]] = 0;
 
 
 
-
         float currentLength = 0;
 
-        //æœ€å¾Œã®ãƒ‘ãƒ¼ãƒ†ã‚£ã‚¯ãƒ«ãŒãƒ’ãƒƒãƒˆã—ãŸåœ°ç‚¹ã¾ã§åˆ°é”ã—ã¦ã„ãªã„é–“ã€ãƒ­ãƒ¼ãƒ—ã‚’å»¶é•·ã—ã¾ã™ã€‚
+        //ÅŒã‚Ìƒp[ƒeƒBƒNƒ‹‚ªƒqƒbƒg‚µ‚½’n“_‚Ü‚Å“’B‚µ‚Ä‚¢‚È‚¢ŠÔAƒ[ƒv‚ğ‰„’·‚µ‚Ü‚·B
         while (true)
         {
-            //solverspaceã§ãƒ­ãƒ¼ãƒ—ã®èµ·ç‚¹ã‚’è¨ˆç®—ã™ã‚‹
+            //solverspace‚Åƒ[ƒv‚Ì‹N“_‚ğŒvZ‚·‚é
             Vector3 origin = solver.transform.InverseTransformPoint(m_rope.transform.position);
 
-            //æ–¹å‘ã¨ãƒ•ãƒƒã‚¯ãƒã‚¤ãƒ³ãƒˆã¾ã§ã®è·é›¢ã‚’æ›´æ–°ã—ã¾ã™ã€‚
-            Vector3 direction = hookAttachment.point - origin;
+            //•ûŒü‚ÆƒtƒbƒNƒ|ƒCƒ“ƒg‚Ü‚Å‚Ì‹——£‚ğXV‚µ‚Ü‚·B
+            Vector3 direction = TargetTf.position - origin;
             float distance = direction.magnitude;
             direction.Normalize();
 
-            //currentLengthã‚’é•·ãã—ã¾ã™:
+            //currentLength‚ğ’·‚­‚µ‚Ü‚·:
             currentLength += hookShootSpeed * Time.deltaTime;
 
-            //ç›®çš„ã®é•·ã•ã«é”ã—ãŸã‚‰ã€ãƒ«ãƒ¼ãƒ—ã‚’ä¸­æ–­ã—ã¾ã™ã€‚
+            //–Ú“I‚Ì’·‚³‚É’B‚µ‚½‚çAƒ‹[ƒv‚ğ’†’f‚µ‚Ü‚·B
             if (currentLength >= distance)
             {
                 cursor.ChangeLength(distance);
                 break;
             }
 
-            // ãƒ­ãƒ¼ãƒ—ã®é•·ã•ã‚’å¤‰æ›´ã™ã‚‹ï¼ˆã‚ªãƒ¼ãƒãƒ¼ã‚·ãƒ¥ãƒ¼ãƒˆã‚’é¿ã‘ã‚‹ãŸã‚ã«ã€ãƒ­ãƒ¼ãƒ—ã®èµ·ç‚¹ã¨ãƒ•ãƒƒã‚¯ã®é–“ã®è·é›¢ã«åˆã‚ã›ã¦ã‚¯ãƒ©ãƒ³ãƒ—ã—ã¾ã™ï¼‰
+            // ƒ[ƒv‚Ì’·‚³‚ğ•ÏX‚·‚éiƒI[ƒo[ƒVƒ…[ƒg‚ğ”ğ‚¯‚é‚½‚ß‚ÉAƒ[ƒv‚Ì‹N“_‚ÆƒtƒbƒN‚ÌŠÔ‚Ì‹——£‚É‡‚í‚¹‚ÄƒNƒ‰ƒ“ƒv‚µ‚Ü‚·j
             cursor.ChangeLength(Mathf.Min(distance, currentLength));
 
-            // ã™ã¹ã¦ã®ãƒ‘ãƒ¼ãƒ†ã‚£ã‚¯ãƒ«ã‚’é †ç•ªã«ç¹°ã‚Šè¿”ã—ã€è¦ç´ ã®é•·ã•ã‚’è€ƒæ…®ã—ã¦ç›´ç·šã«é…ç½®ã—ã¾ã™ã€‚
+            // ‚·‚×‚Ä‚Ìƒp[ƒeƒBƒNƒ‹‚ğ‡”Ô‚ÉŒJ‚è•Ô‚µA—v‘f‚Ì’·‚³‚ğl—¶‚µ‚Ä’¼ü‚É”z’u‚µ‚Ü‚·B
             float length = 0;
             for (int i = 0; i < m_rope.elements.Count; ++i)
             {
@@ -220,66 +214,19 @@ public class HookShot : MonoBehaviour
                 length += m_rope.elements[i].restLength;
             }
 
-            //1ãƒ•ãƒ¬ãƒ¼ãƒ å¾…ã¡ã¾ã™
+            //1ƒtƒŒ[ƒ€‘Ò‚¿‚Ü‚·
             yield return null;
         }
 
-        //ãƒ­ãƒ¼ãƒ—ãŒé…ç½®ã•ã‚ŒãŸæ™‚ç‚¹ã§ã‚·ãƒŸãƒ¥ãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³ãŒå¼•ãç¶™ãŒã‚Œã‚‹ã‚ˆã†ã«è³ªé‡ã‚’å¾©å…ƒã—ã¾ã™ã€‚
+        //ƒ[ƒv‚ª”z’u‚³‚ê‚½“_‚ÅƒVƒ~ƒ…ƒŒ[ƒVƒ‡ƒ“‚ªˆø‚«Œp‚ª‚ê‚é‚æ‚¤‚É¿—Ê‚ğ•œŒ³‚µ‚Ü‚·B
         for (int i = 0; i < m_rope.activeParticleCount; ++i)
             solver.invMasses[m_rope.solverIndices[i]] = 10; // 1/0.1 = 10
 
-        PlayerGrabs();
-        m_grabObj.SetActive(true);
-        m_player.GrabPointSetUp();
-    }
-    private IEnumerator AttachHookForNotKinematic()
-    {
-        //1ãƒ•ãƒ¬ãƒ¼ãƒ å¾…ã¤
-        yield return null;
-
-        //Pin Constraintsã‚’ã‚¯ãƒªã‚¢
-        pinConstraints = m_rope.GetConstraintsByType(Oni.ConstraintType.Pin) as ObiConstraints<ObiPinConstraintsBatch>;
-        pinConstraints.Clear();
-        //ãƒ’ãƒƒãƒˆã—ãŸåœ°ç‚¹ã®åº§æ¨™ã‚’ãƒ­ãƒ¼ã‚«ãƒ«ã®åº§æ¨™ã«å¤‰æ›
-        Vector3 localHit = m_rope.transform.InverseTransformPoint(hookAttachment.point);
-        //ãƒ­ãƒ¼ãƒ— ãƒ‘ã‚¹ã‚’æ‰‹é †ã«å¾“ã£ã¦ç”Ÿæˆã—ã¾ã™ (æ™‚é–“ã®çµŒéã¨ã¨ã‚‚ã«å»¶é•·ã™ã‚‹ãŸã‚ã€çŸ­ã„ã‚»ã‚°ãƒ¡ãƒ³ãƒˆã®ã¿)ã€‚
-        int filterEverything = ObiUtils.MakeFilter(ObiUtils.CollideWithEverything, 0);
-        int filterNothing = ObiUtils.MakeFilter(ObiUtils.CollideWithNothing, 0);
-
-        blueprint.path.Clear();
-        float mass = 0.1f;
-
-        blueprint.path.AddControlPoint(Vector3.zero, Vector3.zero, Vector3.zero, Vector3.up, mass, 0.1f, 1, filterNothing, Color.white, "Hook start");
-        blueprint.path.AddControlPoint(localHit - localHit.normalized, Vector3.zero, Vector3.zero, Vector3.up, mass, 0.1f, 1, filterEverything, Color.white, "Hook end 1");
-
-        blueprint.path.AddControlPoint(localHit, Vector3.zero, Vector3.zero, Vector3.up, mass, 0.1f, 1, filterNothing, Color.white, "Hook end 2");
-        blueprint.path.FlushEvents();
-
-        //ãƒ­ãƒ¼ãƒ—ã®ãƒ‘ãƒ¼ãƒ†ã‚£ã‚¯ãƒ«è¡¨ç¾ã‚’ç”Ÿæˆã—ã¾ã™ (å®Œäº†ã™ã‚‹ã¾ã§å¾…ã¡ã¾ã™)ã€‚
-        yield return blueprint.Generate();
-
-        //ãƒ–ãƒ«ãƒ¼ãƒ—ãƒªãƒ³ãƒˆã‚’è¨­å®šã—ã¾ã™(ã“ã‚Œã«ã‚ˆã‚Šã€ãƒ‘ãƒ¼ãƒ†ã‚£ã‚¯ãƒ«/ã‚³ãƒ³ã‚¹ãƒˆãƒ¬ã‚¤ãƒ³ãƒˆãŒã‚½ãƒ«ãƒãƒ¼ã«è¿½åŠ ã•ã‚Œã€ãã‚Œã‚‰ã®ã‚·ãƒŸãƒ¥ãƒ¬ãƒ¼ã‚·ãƒ§ãƒ³ãŒé–‹å§‹ã•ã‚Œã¾ã™)ã€‚
-        m_rope.ropeBlueprint = blueprint;
-
-        //1ãƒ•ãƒ¬ãƒ¼ãƒ å¾…ã¡ã¾ã™
-        //yield return null;
-
-        m_rope.GetComponent<MeshRenderer>().enabled = true;
-        m_grabObj = Instantiate(m_grabPoint.gameObject, m_tf.position, Quaternion.identity, solver.transform);
-        m_player.SetGrabPoint = m_grabObj.GetComponent<GrabPoint>();
-        m_player.GrabPointSetUp();
-
-        m_particleAttachment.target = m_grabObj.transform;
-        m_particleAttachment.particleGroup = blueprint.groups[0];
-        m_particleAttachment.attachmentType = ObiParticleAttachment.AttachmentType.Static;
-
-        var target2 = m_tf.AddComponent<ObiParticleAttachment>();
-        target2.target = hookAttachment.transform;
-        target2.particleGroup = blueprint.groups[2];
-        target2.attachmentType = ObiParticleAttachment.AttachmentType.Dynamic;
+        ConnectToSelf(Target);
+        //m_player.GrabPointSetUp();
     }
     /// <summary>
-    /// ãƒ­ãƒ¼ãƒ—ã¨ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆã‚’ç¹‹ã
+    /// ƒ[ƒv‚ÆƒIƒuƒWƒFƒNƒg‚ğŒq‚®
     /// </summary>
     public void ConnectCurrentObjToOtherObj(ObiColliderBase collider)
     {
@@ -307,10 +254,10 @@ public class HookShot : MonoBehaviour
         m_rope.SetConstraintsDirty(Oni.ConstraintType.Pin);
     }
 
-    public void PlayerGrabs()
+    public void ConnectToSelf(ObiColliderBase Target)
     {
-        pinConstraints = m_rope.GetConstraintsByType(Oni.ConstraintType.Pin) as ObiConstraints<ObiPinConstraintsBatch>;
-        pinConstraints.Clear();
+        //pinConstraints = m_rope.GetConstraintsByType(Oni.ConstraintType.Pin) as ObiConstraints<ObiPinConstraintsBatch>;
+        //pinConstraints.Clear();
         var batch = new ObiPinConstraintsBatch();
         batch.AddConstraint(
             m_rope.elements[0].particle1,
@@ -321,8 +268,8 @@ public class HookShot : MonoBehaviour
             );
         batch.AddConstraint(
             m_rope.elements[m_rope.elements.Count - 1].particle2,
-            hookAttachment.collider.GetComponent<ObiColliderBase>(),
-            hookAttachment.collider.transform.InverseTransformPoint(hookAttachment.point),
+            Target,
+            Target.transform.InverseTransformPoint(Target.transform.position),
             Quaternion.identity,
             0, 0, float.PositiveInfinity
             );
@@ -330,10 +277,10 @@ public class HookShot : MonoBehaviour
         batch.activeConstraintCount = 2;
         pinConstraints.AddBatch(batch);
         m_rope.SetConstraintsDirty(Oni.ConstraintType.Pin);
-        SetGrabMesh(true);
+
     }
     /// <summary>
-    /// Hookã®å½“ãŸã‚Šåˆ¤å®šã‚’ãªãã™
+    /// Hook‚Ì“–‚½‚è”»’è‚ğ‚È‚­‚·
     /// </summary>
     public void ReleaseRope()
     {
@@ -342,20 +289,18 @@ public class HookShot : MonoBehaviour
 
     public void DetachHook()
     {
-        SetGrabMesh(false);
         // Set the rope blueprint to null (automatically removes the previous blueprint from the solver, if any).
         m_rope.ropeBlueprint = null;
         m_rope.GetComponent<MeshRenderer>().enabled = false;
-        //ãƒ—ãƒ¬ã‚¤ãƒ¤ãƒ¼ã®IKã‚’ãƒªã‚»ãƒƒãƒˆ
+        //ƒvƒŒƒCƒ„[‚ÌIK‚ğƒŠƒZƒbƒg
         m_player.SetIKWeight(0);
         m_player.m_isGrabbing = false;
-        //GrabPointã‚’å‰Šé™¤
-        m_grabObj.SetActive(false);
+        //GrabPoint‚ğíœ
     }
     public void HookShooting()
     {
         DebugPrint.Print(string.Format("AttachmentObj:{0}", m_attachmentTargetObj?.name));
-        //å³ã‚¯ãƒªãƒƒã‚¯ã§ç™ºå°„ã€è§£é™¤
+        //‰EƒNƒŠƒbƒN‚Å”­ËA‰ğœ
         if (Input.GetMouseButtonDown(1))
         {
             if (!m_rope.isLoaded)
@@ -372,58 +317,38 @@ public class HookShot : MonoBehaviour
         float Wheel = Input.GetAxis("Mouse ScrollWheel");
         float max = 20f;
         float min = 0.5f;
-        //ã‚¹ãƒšãƒ¼ã‚¹ã‚­ãƒ¼ã§é•·ã•ã‚’ç¸®å°
+        //ƒXƒy[ƒXƒL[‚Å’·‚³‚ğk¬
         if (Input.GetKey(KeyCode.Space))
         {
             cursor.ChangeLength(Mathf.Clamp(m_rope.restLength - hookExtendRetractSpeed * Time.deltaTime, min, max));
         }
-        if(MPFT_NTD_MMControlSystem.ms_instance != null) 
-        {
-            if (MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.Up)
-            {
-                cursor.ChangeLength(Mathf.Clamp(m_rope.restLength - hookExtendRetractSpeed * Time.deltaTime, min, max));
-            }
-            else if (MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.Down)
-            {
-                cursor.ChangeLength(Mathf.Clamp(m_rope.restLength + hookExtendRetractSpeed * Time.deltaTime, min, max));
-            }
-        }
-        //ã‚·ãƒ•ãƒˆã‚­ãƒ¼ã§é•·ã•ã‚’å»¶é•·
+        //ƒVƒtƒgƒL[‚Å’·‚³‚ğ‰„’·
         if (Input.GetKey(KeyCode.LeftShift))
         {
             cursor.ChangeLength(Mathf.Clamp(m_rope.restLength + hookExtendRetractSpeed * Time.deltaTime, min, max));
         }
         DebugPrint.Print(string.Format("RopeLength{0}", m_rope.restLength));
-        //ãƒã‚¦ã‚¹ãƒ›ã‚¤ãƒ¼ãƒ«ã§é•·ã•ã‚’å¤‰æ›´
+        //ƒ}ƒEƒXƒzƒC[ƒ‹‚Å’·‚³‚ğ•ÏX
         cursor.ChangeLength(Mathf.Clamp(m_rope.restLength - hookExtendRetractSpeed * Wheel * Time.deltaTime, min, max));
     }
-    public void SetGrabMesh(bool isEnabled)
-    {
-        m_grabMesh.enabled = isEnabled;
-        if (isEnabled)
-        {
 
-            m_obiStitcher.Actor1 = m_rope;
-        }
 
-        m_obiStitcher.enabled = isEnabled;
-    }
     public GameObject Explosion()
     {
         Vector3 Origin = m_player.transform.position + Vector3.up * 0.1f;
         LayerMask layerMask = LayerMask.NameToLayer("Ropeattach");
         var hits = Physics.SphereCastAll(
-            Origin,     //ä¸­å¿ƒ
-            m_length,          //åŠå¾„
-            Vector3.forward,   //æ–¹å‘
-            0f,                //é•·ã•
-            1 << layerMask          //ãƒ¬ã‚¤ãƒ¤ãƒ¼ãƒã‚¹ã‚¯
+            Origin,     //’†S
+            m_length,          //”¼Œa
+            Vector3.forward,   //•ûŒü
+            0f,                //’·‚³
+            1 << layerMask          //ƒŒƒCƒ„[ƒ}ƒXƒN
             ).Select(h => h.transform.gameObject).ToList();
 
 
         if (hits.Count > 0)
         {
-            //ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãŒç”»é¢å†…ã‹ã¤ã€é–“ã«éšœå®³ç‰©ãŒãªã„ã‚‚ã®ã®ã¿ãƒªã‚¹ãƒˆã‚¢ãƒƒãƒ—ã™ã‚‹, ~(1 << LayerMask.NameToLayer("Player"))
+            //ƒIƒuƒWƒFƒNƒg‚ª‰æ–Ê“à‚©‚ÂAŠÔ‚ÉáŠQ•¨‚ª‚È‚¢‚à‚Ì‚Ì‚İƒŠƒXƒgƒAƒbƒv‚·‚é, ~(1 << LayerMask.NameToLayer("Player"))
             hits = hits.Where(_ =>
             {
                 Vector3 vec = m_mainCamera.WorldToViewportPoint(_.transform.position);
@@ -437,9 +362,9 @@ public class HookShot : MonoBehaviour
             foreach (var hit in hits)
             {
                 Vector3 ViewPort = m_mainCamera.WorldToViewportPoint(hit.transform.position);
-                //è·é›¢ã‚’æ±‚ã‚ã‚‹
+                //‹——£‚ğ‹‚ß‚é
                 float Length = Vector2.Distance(new Vector2(0.5f, 0.5f), new Vector2(ViewPort.x, ViewPort.y));
-                //attachmentObjã¨ã®é–“ã«ã‚³ãƒ©ã‚¤ãƒ€ãƒ¼ä»˜ãã®ã‚ªãƒ–ã‚¸ã‚§ã‚¯ãƒˆãŒã‚ã£ãŸå ´åˆã¯ç„¡è¦–ã™ã‚‹
+                //attachmentObj‚Æ‚ÌŠÔ‚ÉƒRƒ‰ƒCƒ_[•t‚«‚ÌƒIƒuƒWƒFƒNƒg‚ª‚ ‚Á‚½ê‡‚Í–³‹‚·‚é
                 if (Physics.Raycast(Origin, hit.transform.position - Origin, out RaycastHit hitInfo, m_length))
                 {
                     //DebugPrint.Print(string.Format("1{0}", hit));
@@ -465,18 +390,14 @@ public class HookShot : MonoBehaviour
     }
     private void Update()
     {
-
-
-        m_attachmentTargetObj = Explosion();
+        //m_attachmentTargetObj = Explosion();
         if (m_currentAttachObiCol != null)
         {
             DebugPrint.Print(string.Format("{0}", m_currentAttachObiCol.name));
         }
         //  m_grabMesh.enabled = false;
-        if (m_ui != null)
-        {
-            m_ui.m_attachTf = m_attachmentTargetObj?.transform;
-        }
+
     }
 }
+
 

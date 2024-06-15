@@ -5,7 +5,6 @@ using UnityEngine;
 public class GrabPoint : MonoBehaviour
 {
     private VirtualChildBehaviour m_childBehaviour;
-    private Transform m_tf => transform;
     private Collider m_col;
     private ObiColliderBase m_obiCol;
     public ObiColliderBase GetObiCol
@@ -13,8 +12,6 @@ public class GrabPoint : MonoBehaviour
         get { return m_obiCol; }
     }
     private Rigidbody m_rb;
-    private MoveTest m_player;
-    private ObiRope Obirope;
     // Start is called before the first frame update
     public void SetUp()
     {

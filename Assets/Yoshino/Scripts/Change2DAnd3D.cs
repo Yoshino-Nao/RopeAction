@@ -9,7 +9,6 @@ public class Change2DAnd3D : MonoBehaviour
     }
     [SerializeField] eType type;
 
-
     // Start is called before the first frame update
     void Start()
     {
@@ -29,6 +28,7 @@ public class Change2DAnd3D : MonoBehaviour
                 break;
             case eType.To2D:
                 CameraChanger.ms_instance.Set2DCamera();
+                other.transform.position = new Vector3(other.transform.position.x, other.transform.position.y, transform.position.z);
                 break;
         }
 
