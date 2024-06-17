@@ -1726,7 +1726,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &7970322316079251290
 Transform:
   m_ObjectHideFlags: 0
@@ -1736,7 +1736,7 @@ Transform:
   m_GameObject: {fileID: 1100243953117853751}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.1, z: 0.15}
+  m_LocalPosition: {x: 0, y: 0.8, z: 0.3}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
@@ -1754,55 +1754,50 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 61104f33a3f344db9b7e0d0cda41a9fb, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  solverIndices: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000f000000100000001100000012000000130000001400000015000000160000001700000018000000190000001a0000001b0000001c0000001d0000001e0000001f000000200000002100000022000000230000002400000025000000260000002700000028000000290000002a0000002b0000002c0000002d0000002e0000002f000000300000003100000032000000330000003400000035000000360000003700000038000000390000003a0000003b0000003c0000003d0000003e0000003f000000400000004100000042000000430000004400000045000000460000004700000048000000490000004a0000004b0000004c0000004d0000004e0000004f000000500000005100000052000000530000005400000055000000560000005700000058000000590000005a0000005b0000005c0000005d0000005e0000005f000000600000006100000062000000630000006400000065000000660000006700000068000000690000006a0000006b0000006c0000006d000000
+  solverIndices: 000000000100000002000000030000000400000005000000060000000700000008000000090000000a0000000b0000000c0000000d0000000e0000000f000000100000001100000012000000130000001400000015000000160000001700000018000000190000001a0000001b0000001c0000001d0000001e0000001f000000200000002100000022000000230000002400000025000000260000002700000028000000290000002a0000002b0000002c0000002d0000002e0000002f000000300000003100000032000000330000003400000035000000360000003700000038000000390000003a0000003b0000003c0000003d0000003e0000003f000000400000004100000042000000430000004400000045000000460000004700000048000000490000004a0000004b0000004c0000004d0000004e0000004f000000500000005100000052000000530000005400000055000000560000005700000058000000590000005a0000005b0000005c0000005d0000005e0000005f000000600000006100000062000000630000006400000065000000660000006700000068000000690000006a0000006b0000006c000000
   m_CollisionMaterial: {fileID: 0}
   m_SurfaceCollisions: 0
   m_SelfCollisions: 0
-  restLength_: 0.81041104
+  restLength_: 0.8
   elements:
   - particle1: 0
     particle2: 1
-    restLength: 0.08005949
+    restLength: 0.09927528
     constraintForce: 0
     tearResistance: 1
   - particle1: 1
     particle2: 2
-    restLength: 0.08035151
+    restLength: 0.10046556
     constraintForce: 0
     tearResistance: 1
   - particle1: 2
     particle2: 3
-    restLength: 0.092846125
+    restLength: 0.100062564
     constraintForce: 0
     tearResistance: 1
   - particle1: 3
     particle2: 4
-    restLength: 0.09256077
+    restLength: 0.1001966
     constraintForce: 0
     tearResistance: 1
   - particle1: 4
     particle2: 5
-    restLength: 0.09305897
+    restLength: 0.10019657
     constraintForce: 0
     tearResistance: 1
   - particle1: 5
     particle2: 6
-    restLength: 0.09306806
+    restLength: 0.10006261
     constraintForce: 0
     tearResistance: 1
   - particle1: 6
     particle2: 7
-    restLength: 0.09305912
+    restLength: 0.100465536
     constraintForce: 0
     tearResistance: 1
   - particle1: 7
     particle2: 8
-    restLength: 0.09256077
-    constraintForce: 0
-    tearResistance: 1
-  - particle1: 8
-    particle2: 9
-    restLength: 0.092846215
+    restLength: 0.09927529
     constraintForce: 0
     tearResistance: 1
   m_RopeBlueprint: {fileID: 11400000, guid: 290255ba995bd334dae154db9bfaa627, type: 2}
@@ -1907,7 +1902,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1100243953117853751}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 4d03c9194b7ab4aaba4dfa5afec22c69, type: 3}
   m_Name: 
@@ -1933,7 +1928,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Actor: {fileID: 5942700624574505219}
   m_Target: {fileID: 7970322316079251290}
-  m_ParticleGroup: {fileID: -2666753395082600857, guid: 290255ba995bd334dae154db9bfaa627, type: 2}
+  m_ParticleGroup: {fileID: 2120380440219332446, guid: 290255ba995bd334dae154db9bfaa627, type: 2}
   m_AttachmentType: 0
   m_ConstrainOrientation: 0
   m_Compliance: 0
@@ -1945,7 +1940,7 @@ MonoBehaviour:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1100243953117853751}
-  m_Enabled: 1
+  m_Enabled: 0
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: cdace116829344344988718be4fb70ab, type: 3}
   m_Name: 
@@ -5419,7 +5414,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &7608799419398288387
 Transform:
   m_ObjectHideFlags: 0
@@ -5429,7 +5424,7 @@ Transform:
   m_GameObject: {fileID: 2517573769603134870}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.1, z: 0.15}
+  m_LocalPosition: {x: 0, y: 1.1, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -6322,30 +6317,30 @@ MonoBehaviour:
   serializeData2:
     selectionData:
       positions:
-      - x: -0.000057069126
-        y: 0.71980584
-        z: -0.12976927
-      - x: -0.000057069145
-        y: 0.7125501
-        z: -0.15231144
-      - x: -0.000057069206
-        y: 0.6532381
-        z: -0.23638254
-      - x: -0.000057069345
-        y: 0.5971501
-        z: -0.30305475
-      - x: -0.000057069617
-        y: 0.4973838
-        z: -0.40072173
-      - x: -0.000057069934
-        y: 0.42089057
-        z: -0.49740204
-      - x: -0.00005706998
-        y: 0.37997222
-        z: -0.62368655
-      - x: -0.0000570698
-        y: 0.40178606
-        z: -0.7373733
+      - x: -0.00005722046
+        y: 0.7198067
+        z: -0.12976933
+      - x: -0.00005722046
+        y: 0.7125492
+        z: -0.15231133
+      - x: -0.00005722046
+        y: 0.6532383
+        z: -0.23638248
+      - x: -0.00005722046
+        y: 0.5971508
+        z: -0.3030548
+      - x: -0.00005722046
+        y: 0.49738312
+        z: -0.40072155
+      - x: -0.00005722046
+        y: 0.4208908
+        z: -0.4974022
+      - x: -0.00005722046
+        y: 0.37997246
+        z: -0.6236868
+      - x: -0.00005722046
+        y: 0.4017868
+        z: -0.73737335
       attributes:
       - Value: 1
       - Value: 2
@@ -6355,7 +6350,7 @@ MonoBehaviour:
       - Value: 2
       - Value: 2
       - Value: 2
-      maxConnectionDistance: 0.13961428
+      maxConnectionDistance: 0.13961513
       userEdit: 0
     preBuildData:
       enabled: 0

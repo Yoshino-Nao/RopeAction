@@ -77,11 +77,12 @@ public class Player : MonoBehaviour
     private Transform m_CameraTf;
 
     //ÉçÅ[Évî≠éÀä÷åW
+    private ObiSolver m_obiSolver;
     [SerializeField] private HookShot2 m_hookShot;
     private Transform m_hookShotTf;
     private ObiColliderBase m_obiCollider;
     private float m_lerpTForGrabbable = 0f;
-    [SerializeField] private Grabbable m_grabbable;
+    private Grabbable m_grabbable;
     public Grabbable SetGrabbable
     {
         set { m_grabbable = value; }
@@ -296,13 +297,13 @@ public class Player : MonoBehaviour
         }
     }
     //íÕÇﬁ
-    public bool LerpGrabbable()
+    public bool LerpGrabbable(Vector3 GrabPos)
     {
         m_lerpTForGrabbable += Time.deltaTime / m_grabTotalTime;
 
         m_grabbable.transform.position = Vector3.Lerp(
             m_grabbable.transform.position,
-            m_grabPos.transform.position,
+            GrabPos,
             m_lerpTForGrabbable
             );
 
@@ -310,9 +311,16 @@ public class Player : MonoBehaviour
 
         return m_lerpTForGrabbable >= 1;
     }
-    private void ConnectToPlayer()
+    private IEnumerator ConnectToPlayer()
     {
-        m_hookShot.ConnectToPlayer(m_obiCollider, m_grabPos.localPosition);
+        m_grabbable.SetParent(null);
+        m_lerpTForGrabbable = 0;
+        yield return LerpGrabbable(m_tf.position + m_orgVectColCenter * 2);
+        m_lerpTForGrabbable = 0;
+
+        m_hookShot.ConnectToPlayer(m_obiCollider, m_orgVectColCenter * 2);
+
+        //m_grabbable.SetParent(m_tf);
     }
     private void EnablePhysics()
     {
@@ -330,7 +338,7 @@ public class Player : MonoBehaviour
         m_grabbable.SetParent(null);
 
         m_lerpTForGrabbable = 0;
-        yield return new WaitUntil(() => LerpGrabbable());
+        yield return new WaitUntil(() => LerpGrabbable(m_grabPos.position));
         m_lerpTForGrabbable = 0;
         m_isGrabbing = true;
 
@@ -357,12 +365,20 @@ public class Player : MonoBehaviour
         //m_hookShot = GetComponentInChildren<HookShot2>();
         m_fullBodyBipedIK = GetComponentInChildren<FullBodyBipedIK>();
 
+        m_obiSolver = FindObjectOfType<ObiSolver>();
+
+        var HookObj = Instantiate(m_hookShot, m_obiSolver.transform);
+        m_hookShot = HookObj.GetComponent<HookShot2>();
         m_hookShotTf = m_hookShot.transform;
+
+        m_grabbable = HookObj.GetComponent<Grabbable>();
+        m_hookShotTf.position = m_grabPos.position;
+
         m_grabbable.SetUp();
         //ã^éóìIÇ»êeéqä÷åWÇåãÇ‘
         m_grabbable.SetParent(m_tf);
 
-
+        
 
         stateMachine = new ImtStateMachine<Player, StateEvent>(this);
 
@@ -576,7 +592,7 @@ public class Player : MonoBehaviour
             base.Enter();
             Debug.Log(stateMachine.CurrentStateName);
             Context.LandingAndJumpSetUp(false);
-            Context.ConnectToPlayer();
+            Context.StartCoroutine(Context.ConnectToPlayer());
         }
         protected internal override void Update()
         {
@@ -590,7 +606,7 @@ public class Player : MonoBehaviour
                 stateMachine.SendEvent(StateEvent.Air);
             }
             //Context.Move();
-            Context.RopeGrabbingOnAir();
+            //Context.RopeGrabbingOnAir();
 
             if (Input.GetButtonDown("Jump"))
             {

@@ -118,8 +118,8 @@ public class HookShot2 : MonoBehaviour
         cursor.cursorMu = 0;
         cursor.direction = true;
 
-        m_obiStitcher.Actor1 = m_rope;
-        m_obiStitcher.enabled = false;
+        //m_obiStitcher.Actor1 = m_rope;
+        //m_obiStitcher.enabled = false;
         //m_grabObj.transform.position = m_tf.position;
         //m_grabPoint.SetParent(m_tf);
     }
