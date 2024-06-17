@@ -51,7 +51,7 @@ public class HookShot : MonoBehaviour
     private ObiColliderBase m_currentAttachObiCol;
     private Player m_player;
 
-    [SerializeField] private GrabPoint m_grabPoint;
+    [SerializeField] private Grabbable m_grabPoint;
     private GameObject m_grabObj;
     [SerializeField] private ObiParticleAttachment m_particleAttachment;
     [SerializeField] private ObiColliderBase Test;
@@ -105,7 +105,7 @@ public class HookShot : MonoBehaviour
         m_obiStitcher = m_tf.parent.GetComponentInChildren<ObiStitcher>();
         m_particleAttachment = GetComponent<ObiParticleAttachment>();
         m_grabObj = Instantiate(m_grabPoint.gameObject, m_tf.position, Quaternion.identity, solver.transform);
-        m_player.SetGrabPoint = m_grabObj.GetComponent<GrabPoint>();
+        //m_player.SetGrabPoint = m_grabObj.GetComponent<GrabPoint>();
     }
 
     private void OnDestroy()
@@ -266,7 +266,7 @@ public class HookShot : MonoBehaviour
 
         m_rope.GetComponent<MeshRenderer>().enabled = true;
         m_grabObj = Instantiate(m_grabPoint.gameObject, m_tf.position, Quaternion.identity, solver.transform);
-        m_player.SetGrabPoint = m_grabObj.GetComponent<GrabPoint>();
+        //m_player.SetGrabPoint = m_grabObj.GetComponent<GrabPoint>();
         m_player.GrabPointSetUp();
 
         m_particleAttachment.target = m_grabObj.transform;
@@ -475,7 +475,7 @@ public class HookShot : MonoBehaviour
         //  m_grabMesh.enabled = false;
         if (m_ui != null)
         {
-            m_ui.m_attachTf = m_attachmentTargetObj?.transform;
+            m_ui.SetAttachmentTarget = m_attachmentTargetObj?.transform;
         }
     }
 }

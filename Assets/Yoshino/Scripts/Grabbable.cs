@@ -1,9 +1,13 @@
 using Obi;
+using RootMotion.FinalIK;
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
-public class GrabPoint : MonoBehaviour
+public class Grabbable : MonoBehaviour
 {
+    [SerializeField] Transform m_rightTarget;
+    [SerializeField] Transform m_leftTarget;
+
     private VirtualChildBehaviour m_childBehaviour;
     private Collider m_col;
     private ObiColliderBase m_obiCol;
@@ -20,7 +24,11 @@ public class GrabPoint : MonoBehaviour
         m_obiCol = GetComponent<ObiColliderBase>();
         m_rb = GetComponent<Rigidbody>();
     }
-
+    public void SetArmIKTarget(ref FullBodyBipedIK IK)
+    {
+        IK.solver.rightHandEffector.target = m_rightTarget;
+        IK.solver.leftHandEffector.target = m_leftTarget;
+    }
     // Update is called once per frame
     void Update()
     {

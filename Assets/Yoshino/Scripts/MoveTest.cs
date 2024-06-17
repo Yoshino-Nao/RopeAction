@@ -65,8 +65,8 @@ public class MoveTest : MonoBehaviour
     private HookShot m_hookShot;
     private IKTarget m_ikTarget;
     private float m_lerpTGrabPoint = 0f;
-    private GrabPoint m_grabPoint;
-    public GrabPoint SetGrabPoint
+    private Grabbable m_grabPoint;
+    public Grabbable SetGrabPoint
     {
         set { m_grabPoint = value; }
     }
@@ -309,7 +309,7 @@ public class MoveTest : MonoBehaviour
     }
     public void GrabPointSetUp()
     {
-        m_grabPoint.SetUp();
+        //m_grabPoint.SetUp();
         SetIKWeight(1);
         m_grabPoint.SetParent(m_tf);
         Debug.Log("ロープを掴みました");
