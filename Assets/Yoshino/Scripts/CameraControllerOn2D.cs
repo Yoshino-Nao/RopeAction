@@ -35,6 +35,9 @@ public class CameraController2D : MonoBehaviour
         m_pov.m_HorizontalAxis.m_MinValue = m_pov.m_VerticalAxis.m_MinValue = -m_mexAngle;
         m_pov.m_VerticalAxis.m_AccelTime = m_pov.m_HorizontalAxis.m_AccelTime = m_comMoveSpeed * 10;
 
+        m_pov.m_HorizontalAxis.m_InputAxisName = "";
+        m_pov.m_VerticalAxis.m_InputAxisName = "";
+
         m_povSpeedDef = m_pov.m_HorizontalAxis.m_MaxSpeed;
         m_pov.m_HorizontalAxis.m_AccelTime = m_pov.m_VerticalAxis.m_AccelTime = m_camRotateAccelTime;
     }
