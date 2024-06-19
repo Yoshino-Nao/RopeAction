@@ -357,9 +357,11 @@ public class HookShot2 : MonoBehaviour
         float min = 0.5f;
         float Dist = Vector3.Distance(m_tf.position, m_currentAttachTf.position);
         float FinalMin = Mathf.Max(Dist, min);
+
+        //Switchの上キーで長さを縮小
         if (MPFT_NTD_MMControlSystem.ms_instance != null)
         {
-            if (MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.Down)
+            if (MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.Up)
             {
                 cursor.ChangeLength(Mathf.Clamp(m_rope.restLength - hookExtendRetractSpeed * Time.deltaTime, min, max));
             }
@@ -369,9 +371,10 @@ public class HookShot2 : MonoBehaviour
         {
             cursor.ChangeLength(Mathf.Clamp(m_rope.restLength - hookExtendRetractSpeed * Time.deltaTime, min, max));
         }
+        //Switchの下キーで長さを延長
         if (MPFT_NTD_MMControlSystem.ms_instance != null)
         {
-            if (MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.Up)
+            if (MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.Down)
             {
                 cursor.ChangeLength(Mathf.Clamp(m_rope.restLength + hookExtendRetractSpeed * Time.deltaTime, min, max));
             }

@@ -220,10 +220,7 @@ public class Player : MonoBehaviour
     {
         m_hookShot.LaunchHook();
 
-        m_grabbable.SetArmIKTarget(ref m_fullBodyBipedIK);
-        //プレイヤーのIKをセット
-        SetArmIKWeight(1);
-        m_isGrabbing = true;
+        
 
         //StartCoroutine(RopeGrabSetupOnGround());
     }
@@ -365,6 +362,10 @@ public class Player : MonoBehaviour
         m_grabbable.transform.position = GrabPos;
         m_hookShot.ConnectToPlayer(m_obiCollider, m_tf.InverseTransformPoint(m_grabbable.transform.position));
 
+        m_grabbable.SetArmIKTarget(ref m_fullBodyBipedIK);
+        //プレイヤーのIKをセット
+        SetArmIKWeight(1);
+        m_isGrabbing = true;
         //m_grabbable.SetParent(m_tf);
     }
     private void EnablePhysics()
