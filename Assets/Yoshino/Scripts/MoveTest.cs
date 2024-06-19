@@ -341,7 +341,6 @@ public class MoveTest : MonoBehaviour
         //移動中は移動方向へ向く|| Mathf.Abs((m_oldPos - m_tf.position).magnitude) > 0f
         if (m_isGround)
         {
-
             if (m_moveDir.magnitude > 0)
             {
                 m_tf.rotation = Quaternion.LookRotation(m_moveDir, Vector3.up);

@@ -42,37 +42,42 @@ public class CameraController2D : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        float h;
-        float v;
-        if (m_mode == eInputMode.Mouse)
+        float h = 0;
+        float v = 0;
+        if (MPFT_NTD_MMControlSystem.ms_instance != null)
+        {
+            h = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.R_Analog_X;
+            v = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.R_Analog_Y;
+        }
+        else if (m_mode == eInputMode.Mouse)
         {
             h = Input.GetAxis("Mouse X");
             v = Input.GetAxis("Mouse Y");
-            m_pov.m_HorizontalAxis.m_InputAxisName = "Mouse X";
-            m_pov.m_VerticalAxis.m_InputAxisName = "Mouse Y";
+            //m_pov.m_HorizontalAxis.m_InputAxisName = "Mouse X";
+            //m_pov.m_VerticalAxis.m_InputAxisName = "Mouse Y";
 
         }
         else
         {
             h = Input.GetAxis("HorizontalArrow");
             v = Input.GetAxis("VerticalArrow");
-            m_pov.m_HorizontalAxis.m_InputAxisName = "HorizontalArrow";
-            m_pov.m_VerticalAxis.m_InputAxisName = "VerticalArrow";
+            //m_pov.m_HorizontalAxis.m_InputAxisName = "HorizontalArrow";
+            //m_pov.m_VerticalAxis.m_InputAxisName = "VerticalArrow";
         }
-        if (MPFT_NTD_MMControlSystem.ms_instance != null)
-        {
-            h = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.R_Analog_X;
-            v = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.R_Analog_Y;
-        }
-        Vector3 Value = new Vector3(h, v, 0);
 
+        Vector3 Value = new Vector3(h, v, 0);
+        DebugPrint.Print(string.Format("nullCheck{0}", MPFT_NTD_MMControlSystem.ms_instance != null));
+        DebugPrint.Print(string.Format("CameraInput{0}", Value));
         ////“ü—Í‚ª‚È‚¢ê‡‚Í‰ŠúˆÊ’u‚É•âŠÔ‚·‚é
         if (Value.magnitude > 0)
         {
             if (m_isOnlyRotation)
             {
-                m_pov.m_HorizontalAxis.m_MaxSpeed = m_povSpeedDef;
-                m_pov.m_VerticalAxis.m_MaxSpeed = m_povSpeedDef;
+                m_pov.m_HorizontalAxis.m_InputAxisValue = h;
+                m_pov.m_VerticalAxis.m_InputAxisValue = v;
+
+                //m_pov.m_HorizontalAxis.m_MaxSpeed = m_povSpeedDef;
+                //m_pov.m_VerticalAxis.m_MaxSpeed = m_povSpeedDef;
             }
             else
             {

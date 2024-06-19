@@ -75,7 +75,7 @@ public class HookShot2 : MonoBehaviour
         }
     }
 
-    void Awake()
+    void OnEnable()
     {
         if (solver == null)
         {
@@ -127,6 +127,7 @@ public class HookShot2 : MonoBehaviour
     {
 
     }
+
     private void OnDestroy()
     {
         DestroyImmediate(blueprint);
@@ -238,6 +239,7 @@ public class HookShot2 : MonoBehaviour
             solver.invMasses[m_rope.solverIndices[i]] = 10; // 1/0.1 = 10
 
         ConnectToSelf(Target);
+        m_player.StateChangeSetupOnRopeGrab(true);
         //m_player.GrabPointSetUp();
     }
     /// <summary>
@@ -270,7 +272,7 @@ public class HookShot2 : MonoBehaviour
         pinConstraints.AddBatch(batch);
         m_rope.SetConstraintsDirty(Oni.ConstraintType.Pin);
     }
-    public void ConnectToPlayer(ObiColliderBase Playerobicol,Vector3 GrabPos)
+    public void ConnectToPlayer(ObiColliderBase Playerobicol, Vector3 GrabPos)
     {
         //pinConstraints = m_rope.GetConstraintsByType(Oni.ConstraintType.Pin) as ObiConstraints<ObiPinConstraintsBatch>;
         //pinConstraints.Clear();
@@ -332,10 +334,7 @@ public class HookShot2 : MonoBehaviour
         // Set the rope blueprint to null (automatically removes the previous blueprint from the solver, if any).
         m_rope.ropeBlueprint = null;
         m_rope.GetComponent<MeshRenderer>().enabled = false;
-        m_obiStitcher.enabled = false;
-        //プレイヤーのIKをリセット
-        m_player.SetIKWeight(0);
-        m_player.m_isGrabbing = false;
+        //m_obiStitcher.enabled = false;
         //GrabPointを削除
     }
     public void HookShooting()
@@ -358,13 +357,27 @@ public class HookShot2 : MonoBehaviour
         float min = 0.5f;
         float Dist = Vector3.Distance(m_tf.position, m_currentAttachTf.position);
         float FinalMin = Mathf.Max(Dist, min);
+        if (MPFT_NTD_MMControlSystem.ms_instance != null)
+        {
+            if (MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.Down)
+            {
+                cursor.ChangeLength(Mathf.Clamp(m_rope.restLength - hookExtendRetractSpeed * Time.deltaTime, min, max));
+            }
+        }
         //スペースキーで長さを縮小
-        if (Input.GetKey(KeyCode.Space))
+        else if (Input.GetKey(KeyCode.Space))
         {
             cursor.ChangeLength(Mathf.Clamp(m_rope.restLength - hookExtendRetractSpeed * Time.deltaTime, min, max));
         }
+        if (MPFT_NTD_MMControlSystem.ms_instance != null)
+        {
+            if (MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.Up)
+            {
+                cursor.ChangeLength(Mathf.Clamp(m_rope.restLength + hookExtendRetractSpeed * Time.deltaTime, min, max));
+            }
+        }
         //シフトキーで長さを延長
-        if (Input.GetKey(KeyCode.LeftShift))
+        else if (Input.GetKey(KeyCode.LeftShift))
         {
             cursor.ChangeLength(Mathf.Clamp(m_rope.restLength + hookExtendRetractSpeed * Time.deltaTime, min, max));
         }
@@ -379,11 +392,11 @@ public class HookShot2 : MonoBehaviour
         Vector3 Origin = m_player.transform.position + Vector3.up * 0.1f;
         LayerMask layerMask = LayerMask.NameToLayer("Ropeattach");
         var hits = Physics.SphereCastAll(
-            Origin,     //中心
+            Origin,            //中心
             m_length,          //半径
-            Vector3.forward,   //方向
+            m_tf.forward,      //方向
             0f,                //長さ
-            1 << layerMask          //レイヤーマスク
+            1 << layerMask     //レイヤーマスク
             ).Select(h => h.transform.gameObject).ToList();
 
 
@@ -400,13 +413,14 @@ public class HookShot2 : MonoBehaviour
 
             GameObject obj = null;
             float MinLength = float.MaxValue;
+            LayerMask Mask = 1 << LayerMask.NameToLayer("Ground");
             foreach (var hit in hits)
             {
                 Vector3 ViewPort = m_mainCamera.WorldToViewportPoint(hit.transform.position);
                 //距離を求める
                 float Length = Vector2.Distance(new Vector2(0.5f, 0.5f), new Vector2(ViewPort.x, ViewPort.y));
                 //attachmentObjとの間にコライダー付きのオブジェクトがあった場合は無視する
-                if (Physics.Raycast(Origin, hit.transform.position - Origin, out RaycastHit hitInfo, m_length))
+                if (Physics.Raycast(Origin, hit.transform.position - Origin, out RaycastHit hitInfo, m_length, Mask))
                 {
                     //DebugPrint.Print(string.Format("1{0}", hit));
                     //DebugPrint.Print(string.Format("2{0}", hitInfo.collider.gameObject));
