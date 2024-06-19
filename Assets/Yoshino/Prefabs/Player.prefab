@@ -61,9 +61,10 @@ MonoBehaviour:
   m_jumpPower: 280
   m_playerForwardOn2d: {x: 1, y: 0, z: 0}
   m_grabTotalTime: 1
+  m_testTf: {fileID: 0}
   m_hookShot: {fileID: 6120042638037030704, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
   m_isGrabbing: 0
-  m_grabPos: {fileID: 1841312204458033540}
+  m_grabPoint: {fileID: 1841312204458033540}
 --- !u!136 &8040820617923788580
 CapsuleCollider:
   m_ObjectHideFlags: 0
