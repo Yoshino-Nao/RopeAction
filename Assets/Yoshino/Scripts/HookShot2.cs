@@ -33,7 +33,7 @@ public class HookShot2 : MonoBehaviour
     {
         get { return m_rope; }
     }
-
+    private MeshRenderer m_grabRopeMeshRenderer;
     private ObiRopeBlueprint blueprint;
     private ObiRopeExtrudedRenderer ropeRenderer;
     private ObiRopeCursor cursor;
@@ -425,10 +425,10 @@ public class HookShot2 : MonoBehaviour
             foreach (var hit in hits)
             {
                 Vector3 ViewPort = m_mainCamera.WorldToViewportPoint(hit.transform.position);
-                //距離を求める
+                //画面の中心との距離を求める
                 float Length = Vector2.Distance(new Vector2(0.5f, 0.5f), new Vector2(ViewPort.x, ViewPort.y));
                 //attachmentObjとの間にコライダー付きのオブジェクトがあった場合は無視する
-                if (Physics.Raycast(Origin, hit.transform.position - Origin, out RaycastHit hitInfo, m_length, Mask))
+                if (Physics.Raycast(Origin, hit.transform.position - Origin, out RaycastHit hitInfo, (hit.transform.position - Origin).magnitude, Mask))
                 {
                     //DebugPrint.Print(string.Format("1{0}", hit));
                     //DebugPrint.Print(string.Format("2{0}", hitInfo.collider.gameObject));
