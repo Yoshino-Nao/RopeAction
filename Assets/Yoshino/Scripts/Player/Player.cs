@@ -5,6 +5,7 @@ using UnityEngine;
 using IceMilkTea.StateMachine;
 using VInspector;
 using Obi;
+using nn.hid;
 public class Player : MonoBehaviour
 {
     private ImtStateMachine<Player, StateEvent> stateMachine;
@@ -39,7 +40,6 @@ public class Player : MonoBehaviour
 
     [SerializeField] private float m_grabTotalTime = 1f;
 
-    [SerializeField] private Transform m_testTf;
     //プレイヤーが持っているコンポーネント
     private Transform m_tf => transform;
     private CapsuleCollider m_capsuleCol;
@@ -220,7 +220,7 @@ public class Player : MonoBehaviour
     {
         m_hookShot.LaunchHook();
 
-        
+
 
         //StartCoroutine(RopeGrabSetupOnGround());
     }
@@ -281,35 +281,26 @@ public class Player : MonoBehaviour
             (m_hookShot.GetCurrnetAttachTf.position -
             m_grabbable.transform.position
             ).normalized;
-        //Vector3 ToAttachPointDir = m_testTf.position - m_tf.position;
-        //Debug.DrawRay(m_grabbable.transform.position, ToAttachPointDir * 100);
-        //アタッチしたオブジェクトが固定されたものであれば
-        //if (m_hookShot.GetCurrnetAttachRb.isKinematic)
+
+        Vector3 Dir;
+        //移動入力がある時
+        if (m_moveDir.magnitude > 0)
         {
-            //移動入力がある時
-            if (m_moveDir.magnitude > 0)
-            {
-                //ロープの方向を基準としたときの移動方向へと回転する
-                Vector3 Vec = Vector3.ProjectOnPlane(m_moveDir, ToAttachPointDir);
-                //Vector3.Dot
-                Debug.DrawRay(m_tf.position, Vec * 100);
-                //m_tf.rotation = Quaternion.RotateTowards(
-                //    m_tf.rotation,
-                //    Quaternion.LookRotation(Vector3.ProjectOnPlane(Vec, ToAttachPointDir)),
-                //    m_rotateSpeed * Time.fixedDeltaTime);
-                m_tf.rotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(Vec, ToAttachPointDir));
-            }
-            //移動入力がない時
-            else
-            {
-                //ワールドの上方向を基準にしたときのプレイヤーの正面方向へ回転させる
-                //m_tf.rotation = Quaternion.RotateTowards(
-                //    m_tf.rotation,
-                //    Quaternion.LookRotation(Vector3.ProjectOnPlane(m_tf.forward, ToAttachPointDir)),
-                //    m_rotateSpeed * Time.fixedDeltaTime);
-                m_tf.rotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(m_tf.forward, ToAttachPointDir));
-            }
+            Dir = m_moveDir;
+
         }
+        //移動入力がない時
+        else
+        {
+            Dir = m_tf.forward;
+        }
+//回転する
+        m_tf.rotation = 
+            Quaternion.RotateTowards(
+            m_tf.rotation,
+            Quaternion.FromToRotation(Vector3.up, ToAttachPointDir) * Quaternion.LookRotation(Dir),
+            m_rotateSpeed);
+
     }
     #endregion
 
@@ -453,9 +444,7 @@ public class Player : MonoBehaviour
     {
         m_isGround = FootCollider();
         SetMoveDir();
-        //SetArmIKWeight(0);
 
-        //RopeGrabbingOnAir();
         //DebugPrint.Print(string.Format("{0}", m_rb.velocity));
         m_anim.SetBool("Ground", m_isGround);
 
@@ -528,11 +517,13 @@ public class Player : MonoBehaviour
             {
                 Context.Jump();
             }
-            if (MPFT_NTD_MMControlSystem.ms_instance != null && MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.B)
+            if (MPFT_NTD_MMControlSystem.ms_instance != null)
             {
-                Context.Jump();
+                if (MPFT_NTD_MMControlSystem.ms_instance.npadState.GetButtonDown(NpadButton.A))
+                {
+                    Context.Jump();
+                }
             }
-
         }
 
 
@@ -604,9 +595,12 @@ public class Player : MonoBehaviour
             {
                 Context.Jump();
             }
-            if (MPFT_NTD_MMControlSystem.ms_instance != null && MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.B)
+            if (MPFT_NTD_MMControlSystem.ms_instance != null)
             {
-                Context.Jump();
+                if (MPFT_NTD_MMControlSystem.ms_instance.npadState.GetButtonDown(NpadButton.A))
+                {
+                    Context.Jump();
+                }
             }
             //ロープを離す
             if (Input.GetKeyDown(KeyCode.V))
@@ -664,9 +658,12 @@ public class Player : MonoBehaviour
             {
                 Context.RopeJump();
             }
-            if (MPFT_NTD_MMControlSystem.ms_instance != null && MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.B)
+            if (MPFT_NTD_MMControlSystem.ms_instance != null)
             {
-                Context.Jump();
+                if (MPFT_NTD_MMControlSystem.ms_instance.npadState.GetButtonDown(NpadButton.A))
+                {
+                    Context.Jump();
+                }
             }
 
             if (Input.GetMouseButtonDown(1))

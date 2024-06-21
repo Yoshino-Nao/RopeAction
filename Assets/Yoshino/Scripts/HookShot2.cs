@@ -29,6 +29,11 @@ public class HookShot2 : MonoBehaviour
     private Camera m_mainCamera;
 
     private ObiRope m_rope;
+    public ObiRope GetRope
+    {
+        get { return m_rope; }
+    }
+
     private ObiRopeBlueprint blueprint;
     private ObiRopeExtrudedRenderer ropeRenderer;
     private ObiRopeCursor cursor;

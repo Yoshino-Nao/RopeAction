@@ -4304,12 +4304,12 @@ GameObject:
   - component: {fileID: 193532176}
   - component: {fileID: 193532175}
   m_Layer: 0
-  m_Name: Switch
+  m_Name: SwitchInputSystem
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 0
+  m_IsActive: 1
 --- !u!114 &193532175
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -25792,6 +25792,10 @@ PrefabInstance:
     - target: {fileID: 2436110867473921493, guid: 4aade0c8d82ab854fbdfed806bb43f94, type: 3}
       propertyPath: m_isOnlyRotation
       value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 2436110867473921493, guid: 4aade0c8d82ab854fbdfed806bb43f94, type: 3}
+      propertyPath: m_camRotateAccelTime
+      value: 2
       objectReference: {fileID: 0}
     - target: {fileID: 3301516952260531950, guid: 4aade0c8d82ab854fbdfed806bb43f94, type: 3}
       propertyPath: m_FollowOffset.z
