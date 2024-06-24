@@ -346,8 +346,6 @@ public class HookShot : MonoBehaviour
         // Set the rope blueprint to null (automatically removes the previous blueprint from the solver, if any).
         m_rope.ropeBlueprint = null;
         m_rope.GetComponent<MeshRenderer>().enabled = false;
-        //プレイヤーのIKをリセット
-        m_player.SetArmIKWeight(0);
         m_player.m_isGrabbing = false;
         //GrabPointを削除
         m_grabObj.SetActive(false);

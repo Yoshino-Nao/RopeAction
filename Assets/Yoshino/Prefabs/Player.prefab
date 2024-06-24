@@ -36,6 +36,7 @@ Transform:
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1841312204458033540}
+  - {fileID: 471725751385836347}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &3602940252276104128
@@ -62,6 +63,7 @@ MonoBehaviour:
   m_playerForwardOn2d: {x: 1, y: 0, z: 0}
   m_grabTotalTime: 1
   m_hookShot: {fileID: 6120042638037030704, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+  m_grabbable: {fileID: 0}
   m_isGrabbing: 0
   m_grabPoint: {fileID: 1841312204458033540}
 --- !u!136 &8040820617923788580
@@ -191,3 +193,565 @@ Transform:
   m_Children: []
   m_Father: {fileID: 3259156906742741579}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!1001 &6786117932702735826
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 3259156906742741579}
+    m_Modifications:
+    - target: {fileID: 6388015620044510953, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6388015620044510953, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6388015620044510953, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6388015620044510953, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6388015620044510953, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6388015620044510953, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6388015620044510953, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6388015620044510953, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6388015620044510953, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6388015620044510953, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[0]
+      value: 344
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[1]
+      value: 345
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[2]
+      value: 346
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[3]
+      value: 347
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[4]
+      value: 348
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[5]
+      value: 349
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[6]
+      value: 350
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[7]
+      value: 351
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[8]
+      value: 352
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[9]
+      value: 353
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[10]
+      value: 354
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[11]
+      value: 355
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[12]
+      value: 356
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[13]
+      value: 357
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[14]
+      value: 358
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[15]
+      value: 359
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[16]
+      value: 360
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[17]
+      value: 361
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[18]
+      value: 362
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[19]
+      value: 363
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[20]
+      value: 364
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[21]
+      value: 365
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[22]
+      value: 366
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[23]
+      value: 367
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[24]
+      value: 368
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[25]
+      value: 369
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[26]
+      value: 370
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[27]
+      value: 371
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[28]
+      value: 372
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[29]
+      value: 373
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[30]
+      value: 374
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[31]
+      value: 375
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[32]
+      value: 376
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[33]
+      value: 377
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[34]
+      value: 378
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[35]
+      value: 379
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[36]
+      value: 380
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[37]
+      value: 381
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[38]
+      value: 382
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[39]
+      value: 383
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[40]
+      value: 384
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[41]
+      value: 385
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[42]
+      value: 386
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[43]
+      value: 387
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[44]
+      value: 388
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[45]
+      value: 389
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[46]
+      value: 390
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[47]
+      value: 391
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[48]
+      value: 392
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[49]
+      value: 393
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[50]
+      value: 394
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[51]
+      value: 395
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[52]
+      value: 396
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[53]
+      value: 397
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[54]
+      value: 398
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[55]
+      value: 399
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[56]
+      value: 400
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[57]
+      value: 401
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[58]
+      value: 402
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[59]
+      value: 403
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[60]
+      value: 404
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[61]
+      value: 405
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[62]
+      value: 406
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[63]
+      value: 407
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[64]
+      value: 408
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[65]
+      value: 409
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[66]
+      value: 410
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[67]
+      value: 411
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[68]
+      value: 412
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[69]
+      value: 413
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[70]
+      value: 414
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[71]
+      value: 415
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[72]
+      value: 416
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[73]
+      value: 417
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[74]
+      value: 418
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[75]
+      value: 419
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[76]
+      value: 420
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[77]
+      value: 421
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[78]
+      value: 422
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[79]
+      value: 423
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[80]
+      value: 424
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[81]
+      value: 425
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[82]
+      value: 426
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[83]
+      value: 427
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[84]
+      value: 428
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[85]
+      value: 429
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[86]
+      value: 430
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[87]
+      value: 431
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[88]
+      value: 432
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[89]
+      value: 433
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[90]
+      value: 434
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[91]
+      value: 435
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[92]
+      value: 436
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[93]
+      value: 437
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[94]
+      value: 438
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[95]
+      value: 439
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[96]
+      value: 440
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[97]
+      value: 441
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[98]
+      value: 442
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[99]
+      value: 443
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[100]
+      value: 444
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[101]
+      value: 445
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[102]
+      value: 446
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[103]
+      value: 447
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[104]
+      value: 448
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[105]
+      value: 449
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[106]
+      value: 450
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[107]
+      value: 451
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: solverIndices.Array.data[108]
+      value: 452
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: elements.Array.data[0].particle1
+      value: 344
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: elements.Array.data[0].particle2
+      value: 345
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: elements.Array.data[1].particle1
+      value: 345
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: elements.Array.data[1].particle2
+      value: 346
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: elements.Array.data[2].particle1
+      value: 346
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: elements.Array.data[2].particle2
+      value: 347
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: elements.Array.data[3].particle1
+      value: 347
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: elements.Array.data[3].particle2
+      value: 348
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: elements.Array.data[4].particle1
+      value: 348
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: elements.Array.data[4].particle2
+      value: 349
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: elements.Array.data[5].particle1
+      value: 349
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: elements.Array.data[5].particle2
+      value: 350
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: elements.Array.data[6].particle1
+      value: 350
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: elements.Array.data[6].particle2
+      value: 351
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: elements.Array.data[7].particle1
+      value: 351
+      objectReference: {fileID: 0}
+    - target: {fileID: 8879483094599995784, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: elements.Array.data[7].particle2
+      value: 352
+      objectReference: {fileID: 0}
+    - target: {fileID: 9174577497761929709, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+      propertyPath: m_Name
+      value: HookShot
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+--- !u!4 &471725751385836347 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6388015620044510953, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
+  m_PrefabInstance: {fileID: 6786117932702735826}
+  m_PrefabAsset: {fileID: 0}

@@ -34,6 +34,10 @@ public class HookShot2 : MonoBehaviour
         get { return m_rope; }
     }
     private MeshRenderer m_grabRopeMeshRenderer;
+    public bool SetGrabRopeMesh
+    {
+        set { m_grabRopeMeshRenderer.enabled = value; }
+    }
     private ObiRopeBlueprint blueprint;
     private ObiRopeExtrudedRenderer ropeRenderer;
     private ObiRopeCursor cursor;
@@ -45,10 +49,10 @@ public class HookShot2 : MonoBehaviour
     [SerializeField] private GameObject m_attachmentTargetObj = null;
 
     //ロープをアタッチしているオブジェクトのコンポーネント
-    private Transform m_currentAttachTf;
-    public Transform GetCurrnetAttachTf
+    private Vector3 m_currentAttachPos;
+    public Vector3 GetCurrnetAttachPos
     {
-        get { return m_currentAttachTf; }
+        get { return m_currentAttachPos; }
     }
     private Rigidbody m_currentAttachRb;
     public Rigidbody GetCurrnetAttachRb
@@ -80,7 +84,7 @@ public class HookShot2 : MonoBehaviour
         }
     }
 
-    void OnEnable()
+    void Start()
     {
         if (solver == null)
         {
@@ -93,6 +97,8 @@ public class HookShot2 : MonoBehaviour
         m_mainCamera = Camera.main;
         m_player = FindObjectOfType<Player>();
         m_ui = FindFirstObjectByType<UITest>();
+        m_grabRopeMeshRenderer = GetComponent<MeshRenderer>();
+
 
         GameObject RopeObj = new GameObject("Rope");
         RopeObj.transform.parent = transform;
@@ -128,10 +134,7 @@ public class HookShot2 : MonoBehaviour
         //m_grabObj.transform.position = m_tf.position;
         //m_grabPoint.SetParent(m_tf);
     }
-    private void Start()
-    {
-
-    }
+   
 
     private void OnDestroy()
     {
@@ -145,7 +148,6 @@ public class HookShot2 : MonoBehaviour
 
         Ray ray = new Ray(m_tf.position, m_attachmentTargetObj.transform.position - m_tf.position);
         //Vector3 vec = 
-        m_currentAttachTf = m_attachmentTargetObj.transform;
         m_currentAttachRb = m_attachmentTargetObj.GetComponent<Rigidbody>();
         m_currentAttachObiCol = m_attachmentTargetObj.GetComponent<ObiColliderBase>();
         // Raycast to see what we hit:
@@ -155,6 +157,8 @@ public class HookShot2 : MonoBehaviour
             {
                 DetachHook();
             }
+
+            m_currentAttachPos = hookAttachment.point;
             StartCoroutine(AttachHookForKinematic(m_currentAttachObiCol));
 
         }
@@ -244,8 +248,8 @@ public class HookShot2 : MonoBehaviour
             solver.invMasses[m_rope.solverIndices[i]] = 10; // 1/0.1 = 10
 
         ConnectToSelf(Target);
-        m_player.StateChangeSetupOnRopeGrab(true);
-        //m_player.GrabPointSetUp();
+        //m_rope.getP
+        //StartCoroutine(m_player.StateChangeSetupOnRopeGrab(true));
     }
     /// <summary>
     /// ロープとオブジェクトを繋ぐ
@@ -279,8 +283,8 @@ public class HookShot2 : MonoBehaviour
     }
     public void ConnectToPlayer(ObiColliderBase Playerobicol, Vector3 GrabPos)
     {
-        //pinConstraints = m_rope.GetConstraintsByType(Oni.ConstraintType.Pin) as ObiConstraints<ObiPinConstraintsBatch>;
-        //pinConstraints.Clear();
+        pinConstraints = m_rope.GetConstraintsByType(Oni.ConstraintType.Pin) as ObiConstraints<ObiPinConstraintsBatch>;
+        pinConstraints.Clear();
         var batch = new ObiPinConstraintsBatch();
         batch.AddConstraint(
             m_rope.elements[0].particle1,
@@ -360,7 +364,7 @@ public class HookShot2 : MonoBehaviour
         float Wheel = Input.GetAxis("Mouse ScrollWheel");
         float max = 20f;
         float min = 0.5f;
-        float Dist = Vector3.Distance(m_tf.position, m_currentAttachTf.position);
+        float Dist = Vector3.Distance(m_tf.position, m_currentAttachPos);
         float FinalMin = Mathf.Max(Dist, min);
 
         //Switchの上キーで長さを縮小

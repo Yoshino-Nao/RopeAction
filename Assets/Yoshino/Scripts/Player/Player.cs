@@ -6,6 +6,7 @@ using IceMilkTea.StateMachine;
 using VInspector;
 using Obi;
 using nn.hid;
+using System.Runtime.Remoting.Metadata.W3cXsd2001;
 public class Player : MonoBehaviour
 {
     private ImtStateMachine<Player, StateEvent> stateMachine;
@@ -48,6 +49,7 @@ public class Player : MonoBehaviour
 
     //キャラクターモデルが持っているコンポーネント
     private FullBodyBipedIK m_fullBodyBipedIK;
+    private GrounderFBBIK m_grounderFBBIK;
 
     //アニメーション関係
     private Animator m_anim;
@@ -65,6 +67,7 @@ public class Player : MonoBehaviour
     private Vector2 m_inputMoveDir;
     private Vector3 m_normal;
     private Vector3 m_oldPos;
+    private Coroutine m_LegIKCor;
 
     //接地判定で使用する
     private bool m_isGround;
@@ -84,7 +87,7 @@ public class Player : MonoBehaviour
     private Transform m_hookShotTf;
     private ObiColliderBase m_obiCollider;
     private float m_lerpTForGrabbable = 0f;
-    private Grabbable m_grabbable;
+    [SerializeField] private Grabbable m_grabbable;
     public Grabbable SetGrabbable
     {
         set { m_grabbable = value; }
@@ -92,15 +95,12 @@ public class Player : MonoBehaviour
 
     public bool m_isGrabbing = false;
     [SerializeField] private Transform m_grabPoint;
+    bool Tgr = false;
     [Button]
     void Test()
     {
-        if (m_grabbable != null)
-        {
-            //m_grabbable.SetArmIKTarget(ref m_fullBodyBipedIK);
-            //SetIKWeight(1);
-            //StartCoroutine(StateChangeSetup());
-        }
+        Tgr = !Tgr ? true : false;
+        StartCoroutine(StateChangeSetupOnRopeGrab(Tgr));
     }
 
     #region 移動関係
@@ -201,6 +201,11 @@ public class Player : MonoBehaviour
         m_rb.AddForce(Vector3.up * m_jumpPower, ForceMode.Impulse);
         m_anim.SetBool("Jump", false);
         Debug.Log("Jump");
+        if (m_LegIKCor != null)
+        {
+            StopCoroutine(SetLegIKWeight());
+        }
+        m_LegIKCor = StartCoroutine(SetLegIKWeight());
     }
     private void RopeJump()
     {
@@ -220,7 +225,7 @@ public class Player : MonoBehaviour
     {
         m_hookShot.LaunchHook();
 
-
+        StartCoroutine(StateChangeSetupOnRopeGrab(m_isGround));
 
         //StartCoroutine(RopeGrabSetupOnGround());
     }
@@ -232,9 +237,12 @@ public class Player : MonoBehaviour
         m_hookShot.DetachHook();
 
         //プレイヤーのIKをリセット
+        m_grabbable.SetParent(null);
         SetArmIKWeight(0);
         m_isGrabbing = false;
-
+        m_hookShot.transform.position = m_grabPoint.position;
+        //m_grabbable.SetParent(m_tf);
+        
     }
     public void Release()
     {
@@ -249,11 +257,7 @@ public class Player : MonoBehaviour
         //    m_isGrabbing = false;
         //    Debug.Log("ロープを離しました");
     }
-    private void Conntect()
-    {
-        Release();
-        //m_hookShot.ConnectToOtherObj(m_hookShot.GetAttachmentTargetObiCol);
-    }
+
     public void GrabPointSetUp()
     {
         //m_grabPoint.SetUp();
@@ -276,26 +280,28 @@ public class Player : MonoBehaviour
     {
         m_hookShot.RopeChangeLength();
 
+
         //フックショットからロープが当たっているオブジェクトへの方向
         Vector3 ToAttachPointDir =
-            (m_hookShot.GetCurrnetAttachTf.position -
-            m_grabbable.transform.position
+            (m_hookShot.GetCurrnetAttachPos -
+            m_hookShotTf.position
             ).normalized;
-
+        Debug.DrawRay(m_hookShotTf.position, m_hookShot.GetCurrnetAttachPos - m_hookShotTf.position);
         Vector3 Dir;
         //移動入力がある時
         if (m_moveDir.magnitude > 0)
         {
             Dir = m_moveDir;
+            
 
         }
         //移動入力がない時
         else
         {
-            Dir = m_tf.forward;
+            Dir = Vector3.Scale(m_CameraTf.forward, new Vector3(1, 0, 1)).normalized;
         }
-//回転する
-        m_tf.rotation = 
+        //回転する
+        m_tf.rotation =
             Quaternion.RotateTowards(
             m_tf.rotation,
             Quaternion.FromToRotation(Vector3.up, ToAttachPointDir) * Quaternion.LookRotation(Dir),
@@ -326,38 +332,63 @@ public class Player : MonoBehaviour
             m_physicMaterial.staticFriction = 0;
             //重力を有効化
             m_rb.useGravity = true;
+
         }
+
     }
     /// <summary>
     /// ロープを掴んだ状態で地上と空中状態が変化した瞬間に行う処理
     /// </summary>
     /// <param name="isGround"></param>
-    public void StateChangeSetupOnRopeGrab(bool isGround)
+    public IEnumerator StateChangeSetupOnRopeGrab(bool isGround)
     {
-        //地上と空中で掴む位置を変える
+        //m_grabbable.SetParent(null);
         Vector3 GrabPos;
         if (isGround)
         {
-            //手元
-            GrabPos = m_grabPoint.position;
+           //m_hookShot.SetIsKinematic = true;
 
-            m_hookShot.SetIsKinematic = true;
+            //手元
+            m_hookShotTf.position = m_grabPoint.position;
+            //GrabPos = m_grabPoint.position;
         }
         else
         {
-            //頭上
-            GrabPos = m_tf.position + m_orgVectColCenter * 2;
+            //m_hookShot.SetIsKinematic = false;
 
-            m_hookShot.SetIsKinematic = false;
+            //m_hookShotTf.position = m_tf.position + m_tf.up * m_orgColHight;
+            m_hookShotTf.localPosition = m_orgVectColCenter * 2;
+            // = m_tf.position + m_tf.up * m_orgColHight;
         }
-        m_grabbable.transform.position = GrabPos;
-        m_hookShot.ConnectToPlayer(m_obiCollider, m_tf.InverseTransformPoint(m_grabbable.transform.position));
+        //yield return null;
+
+
+        //m_grabbable.SetParent(m_tf);
+        //m_hookShot.ConnectToSelf(m_hookShot.GetCurrnetAttachObiCol);
+        //m_hookShot.SetIsKinematic = true;
+
+        GrabPos = m_hookShotTf.position;
 
         m_grabbable.SetArmIKTarget(ref m_fullBodyBipedIK);
+
         //プレイヤーのIKをセット
         SetArmIKWeight(1);
+
+
+        //yield return new WaitForSeconds(0.25f);
+
         m_isGrabbing = true;
-        //m_grabbable.SetParent(m_tf);
+        m_hookShot.ConnectToPlayer(m_obiCollider, m_tf.InverseTransformPoint(GrabPos));
+
+
+
+
+
+        yield return null;
+
+        //m_hookShot.SetIsKinematic = isGround;
+
+
     }
     private void EnablePhysics()
     {
@@ -368,12 +399,60 @@ public class Player : MonoBehaviour
     /// 腕のIKのWeghtを設定
     /// </summary>
     /// <param name="weight"></param>
-    public void SetArmIKWeight(float weight)
+    private void SetArmIKWeight(float weight)
     {
         m_fullBodyBipedIK.solver.leftHandEffector.positionWeight = weight;
         m_fullBodyBipedIK.solver.leftHandEffector.rotationWeight = weight;
         m_fullBodyBipedIK.solver.rightHandEffector.positionWeight = weight;
         m_fullBodyBipedIK.solver.rightHandEffector.rotationWeight = weight;
+
+        //Weghtが0の時に飾りのロープの描画をしない
+        if (weight <= 0)
+        {
+            m_hookShot.SetGrabRopeMesh = false;
+        }
+        else
+        {
+            m_hookShot.SetGrabRopeMesh = true;
+        }
+    }
+    private IEnumerator SetLegIKWeight()
+    {
+        // ジャンプ開始して一定時間で
+        // IK処理のウェイトを1から0に変更して、
+        // IK処理の影響を徐々に受けないようにする
+        float elapsed = 0f;
+        float time = 0.25f;
+        while (elapsed < time)
+        {
+            float alpha = elapsed / time;
+            m_grounderFBBIK.weight = 1f - alpha;
+            yield return null;
+
+            elapsed += Time.deltaTime;
+        }
+        m_grounderFBBIK.weight = 0;
+        // ジャンプによる上昇中か、
+        // 地面に接地していない間は、地面とのIK処理を切ったままにする
+        while (m_rb.velocity.y > 0f || !m_isGround)
+        {
+            yield return null;
+        }
+        // 一定時間で地面とのIK処理のウェイトを元に戻す
+        elapsed = 0;
+        time = 0.25f;
+
+        while (elapsed < time)
+        {
+            float alpha = elapsed / time;
+            m_grounderFBBIK.weight = alpha;
+            yield return null;
+
+            elapsed += Time.deltaTime;
+        }
+        m_grounderFBBIK.weight = 1f;
+        //コルーチンの終了
+        m_LegIKCor = null;
     }
     private bool FootCollider()
     {
@@ -397,19 +476,19 @@ public class Player : MonoBehaviour
         m_anim = GetComponentInChildren<Animator>();
         //m_hookShot = GetComponentInChildren<HookShot2>();
         m_fullBodyBipedIK = GetComponentInChildren<FullBodyBipedIK>();
-
+        m_grounderFBBIK = GetComponentInChildren<GrounderFBBIK>();
         m_obiSolver = FindObjectOfType<ObiSolver>();
 
-        var HookObj = Instantiate(m_hookShot, m_obiSolver.transform);
-        m_hookShot = HookObj.GetComponent<HookShot2>();
+        //var HookObj = Instantiate(m_hookShot, m_tf);
+        m_hookShot = GetComponentInChildren<HookShot2>();
         m_hookShotTf = m_hookShot.transform;
-
-        m_grabbable = HookObj.GetComponent<Grabbable>();
+        m_hookShotTf.position = m_grabPoint.position;
+        m_grabbable = GetComponentInChildren<Grabbable>();
         m_hookShotTf.position = m_grabPoint.position;
 
         m_grabbable.SetUp();
         //疑似的な親子関係を結ぶ
-        m_grabbable.SetParent(m_tf);
+        //m_grabbable.SetParent(m_tf);
 
 
 
@@ -436,7 +515,6 @@ public class Player : MonoBehaviour
 
 
 
-
     }
 
     // Update is called once per frame
@@ -449,7 +527,7 @@ public class Player : MonoBehaviour
         m_anim.SetBool("Ground", m_isGround);
 
         //m_hookShot.HookShooting();
-        //   DebugPrint.Print(string.Format("CurrentStateName:{0}", stateMachine.CurrentStateName));
+        DebugPrint.Print(string.Format("CurrentStateName:{0}", stateMachine.CurrentStateName));
         stateMachine.Update();
     }
     private void FixedUpdate()
@@ -469,6 +547,7 @@ public class Player : MonoBehaviour
             Context.LandingAndJumpSetUp(true);
 
             Context.SetArmIKWeight(0);
+
             Context.m_anim.SetBool("Jump", false);
         }
         protected internal override void Update()
@@ -490,16 +569,6 @@ public class Player : MonoBehaviour
             //移動処理
             Context.Move();
 
-            //手の位置の制御
-            //if (Context.m_grabPoint != null)
-            //{
-            //    float dist = Vector3.Distance(Context.m_tf.position, Context.m_grabPoint.transform.position);
-            //    float length = 2f;
-            //    if (Input.GetKeyDown(KeyCode.V) && dist <= length)
-            //    {
-            //        Context.StartCoroutine(Context.Grab());
-            //    }
-            //}
             //ロープ発射
             if (Input.GetMouseButtonDown(1))
             {
@@ -573,7 +642,7 @@ public class Player : MonoBehaviour
 
             Debug.Log(stateMachine.CurrentStateName);
             Context.LandingAndJumpSetUp(true);
-
+            //Context.m_anim.SetBool("RopeGrab", true);
             //Context.StartCoroutine(Context.StateChangeSetup(true));
         }
         protected internal override void Update()
@@ -582,6 +651,7 @@ public class Player : MonoBehaviour
             if (!Context.m_isGround)
             {
                 stateMachine.SendEvent(StateEvent.GrabbingRopeOnAir);
+                Context.StartCoroutine(Context.StateChangeSetupOnRopeGrab(false));
             }
             if (!Context.m_isGrabbing)
             {
@@ -624,6 +694,8 @@ public class Player : MonoBehaviour
         protected internal override void Exit()
         {
             base.Exit();
+            //Context.m_anim.SetBool("RopeGrab", false);
+
         }
     }
     private class GrabbingRopeOnAir : MyState
@@ -633,9 +705,8 @@ public class Player : MonoBehaviour
             base.Enter();
             Debug.Log(stateMachine.CurrentStateName);
             Context.LandingAndJumpSetUp(false);
-
+            Context.m_anim.SetBool("RopeGrab", true);
             //Context.StartCoroutine(Context.StateChangeSetup(false));
-            Context.StateChangeSetupOnRopeGrab(false);
         }
         protected internal override void Update()
         {
@@ -644,8 +715,10 @@ public class Player : MonoBehaviour
             base.Update();
             if (Context.m_isGround)
             {
-                Context.StateChangeSetupOnRopeGrab(true);
+
+                //Context.StartCoroutine(Context.StateChangeSetupOnRopeGrab(true));
                 stateMachine.SendEvent(StateEvent.GrabbingRopeOnGround);
+                Context.StartCoroutine(Context.StateChangeSetupOnRopeGrab(true));
             }
             if (!Context.m_isGrabbing)
             {
@@ -678,6 +751,8 @@ public class Player : MonoBehaviour
         protected internal override void Exit()
         {
             base.Exit();
+            Context.m_anim.SetBool("RopeGrab", false);
+
             //Context.EnablePhysics();
         }
     }
