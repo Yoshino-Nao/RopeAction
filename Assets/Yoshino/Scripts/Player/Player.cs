@@ -412,7 +412,7 @@ public class Player : MonoBehaviour
         m_hookShot.ConnectToSelf(m_hookShot.GetCurrentAttachObiCol);
     }
     /// <summary>
-    /// ˜r‚ÌIK‚ÌWeght‚ğİ’è
+    /// ˜r‚ÌIK‚ÌWeight‚ğİ’è
     /// </summary>
     /// <param name="weight"></param>
     private void SetArmIKWeight(float weight)
@@ -422,7 +422,7 @@ public class Player : MonoBehaviour
         m_fullBodyBipedIK.solver.rightHandEffector.positionWeight = weight;
         m_fullBodyBipedIK.solver.rightHandEffector.rotationWeight = weight;
 
-        //Weght‚ª0‚Ì‚Éü‚è‚Ìƒ[ƒv‚Ì•`‰æ‚ğ‚µ‚È‚¢
+        //Weight‚ª0‚Ì‚Éü‚è‚Ìƒ[ƒv‚Ì•`‰æ‚ğ‚µ‚È‚¢
         if (weight <= 0)
         {
             m_hookShot.SetGrabRopeMesh = false;
@@ -476,6 +476,9 @@ public class Player : MonoBehaviour
     }
     private void Awake()
     {
+        Application.targetFrameRate = 30;
+
+
         m_capsuleCol = GetComponent<CapsuleCollider>();
         m_orgColHight = m_capsuleCol.height;
         m_orgVectColCenter = m_capsuleCol.center;

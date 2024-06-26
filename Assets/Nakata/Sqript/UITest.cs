@@ -14,10 +14,11 @@ public class UITest : MonoBehaviour
     private RectTransform rectTf;
     private Image image;
     private Vector3 view;
-    void Start()
+    void Awake()
     {
         rectTf = GetComponentInParent<RectTransform>();
         image = GetComponentInParent<Image>();
+        image.enabled = true;
     }
     void LateUpdate()
     {
