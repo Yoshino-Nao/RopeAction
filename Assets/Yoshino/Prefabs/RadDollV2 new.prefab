@@ -1312,7 +1312,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 785026813593212446}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.026426576, y: -0.09258301, z: -0.020562008, w: 0.9951418}
+  m_LocalRotation: {x: 0.026426585, y: -0.09258301, z: -0.020562017, w: 0.9951418}
   m_LocalPosition: {x: 1.7462298e-10, y: 0.00031136323, z: -2.2584572e-10}
   m_LocalScale: {x: 0.99999994, y: 1.0000001, z: 1}
   m_ConstrainProportionsScale: 0
@@ -3700,7 +3700,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1721364398203449904}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.026426634, y: 0.092583, z: 0.020562021, w: 0.9951418}
+  m_LocalRotation: {x: 0.026426643, y: 0.092583, z: 0.02056203, w: 0.9951418}
   m_LocalPosition: {x: 8.032657e-10, y: 0.00031136267, z: 0.0000000020000153}
   m_LocalScale: {x: 1.0000001, y: 1.0000001, z: 1.0000001}
   m_ConstrainProportionsScale: 0
@@ -6317,30 +6317,30 @@ MonoBehaviour:
   serializeData2:
     selectionData:
       positions:
-      - x: -0.00005722046
-        y: 0.7198067
-        z: -0.12976933
-      - x: -0.00005722046
-        y: 0.7125492
-        z: -0.15231133
-      - x: -0.00005722046
-        y: 0.6532383
-        z: -0.23638248
-      - x: -0.00005722046
-        y: 0.5971508
-        z: -0.3030548
-      - x: -0.00005722046
-        y: 0.49738312
-        z: -0.40072155
-      - x: -0.00005722046
-        y: 0.4208908
-        z: -0.4974022
-      - x: -0.00005722046
-        y: 0.37997246
-        z: -0.6236868
-      - x: -0.00005722046
-        y: 0.4017868
-        z: -0.73737335
+      - x: -0.003314972
+        y: 0.72501564
+        z: -0.24832153
+      - x: -0.003314972
+        y: 0.7218609
+        z: -0.27179146
+      - x: -0.003314972
+        y: 0.6783447
+        z: -0.36502457
+      - x: -0.003314972
+        y: 0.63492775
+        z: -0.4405613
+      - x: -0.003314972
+        y: 0.55399704
+        z: -0.554327
+      - x: -0.003314972
+        y: 0.49580193
+        z: -0.66300774
+      - x: -0.003314972
+        y: 0.47785187
+        z: -0.79453754
+      - x: -0.003314972
+        y: 0.5194206
+        z: -0.90257645
       attributes:
       - Value: 1
       - Value: 2
@@ -6350,7 +6350,7 @@ MonoBehaviour:
       - Value: 2
       - Value: 2
       - Value: 2
-      maxConnectionDistance: 0.13961513
+      maxConnectionDistance: 0.13961525
       userEdit: 0
     preBuildData:
       enabled: 0
@@ -14041,7 +14041,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6481118220213144978}
   serializedVersion: 2
-  m_LocalRotation: {x: 0.058640674, y: 0.050066166, z: 0.021512669, w: 0.99679077}
+  m_LocalRotation: {x: 0.058640692, y: 0.050066166, z: 0.021512678, w: 0.99679077}
   m_LocalPosition: {x: 0.0000000022747553, y: 0.00030425354, z: 0.0000000036298295}
   m_LocalScale: {x: 0.9999998, y: 0.9999999, z: 0.9999999}
   m_ConstrainProportionsScale: 0
@@ -16585,7 +16585,7 @@ GameObject:
   - component: {fileID: 1689508515354595564}
   - component: {fileID: 6343418047293930948}
   - component: {fileID: 8995487760377982450}
-  - component: {fileID: 9108854617429314721}
+  - component: {fileID: 904426753543368952}
   m_Layer: 7
   m_Name: RadDollV2 new
   m_TagString: Untagged
@@ -16662,7 +16662,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 07e0aa38b6d73dc4f814bbeee4c660a9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
---- !u!114 &9108854617429314721
+--- !u!114 &904426753543368952
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -17202,13 +17202,25 @@ MonoBehaviour:
   - enable: 1
     _fixed: 0
     autoRotation: 0
-    spaceType: 0
+    spaceType: 1
     parent: {fileID: 0}
-    position: {x: 17.965258, y: 16.993608, z: 13.550553}
-    rotation: {x: -0.48781532, y: -0.4369595, z: -0.5207733, w: -0.5476293}
+    position: {x: -0.0013006972, y: -0.00024047712, z: 0.00037024144}
+    rotation: {x: -0.022310618, y: 0.6116062, z: -0.00033705137, w: -0.7908477}
     headWeight: 1
     eyesWeight: 0
-    swivelRotation: 151.08301
+    swivelRotation: 139.47034
+    swivelPosition: {x: 0, y: 0, z: 0}
+    parentPath: 
+  - enable: 1
+    _fixed: 0
+    autoRotation: 0
+    spaceType: 1
+    parent: {fileID: 0}
+    position: {x: 0.0013027572, y: -0.00023861833, z: 0.0010072746}
+    rotation: {x: 0.02232172, y: 0.6116062, z: -0.0003280921, w: 0.79084754}
+    headWeight: 1
+    eyesWeight: 0
+    swivelRotation: -139.47025
     swivelPosition: {x: 0, y: 0, z: 0}
     parentPath: 
   - enable: 1
@@ -17216,11 +17228,11 @@ MonoBehaviour:
     autoRotation: 0
     spaceType: 0
     parent: {fileID: 0}
-    position: {x: 18.03715, y: 16.908422, z: 13.569421}
-    rotation: {x: 0.5235309, y: -0.5485897, z: -0.48595208, w: 0.43452892}
+    position: {x: 17.855202, y: 16.513813, z: 14.71923}
+    rotation: {x: 0.46979302, y: -0.035491366, z: 0.00016931443, w: 0.88206285}
     headWeight: 1
     eyesWeight: 0
-    swivelRotation: -151.23724
+    swivelRotation: -9.766724
     swivelPosition: {x: 0, y: 0, z: 0}
     parentPath: 
   - enable: 1
@@ -17228,28 +17240,16 @@ MonoBehaviour:
     autoRotation: 0
     spaceType: 0
     parent: {fileID: 0}
-    position: {x: 17.937586, y: 16.126703, z: 13.514633}
-    rotation: {x: 0.33146998, y: -0.011234037, z: -0.0019498453, w: 0.94339687}
+    position: {x: 18.138836, y: 16.513811, z: 14.719228}
+    rotation: {x: 0.4697931, y: 0.03585936, z: 0.000026248388, w: 0.88204795}
     headWeight: 1
     eyesWeight: 0
-    swivelRotation: -9.994507
-    swivelPosition: {x: 0, y: 0, z: 0}
-    parentPath: 
-  - enable: 1
-    _fixed: 0
-    autoRotation: 0
-    spaceType: 0
-    parent: {fileID: 0}
-    position: {x: 18.05647, y: 16.126703, z: 13.514633}
-    rotation: {x: 0.33147007, y: 0.011235353, z: 0.0019508593, w: 0.9433968}
-    headWeight: 1
-    eyesWeight: 0
-    swivelRotation: 9.994583
+    swivelRotation: 10.010147
     swivelPosition: {x: 0, y: 0, z: 0}
     parentPath: 
   originalIkData: []
   selectionData: []
-  lastSelectAnimationClip: {fileID: 7400000, guid: cc62a7b70eb46a64c927dd75ecbb0e16, type: 2}
+  lastSelectAnimationClip: {fileID: 7400000, guid: 5590e069b295cb84eab2545739a41402, type: 2}
   handPoseList: []
   blendShapeList: []
 --- !u!1 &7515647454622158903

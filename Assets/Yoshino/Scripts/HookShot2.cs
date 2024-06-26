@@ -50,17 +50,17 @@ public class HookShot2 : MonoBehaviour
 
     //ロープをアタッチしているオブジェクトのコンポーネント
     private Vector3 m_currentAttachPos;
-    public Vector3 GetCurrnetAttachPos
+    public Vector3 GetCurrentAttachPos
     {
         get { return m_currentAttachPos; }
     }
     private Rigidbody m_currentAttachRb;
-    public Rigidbody GetCurrnetAttachRb
+    public Rigidbody GetCurrentAttachRb
     {
         get { return m_currentAttachRb; }
     }
     private ObiColliderBase m_currentAttachObiCol;
-    public ObiColliderBase GetCurrnetAttachObiCol
+    public ObiColliderBase GetCurrentAttachObiCol
     {
         get { return m_currentAttachObiCol; }
     }
@@ -72,7 +72,7 @@ public class HookShot2 : MonoBehaviour
     }
 
 
-    public bool GetisLoaded
+    public bool GetIsLoaded
     {
         get
         {
@@ -153,7 +153,7 @@ public class HookShot2 : MonoBehaviour
         // Raycast to see what we hit:
         if (Physics.Raycast(ray, out hookAttachment, float.MaxValue, 1 << LayerMask.NameToLayer("Ropeattach")))
         {
-            if (GetisLoaded)
+            if (GetIsLoaded)
             {
                 DetachHook();
             }
