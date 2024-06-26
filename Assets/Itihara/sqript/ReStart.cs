@@ -1,13 +1,15 @@
 using System.Collections;
 using System.Collections.Generic;
+using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
+using VHierarchy.Libs;
 
 public class ReStart : MonoBehaviour
 {
     //初期座標
-    public Vector3 SRPosition;
-    public GameObject player;
+    [SerializeField] private Vector3 SRPosition;
+    [SerializeField] private GameObject player;
     void Start()
     {
         //プレイヤーの初期座標取得
@@ -15,10 +17,32 @@ public class ReStart : MonoBehaviour
     }
     private void OnCollisionEnter(Collision collision)
     {
-        if(collision.gameObject.tag== "Player")
+        //タグ検索
+        if (collision.gameObject.tag == "Player")
+        {
+            //SceneManager.LoadScene(m_sceneName);
+            player.transform.position = SRPosition;
+        }else{
+
+            Destroy(collision.gameObject);
+            
+        }
+        Debug.Log("当たった");
+    }
+    private void OnCollisionStay(Collision collision)
+    {
+        //タグ検索
+        if (collision.gameObject.tag == "Player")
         {
             //SceneManager.LoadScene(m_sceneName);
             player.transform.position = SRPosition;
         }
+        else
+        {
+
+            Destroy(collision.gameObject);
+
+        }
+        Debug.Log("当たった");
     }
 }

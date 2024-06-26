@@ -6,19 +6,30 @@ using Obi;
 
 public class fallObject : MonoBehaviour
 {
-    public ObiRope rope;
+    public  ObiRope rope;
     public float tensionThreshold = 10.0f; // ˆø‚Á’£‚è‚Æ”»’è‚·‚é—Í‚Ìè‡’l
     public Rigidbody targetRigidbody; // ‘€ì‘ÎÛ‚ÌRigidbody
     private float time = 0.0f;
     private bool check;
     public float WaitTime = 3.0f;
 
-   public void  IsRopeUnderTension()
+    private void Start()
     {
+        body = GetComponent<Rigidbody>();
+        if (rope == null)
+        {
+
+            rope = FindObjectOfType<HookShot2>().GetRope; ;
+        }
+    }
+
+    public void  IsRopeUnderTension()
+    {
+        
         time += UnityEngine.Time.deltaTime;
-        var solver = rope.solver;
+        //var solver = rope.solver;
         float tension = rope.CalculateLength() / rope.restLength - 1;
-        //DebugPrint.Print(string.Format("{0}", tension));
+       DebugPrint.Print(string.Format("{0}", tension));
         if (tension > tensionThreshold)
         {
             time += UnityEngine.Time.deltaTime;
@@ -54,10 +65,7 @@ public class fallObject : MonoBehaviour
     //}
     Rigidbody body;
 
-    private void Start()
-    {
-        body = GetComponent<Rigidbody>();
-    }
+   
     //Õ“Ë‚µ‚½Aobject”j‰ó
     //void OnCollisionEnter(Collision collision)
     //{
