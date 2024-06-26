@@ -84,7 +84,7 @@ public class HookShot2 : MonoBehaviour
         }
     }
 
-    void Start()
+    void Awake()
     {
         if (solver == null)
         {
