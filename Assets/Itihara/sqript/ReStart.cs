@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.SceneManagement;
-using VHierarchy.Libs;
 
 public class ReStart : MonoBehaviour
 {
@@ -20,6 +19,7 @@ public class ReStart : MonoBehaviour
         //タグ検索
         if (collision.gameObject.tag == "Player")
         {
+             
             //SceneManager.LoadScene(m_sceneName);
             player.transform.position = SRPosition;
         }else{
@@ -27,22 +27,6 @@ public class ReStart : MonoBehaviour
             Destroy(collision.gameObject);
             
         }
-        Debug.Log("当たった");
-    }
-    private void OnCollisionStay(Collision collision)
-    {
-        //タグ検索
-        if (collision.gameObject.tag == "Player")
-        {
-            //SceneManager.LoadScene(m_sceneName);
-            player.transform.position = SRPosition;
-        }
-        else
-        {
-
-            Destroy(collision.gameObject);
-
-        }
-        Debug.Log("当たった");
+        //Debug.Log("当たった");
     }
 }
