@@ -211,8 +211,10 @@ public class Player : MonoBehaviour
     {
         if (m_hookShot.GetCurrentAttachRb.isKinematic)
         {
+            Debug.Log("Jump");
             m_rb.AddForce(m_tf.forward * m_jumpPower, ForceMode.Impulse);
             Release();
+            Detach();
         }
     }
     #endregion
@@ -288,32 +290,33 @@ public class Player : MonoBehaviour
             ).normalized;
 
         Vector3 Dir;
-        //移動入力がある時
-        if (m_moveDir.magnitude > 0)
+        //3D
+        if (CameraChanger.ms_instance.m_is3DCamera)
         {
-            if (CameraChanger.ms_instance.m_is3DCamera)
+            //移動入力がある時
+            if (m_moveDir.magnitude > 0)
             {
                 Dir = Vector3.Scale(m_CameraTf.forward, new Vector3(1, 0, 1)).normalized;
             }
+            //移動入力がない時
             else
             {
-                Dir = m_moveDir;
+                Dir = Vector3.Scale(m_CameraTf.forward, new Vector3(1, 0, 1)).normalized;
             }
         }
-        //移動入力がない時
+        //2D
         else
         {
-            if (CameraChanger.ms_instance.m_is3DCamera)
+            if (m_moveDir.magnitude > 0)
             {
-                Dir = Vector3.Scale(m_CameraTf.forward, new Vector3(1, 0, 1)).normalized;
+                Dir = m_moveDir;
             }
             else
             {
                 Dir = m_tf.forward;
             }
-            //Dir = Vector3.Scale(m_CameraTf.forward, new Vector3(1, 0, 1)).normalized;
-           
         }
+       
         //ロープの向きを基準に回転する
         m_tf.rotation =
             Quaternion.RotateTowards(
@@ -476,7 +479,7 @@ public class Player : MonoBehaviour
     }
     private void Awake()
     {
-        Application.targetFrameRate = 30;
+        //Application.targetFrameRate = 30;
 
 
         m_capsuleCol = GetComponent<CapsuleCollider>();
@@ -555,7 +558,12 @@ public class Player : MonoBehaviour
     {
 
         m_rb.AddForce(Vector3.ProjectOnPlane(m_moveVec, m_normal) * m_moveSpeed, ForceMode.Force);
-
+        if (!CameraChanger.ms_instance.m_is3DCamera)
+        {
+            Vector3 Pos2D = m_tf.position;
+            Pos2D.z = 0;
+            m_tf.position = Pos2D;
+        }
     }
     private class GroundState : MyState
     {
@@ -599,19 +607,19 @@ public class Player : MonoBehaviour
                 Context.Launch();
             }
 
-
+            //if()
 
             //ジャンプ
-            if (Input.GetButtonDown("Jump"))
-            {
-                Context.Jump();
-            }
             if (MPFT_NTD_MMControlSystem.ms_instance != null)
             {
                 if (MPFT_NTD_MMControlSystem.ms_instance.npadState.GetButtonDown(NpadButton.A))
                 {
                     Context.Jump();
                 }
+            }
+            else if (Input.GetButtonDown("Jump"))
+            {
+                Context.Jump();
             }
         }
 
@@ -703,6 +711,10 @@ public class Player : MonoBehaviour
             {
                 Context.Jump();
             }
+            else if (Input.GetButtonDown("Jump"))
+            {
+                Context.Jump();
+            }
             //ロープを解除
             if (Input.GetMouseButtonDown(1))
             {
@@ -759,7 +771,7 @@ public class Player : MonoBehaviour
             {
                 if (MPFT_NTD_MMControlSystem.ms_instance.npadState.GetButtonDown(NpadButton.A))
                 {
-                    Context.Jump();
+                    Context.RopeJump();
                 }
             }
 
