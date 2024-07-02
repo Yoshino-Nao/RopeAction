@@ -3,14 +3,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UIElements;
 
-public class Switch : MonoBehaviour
+public class Switch1 : MonoBehaviour
 {
     Vector3 bottomY;
     float speed = 0.5f;
     Vector3 current;
     float MaxSpeed;
     bool active = false;
-    public GoalOpen goal;
+    public FloorUp FU;
     // Start is called before the first frame update
     void Start()
     {
@@ -33,15 +33,14 @@ public class Switch : MonoBehaviour
             //transform.position += Vector3.up * speed * Time.deltaTime;
             transform.position = Vector3.MoveTowards(transform.position,current,MaxSpeed);
         }
-        goal.isMove = Mathf.Abs(transform.position.y - bottomY.y) <= 0.01f;
 
+       FU.isMove = Mathf.Abs(transform.position.y - bottomY.y) <= 0.01f;
     }
     private void OnTriggerEnter(Collider other)
     {
         if (!active && other.CompareTag("Carry"))
         {
             active = true;
-            
         }
         
     }
