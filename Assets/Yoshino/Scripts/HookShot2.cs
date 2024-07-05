@@ -246,8 +246,8 @@ public class HookShot2 : MonoBehaviour
         //ロープが配置された時点でシミュレーションが引き継がれるように質量を復元します。
         for (int i = 0; i < m_rope.activeParticleCount; ++i)
             solver.invMasses[m_rope.solverIndices[i]] = 10; // 1/0.1 = 10
-
-        ConnectToSelf(Target);
+        m_player.StateChangeSetupOnRopeGrab(m_player.GetIsGround);
+        //ConnectToSelf(Target);
         //m_rope.getP
         //StartCoroutine(m_player.StateChangeSetupOnRopeGrab(true));
     }
@@ -281,14 +281,15 @@ public class HookShot2 : MonoBehaviour
         pinConstraints.AddBatch(batch);
         m_rope.SetConstraintsDirty(Oni.ConstraintType.Pin);
     }
-    public void ConnectToPlayer(ObiColliderBase Playerobicol, Vector3 GrabPos)
+    public void ConnectToPlayer(ObiColliderBase PlayerObiCol, Vector3 GrabPos)
     {
+        //return;
         pinConstraints = m_rope.GetConstraintsByType(Oni.ConstraintType.Pin) as ObiConstraints<ObiPinConstraintsBatch>;
         pinConstraints.Clear();
         var batch = new ObiPinConstraintsBatch();
         batch.AddConstraint(
             m_rope.elements[0].particle1,
-            Playerobicol,
+            PlayerObiCol,
             GrabPos,
             Quaternion.identity,
             0, 0, float.PositiveInfinity
@@ -307,8 +308,8 @@ public class HookShot2 : MonoBehaviour
     }
     public void ConnectToSelf(ObiColliderBase Target)
     {
-        //pinConstraints = m_rope.GetConstraintsByType(Oni.ConstraintType.Pin) as ObiConstraints<ObiPinConstraintsBatch>;
-        //pinConstraints.Clear();
+        pinConstraints = m_rope.GetConstraintsByType(Oni.ConstraintType.Pin) as ObiConstraints<ObiPinConstraintsBatch>;
+        pinConstraints.Clear();
         var batch = new ObiPinConstraintsBatch();
         batch.AddConstraint(
             m_rope.elements[0].particle1,
