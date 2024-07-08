@@ -45,12 +45,7 @@ public class CameraController2D : MonoBehaviour
     {
         float h;
         float v;
-        if (MPFT_NTD_MMControlSystem.ms_instance != null)
-        {
-            h = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.R_Analog_X;
-            v = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.R_Analog_Y;
-        }
-        else if (m_mode == eInputMode.Mouse)
+        if (m_mode == eInputMode.Mouse)
         {
             h = Input.GetAxis("Mouse X");
             v = Input.GetAxis("Mouse Y");

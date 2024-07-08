@@ -25,14 +25,6 @@ public class Title : MonoBehaviour
             m_controller.StartTimeLine();
             Debug.Log("Timeline Start");
         }
-        if(MPFT_NTD_MMControlSystem.ms_instance != null && MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.Plus)
-        {
-            if (TitleCanvas.enabled == true)
-            {
-                TitleCanvas.enabled = false;
-            }
-            m_controller.StartTimeLine();
-            Debug.Log("Timeline Start");
-        }
+        
     }
 }

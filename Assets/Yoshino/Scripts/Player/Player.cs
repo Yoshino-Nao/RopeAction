@@ -1,5 +1,4 @@
 using IceMilkTea.StateMachine;
-using nn.hid;
 using Obi;
 using RootMotion.FinalIK;
 using System.Collections;
@@ -111,14 +110,7 @@ public class Player : MonoBehaviour
         float h;
         float v;
         m_inputMoveDir = Vector2.zero;
-        if (MPFT_NTD_MMControlSystem.ms_instance != null)
-        {
-            h = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.L_Analog_X;
-            v = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.L_Analog_Y;
 
-            m_inputMoveDir = new Vector2(h, v);
-        }
-        else
         {
             h = Input.GetAxis("Horizontal");              // 入力デバイスの水平軸をhで定義
             v = Input.GetAxis("Vertical");                // 入力デバイスの垂直軸をvで定義
@@ -613,22 +605,11 @@ public class Player : MonoBehaviour
             {
                 Context.Launch();
             }
-            if (MPFT_NTD_MMControlSystem.ms_instance != null && MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.MM_TR)
-            {
-                Context.Launch();
-            }
+            
 
-            //if()
-
+            
             //ジャンプ
-            if (MPFT_NTD_MMControlSystem.ms_instance != null)
-            {
-                if (MPFT_NTD_MMControlSystem.ms_instance.npadState.GetButtonDown(NpadButton.A))
-                {
-                    Context.Jump();
-                }
-            }
-            else if (Input.GetButtonDown("Jump"))
+            if (Input.GetButtonDown("Jump"))
             {
                 Context.Jump();
             }
@@ -663,10 +644,7 @@ public class Player : MonoBehaviour
             {
                 Context.Launch();
             }
-            if (MPFT_NTD_MMControlSystem.ms_instance != null && MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.MM_TR)
-            {
-                Context.Launch();
-            }
+            
         }
         protected internal override void Exit()
         {
@@ -708,32 +686,18 @@ public class Player : MonoBehaviour
             {
                 Context.Jump();
             }
-            if (MPFT_NTD_MMControlSystem.ms_instance != null)
-            {
-                if (MPFT_NTD_MMControlSystem.ms_instance.npadState.GetButtonDown(NpadButton.A))
-                {
-                    Context.Jump();
-                }
-            }
+            
             //ロープを離す
             if (Input.GetKeyDown(KeyCode.V))
             {
                 Context.Release();
             }
-            if (MPFT_NTD_MMControlSystem.ms_instance != null && MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.B)
-            {
-                Context.Jump();
-            }
-            else if (Input.GetButtonDown("Jump"))
+            if (Input.GetButtonDown("Jump"))
             {
                 Context.Jump();
             }
             //ロープを解除
             if (Input.GetMouseButtonDown(1))
-            {
-                Context.Detach();
-            }
-            if (MPFT_NTD_MMControlSystem.ms_instance != null && MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.MM_TR)
             {
                 Context.Detach();
             }
@@ -780,22 +744,12 @@ public class Player : MonoBehaviour
             {
                 Context.RopeJump();
             }
-            if (MPFT_NTD_MMControlSystem.ms_instance != null)
-            {
-                if (MPFT_NTD_MMControlSystem.ms_instance.npadState.GetButtonDown(NpadButton.A))
-                {
-                    Context.RopeJump();
-                }
-            }
-
+            
             if (Input.GetMouseButtonDown(1))
             {
                 Context.Detach();
             }
-            if (MPFT_NTD_MMControlSystem.ms_instance != null && MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.MM_TR)
-            {
-                Context.Detach();
-            }
+            
         }
         protected internal override void Exit()
         {

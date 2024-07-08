@@ -375,17 +375,7 @@ public class HookShot : MonoBehaviour
         {
             cursor.ChangeLength(Mathf.Clamp(m_rope.restLength - hookExtendRetractSpeed * Time.deltaTime, min, max));
         }
-        if(MPFT_NTD_MMControlSystem.ms_instance != null) 
-        {
-            if (MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.Up)
-            {
-                cursor.ChangeLength(Mathf.Clamp(m_rope.restLength - hookExtendRetractSpeed * Time.deltaTime, min, max));
-            }
-            else if (MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.Down)
-            {
-                cursor.ChangeLength(Mathf.Clamp(m_rope.restLength + hookExtendRetractSpeed * Time.deltaTime, min, max));
-            }
-        }
+        
         //シフトキーで長さを延長
         if (Input.GetKey(KeyCode.LeftShift))
         {
