@@ -5,6 +5,7 @@ using RootMotion.FinalIK;
 using System.Collections;
 using UnityEngine;
 using VInspector;
+using VInspector.Libs;
 public class Player : MonoBehaviour
 {
     private ImtStateMachine<Player, StateEvent> stateMachine;
@@ -63,6 +64,8 @@ public class Player : MonoBehaviour
     private Vector3 m_moveVec;
     private float m_moveSpeed;
     private Vector2 m_inputMoveDir;
+    private delegate void Fixed();
+    private Fixed @fixed;
     private Vector3 m_normal;
     private Vector3 m_oldPos;
     private Coroutine m_JumpCor;
@@ -137,7 +140,7 @@ public class Player : MonoBehaviour
         }
         DebugPrint.Print(string.Format("MoveVec{0}", m_moveDir));
     }
-    private void Move()
+    private void GroundLocomotion()
     {
         //アニメーション
         Vector3 Vec = m_tf.InverseTransformDirection(m_moveDir);
@@ -171,6 +174,70 @@ public class Player : MonoBehaviour
             m_tf.rotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(m_tf.forward, Vector3.up), Vector3.up);
         }
 
+    }
+    private void GroundMove()
+    {
+        m_rb.AddForce(Vector3.ProjectOnPlane(m_moveVec, m_normal) * m_moveSpeed, ForceMode.Force);
+    }
+    /// <summary>
+    /// 空中でロープを掴んでいる状態の移動処理
+    /// </summary>
+    private void MoveOnRopeGrabbingOnAir()
+    {
+        m_hookShot.RopeChangeLength();
+        m_anim.SetFloat("SpeedY", m_moveDir.z);
+
+        //フックショットからロープが当たっているオブジェクトへの方向
+        Vector3 ToAttachPointDir =
+            (m_hookShot.GetCurrentAttachPos -
+            m_hookShotTf.position
+            ).normalized;
+
+        Vector3 Dir;
+        //3D
+        if (CameraChanger.ms_instance.m_is3DCamera)
+        {
+            //移動入力がある時
+            if (m_moveDir.magnitude > 0)
+            {
+                //Dir = Vector3.Scale(m_CameraTf.forward, new Vector3(1, 0, 1)).normalized;
+                Dir = m_moveDir;
+            }
+            //移動入力がない時
+            else
+            {
+                Dir = Vector3.Scale(m_CameraTf.forward, new Vector3(1, 0, 1)).normalized;
+            }
+        }
+        //2D
+        else
+        {
+            if (m_moveDir.magnitude > 0)
+            {
+                Dir = m_moveDir;
+            }
+            else
+            {
+                Dir = m_tf.forward;
+            }
+        }
+
+        //ロープの向きを基準に回転する
+        m_tf.rotation =
+            Quaternion.RotateTowards(
+            m_tf.rotation,
+            Quaternion.FromToRotation(
+                Vector3.up, ToAttachPointDir) *
+                Quaternion.LookRotation(Dir),
+            m_rotateSpeed);
+        //ターザン中は下降中のみプレイヤーの前方に力を与える
+        //上昇中や入力がないときは力を与えない
+        if (m_moveDir.magnitude > 0 &&
+            m_rb.velocity.y < 0)
+        {
+            m_rb.AddForce(m_tf.forward * m_moveSpeed, ForceMode.Force);
+        }
+       
     }
     private void Tarzan()
     {
@@ -255,14 +322,7 @@ public class Player : MonoBehaviour
         //    Debug.Log("ロープを離しました");
     }
 
-    public void GrabPointSetUp()
-    {
-        //m_grabPoint.SetUp();
-        //SetIKWeight(1);
-        //m_grabPoint.SetParent(m_tf);
-        //Debug.Log("ロープを掴みました");
-        //m_isGrabbing = true;
-    }
+    
     /// <summary>
     /// 地上でロープを掴んでいる状態の処理
     /// </summary>
@@ -270,60 +330,7 @@ public class Player : MonoBehaviour
     {
         m_hookShot.RopeChangeLength();
     }
-    /// <summary>
-    /// 空中でロープを掴んでいる状態の処理
-    /// </summary>
-    private void RopeGrabbingOnAir()
-    {
-        m_hookShot.RopeChangeLength();
-        m_anim.SetFloat("SpeedY", m_moveDir.z);
-
-        //フックショットからロープが当たっているオブジェクトへの方向
-        Vector3 ToAttachPointDir =
-            (m_hookShot.GetCurrentAttachPos -
-            m_hookShotTf.position
-            ).normalized;
-
-        Vector3 Dir;
-        //3D
-        if (CameraChanger.ms_instance.m_is3DCamera)
-        {
-            //移動入力がある時
-            if (m_moveDir.magnitude > 0)
-            {
-                //Dir = Vector3.Scale(m_CameraTf.forward, new Vector3(1, 0, 1)).normalized;
-                Dir = m_moveDir;
-            }
-            //移動入力がない時
-            else
-            {
-                Dir = Vector3.Scale(m_CameraTf.forward, new Vector3(1, 0, 1)).normalized;
-            }
-        }
-        //2D
-        else
-        {
-            if (m_moveDir.magnitude > 0)
-            {
-                Dir = m_moveDir;
-            }
-            else
-            {
-                Dir = m_tf.forward;
-            }
-        }
-
-        //ロープの向きを基準に回転する
-        m_tf.rotation =
-            Quaternion.RotateTowards(
-            m_tf.rotation,
-            Quaternion.FromToRotation(
-                Vector3.up, ToAttachPointDir) *
-                Quaternion.LookRotation(Dir),
-            m_rotateSpeed);
-
-    }
-    #endregion
+    
 
     /// <summary>
     /// 地上と空中状態が変化した瞬間に行う処理
@@ -390,6 +397,10 @@ public class Player : MonoBehaviour
         m_hookShot.SetIsKinematic = true;
         m_hookShot.ConnectToSelf(m_hookShot.GetCurrentAttachObiCol);
     }
+
+    #endregion
+
+    #region その他
     /// <summary>
     /// 腕のIKのWeightを設定
     /// </summary>
@@ -413,7 +424,7 @@ public class Player : MonoBehaviour
     }
     private void SetLegIKWeight(float weight)
     {
-        
+        m_grounderFBBIK.weight = weight;
     }
     private IEnumerator JumpCor()
     {
@@ -475,6 +486,7 @@ public class Player : MonoBehaviour
         }
         DebugPrint.Print(string.Format("FPS:{0}", fps));
     }
+    #endregion
     private void Awake()
     {
         //Application.targetFrameRate = 30;
@@ -529,21 +541,17 @@ public class Player : MonoBehaviour
         stateMachine.SetStartState<GroundState>();
     }
 
-    // Start is called before the first frame update
     void Start()
     {
         m_currentBaseState = m_anim.GetCurrentAnimatorStateInfo(0);
-
-
-
-
-
     }
 
-    // Update is called once per frame
     void Update()
     {
-        m_isGround = FootCollider();
+        if (stateMachine.CurrentStateName != "GrabbingRopeOnAir")
+        {
+            m_isGround = FootCollider();
+        }
         SetMoveDir();
 
         DebugPrint.Print(string.Format("{0}", m_moveVec));
@@ -557,8 +565,8 @@ public class Player : MonoBehaviour
     }
     private void FixedUpdate()
     {
-
-        m_rb.AddForce(Vector3.ProjectOnPlane(m_moveVec, m_normal) * m_moveSpeed, ForceMode.Force);
+        @fixed();
+        
         if (!CameraChanger.ms_instance.m_is3DCamera)
         {
             Vector3 Pos2D = m_tf.position;
@@ -566,6 +574,7 @@ public class Player : MonoBehaviour
             m_tf.position = Pos2D;
         }
     }
+    #region ステートマシン
     private class GroundState : MyState
     {
         protected internal override void Enter()
@@ -574,6 +583,7 @@ public class Player : MonoBehaviour
             Debug.Log(stateMachine.CurrentStateName);
             Context.LandingAndJumpSetUp(true);
 
+            Context.@fixed = Context.GroundMove;
             Context.SetArmIKWeight(0);
             Context.m_moveSpeed = Context.m_walkSpeed;
 
@@ -596,7 +606,7 @@ public class Player : MonoBehaviour
             //DebugPrint.Print(string.Format("Test"));
 
             //移動処理
-            Context.Move();
+            Context.GroundLocomotion();
 
             //ロープ発射
             if (Input.GetMouseButtonDown(1))
@@ -648,7 +658,7 @@ public class Player : MonoBehaviour
 
 
 
-            Context.Move();
+            Context.GroundLocomotion();
             if (Input.GetMouseButtonDown(1))
             {
                 Context.Launch();
@@ -671,6 +681,7 @@ public class Player : MonoBehaviour
 
             Debug.Log(stateMachine.CurrentStateName);
             Context.LandingAndJumpSetUp(true);
+            Context.@fixed = Context.GroundMove;
             //Context.m_anim.SetBool("RopeGrab", true);
             //Context.StartCoroutine(Context.StateChangeSetup(true));
 
@@ -689,7 +700,7 @@ public class Player : MonoBehaviour
             {
                 stateMachine.SendEvent(StateEvent.Ground);
             }
-            Context.Move();
+            Context.GroundLocomotion();
             Context.RopeGrabbingOnGround();
 
             //ジャンプ
@@ -742,8 +753,9 @@ public class Player : MonoBehaviour
             Debug.Log(stateMachine.CurrentStateName);
             Context.LandingAndJumpSetUp(false);
             Context.m_anim.SetBool("RopeGrab", true);
+            Context.@fixed = Context.MoveOnRopeGrabbingOnAir;
             //Context.StartCoroutine(Context.StateChangeSetup(false));
-
+            Context.SetLegIKWeight(0);
             Context.m_moveSpeed = Context.m_tarzanSpeed;
         }
         protected internal override void Update()
@@ -761,8 +773,8 @@ public class Player : MonoBehaviour
             {
                 stateMachine.SendEvent(StateEvent.Air);
             }
-            Context.Tarzan();
-            Context.RopeGrabbingOnAir();
+            //Context.Tarzan();
+            //Context.MoveOnRopeGrabbingOnAir();
 
             if (Input.GetButtonDown("Jump"))
             {
@@ -790,7 +802,9 @@ public class Player : MonoBehaviour
             base.Exit();
             Context.m_anim.SetBool("RopeGrab", false);
 
+            Context.SetLegIKWeight(1);
             //Context.EnablePhysics();
         }
     }
+    #endregion
 }

@@ -230,7 +230,7 @@ public class HookShot : MonoBehaviour
 
         PlayerGrabs();
         m_grabObj.SetActive(true);
-        m_player.GrabPointSetUp();
+        //m_player.GrabPointSetUp();
     }
     private IEnumerator AttachHookForNotKinematic()
     {
@@ -267,7 +267,7 @@ public class HookShot : MonoBehaviour
         m_rope.GetComponent<MeshRenderer>().enabled = true;
         m_grabObj = Instantiate(m_grabPoint.gameObject, m_tf.position, Quaternion.identity, solver.transform);
         //m_player.SetGrabPoint = m_grabObj.GetComponent<GrabPoint>();
-        m_player.GrabPointSetUp();
+        //m_player.GrabPointSetUp();
 
         m_particleAttachment.target = m_grabObj.transform;
         m_particleAttachment.particleGroup = blueprint.groups[0];
