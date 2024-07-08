@@ -16,6 +16,6 @@ public class JumpCall : MonoBehaviour
     private void jump()
     {
         m_player?.Jump();
-        player?.Jump();
+        player?.AddJumpPow();
     }
 }

@@ -14,7 +14,7 @@ public class CameraChanger : MonoBehaviour
     [SerializeField] eDefaultMode m_defaultMode;
     [SerializeField, Header("2Dカメラ")]
     private CinemachineVirtualCamera virtualCamera2D = null;
-    MoveTest m_player;
+    Player m_player;
     [SerializeField, Header("3Dカメラ")]
     private CinemachineFreeLook virtualCamera3D = null;
     [Button]
@@ -34,7 +34,7 @@ public class CameraChanger : MonoBehaviour
             //プレイヤーを２人出さないかぎり使わない
             Destroy(gameObject);
         }
-        m_player = FindAnyObjectByType<MoveTest>();
+        m_player = FindAnyObjectByType<Player>();
         CameraSetUp();
         if (m_defaultMode == eDefaultMode._3D)
         {

@@ -65,8 +65,8 @@ public class MoveTest : MonoBehaviour
     private HookShot m_hookShot;
     private IKTarget m_ikTarget;
     private float m_lerpTGrabPoint = 0f;
-    private GrabPoint m_grabPoint;
-    public GrabPoint SetGrabPoint
+    private Grabbable m_grabPoint;
+    public Grabbable SetGrabPoint
     {
         set { m_grabPoint = value; }
     }
@@ -301,7 +301,7 @@ public class MoveTest : MonoBehaviour
     }
     public void GrabPointSetUp()
     {
-        m_grabPoint.SetUp();
+        //m_grabPoint.SetUp();
         SetIKWeight(1);
         m_grabPoint.SetParent(m_tf);
         Debug.Log("ロープを掴みました");
@@ -333,7 +333,6 @@ public class MoveTest : MonoBehaviour
         //移動中は移動方向へ向く|| Mathf.Abs((m_oldPos - m_tf.position).magnitude) > 0f
         if (m_isGround)
         {
-
             if (m_moveDir.magnitude > 0)
             {
                 m_tf.rotation = Quaternion.LookRotation(m_moveDir, Vector3.up);

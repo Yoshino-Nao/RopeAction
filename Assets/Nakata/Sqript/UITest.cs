@@ -6,14 +6,19 @@ using UnityEngine.UI;
 public class UITest : MonoBehaviour
 {
     //帯をつけられるオブジェクト
-    public Transform m_attachTf;
+    private Transform m_attachTf;
+    public Transform SetAttachmentTarget
+    {
+        set { m_attachTf = value; }
+    }
     private RectTransform rectTf;
     private Image image;
-    Vector3 view;
-    void Start()
+    private Vector3 view;
+    void Awake()
     {
         rectTf = GetComponentInParent<RectTransform>();
         image = GetComponentInParent<Image>();
+        image.enabled = true;
     }
     void LateUpdate()
     {

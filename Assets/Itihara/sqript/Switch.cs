@@ -33,14 +33,15 @@ public class Switch : MonoBehaviour
             //transform.position += Vector3.up * speed * Time.deltaTime;
             transform.position = Vector3.MoveTowards(transform.position,current,MaxSpeed);
         }
-
         goal.isMove = Mathf.Abs(transform.position.y - bottomY.y) <= 0.01f;
+
     }
     private void OnTriggerEnter(Collider other)
     {
         if (!active && other.CompareTag("Carry"))
         {
             active = true;
+            
         }
         
     }

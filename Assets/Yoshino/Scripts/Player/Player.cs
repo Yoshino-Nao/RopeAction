@@ -1,8 +1,11 @@
+using IceMilkTea.StateMachine;
+using nn.hid;
+using Obi;
 using RootMotion.FinalIK;
 using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
-using IceMilkTea.StateMachine;
+using VInspector;
+using VInspector.Libs;
 public class Player : MonoBehaviour
 {
     private ImtStateMachine<Player, StateEvent> stateMachine;
@@ -12,8 +15,8 @@ public class Player : MonoBehaviour
         Idle,
         Ground,
         Air,
-        RopeLaunchOnGround,
-        RopeLaunchOnAir,
+        GrabbingRopeOnGround,
+        GrabbingRopeOnAir,
     }
     [SerializeField] private float m_animSpeed = 1.5f;              // アニメーション再生速度設定
     [SerializeField] private float m_lookSmoother = 3.0f;           // a smoothing setting for camera motion
@@ -23,9 +26,9 @@ public class Player : MonoBehaviour
 
     // 以下キャラクターコントローラ用パラメタ
     // 前進速度
-    [SerializeField] private float m_forwardSpeed = 7.0f;
+    [SerializeField] private float m_walkSpeed = 7.0f;
     // 後退速度
-    [SerializeField] private float m_backwardSpeed = 2.0f;
+    [SerializeField] private float m_tarzanSpeed = 14.0f;
     //最高速度
     [SerializeField] private float m_maxSpeed = 20f;
     // 旋回速度
@@ -36,6 +39,7 @@ public class Player : MonoBehaviour
     [SerializeField] Vector3 m_playerForwardOn2d = Vector3.right;
 
     [SerializeField] private float m_grabTotalTime = 1f;
+
     //プレイヤーが持っているコンポーネント
     private Transform m_tf => transform;
     private CapsuleCollider m_capsuleCol;
@@ -44,7 +48,7 @@ public class Player : MonoBehaviour
 
     //キャラクターモデルが持っているコンポーネント
     private FullBodyBipedIK m_fullBodyBipedIK;
-    private float m_ikArmWeight = 0;
+    private GrounderFBBIK m_grounderFBBIK;
 
     //アニメーション関係
     private Animator m_anim;
@@ -59,9 +63,12 @@ public class Player : MonoBehaviour
     private Vector3 m_moveDir;
     private Vector3 m_moveVec;
     private float m_moveSpeed;
-    private Vector3 m_inputMoveDir;
+    private Vector2 m_inputMoveDir;
+    private delegate void Fixed();
+    private Fixed @fixed;
     private Vector3 m_normal;
     private Vector3 m_oldPos;
+    private Coroutine m_JumpCor;
 
     //接地判定で使用する
     private bool m_isGround;
@@ -76,16 +83,26 @@ public class Player : MonoBehaviour
     private Transform m_CameraTf;
 
     //ロープ発射関係
-    private HookShot m_hookShot;
-    private IKTarget m_ikTarget;
-    private float m_lerpTGrabPoint = 0f;
-    private GrabPoint m_grabPoint;
-    public GrabPoint SetGrabPoint
+    private ObiSolver m_obiSolver;
+    [SerializeField] private HookShot2 m_hookShot;
+    private Transform m_hookShotTf;
+    private ObiColliderBase m_obiCollider;
+    private float m_lerpTForGrabbable = 0f;
+    [SerializeField] private Grabbable m_grabbable;
+    public Grabbable SetGrabbable
     {
-        set { m_grabPoint = value; }
+        set { m_grabbable = value; }
     }
 
     public bool m_isGrabbing = false;
+    [SerializeField] private Transform m_grabPoint;
+    bool Tgr = false;
+    [Button]
+    void Test()
+    {
+        Tgr = !Tgr ? true : false;
+        StateChangeSetupOnRopeGrab(Tgr);
+    }
 
     #region 移動関係
 
@@ -93,13 +110,15 @@ public class Player : MonoBehaviour
     {
         float h;
         float v;
-        m_inputMoveDir = Vector3.zero;
-        //if (MPFT_NTD_MMControlSystem.ms_instance != null)
-        //{
-        //    h = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.L_Analog_X;
-        //    v = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.L_Analog_Y;
-        //}
-        //else
+        m_inputMoveDir = Vector2.zero;
+        if (MPFT_NTD_MMControlSystem.ms_instance != null)
+        {
+            h = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.L_Analog_X;
+            v = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.L_Analog_Y;
+
+            m_inputMoveDir = new Vector2(h, v);
+        }
+        else
         {
             h = Input.GetAxis("Horizontal");              // 入力デバイスの水平軸をhで定義
             v = Input.GetAxis("Vertical");                // 入力デバイスの垂直軸をvで定義
@@ -119,17 +138,19 @@ public class Player : MonoBehaviour
             m_moveDir = (m_playerForwardOn2d * h);
 
         }
-
         DebugPrint.Print(string.Format("MoveVec{0}", m_moveDir));
     }
-    private void MoveOnGround()
+    private void GroundLocomotion()
     {
         //アニメーション
         Vector3 Vec = m_tf.InverseTransformDirection(m_moveDir);
         //DebugPrint.Print(string.Format("AnimVec{0}", Vec));
         // Animator側で設定している"Speed"パラメタを渡す
-        m_anim.SetFloat("SpeedX", Vec.x);
-        m_anim.SetFloat("SpeedY", Vec.z);
+        if (m_isGround)
+        {
+            m_anim.SetFloat("SpeedX", Vec.x);
+            m_anim.SetFloat("SpeedY", Vec.z);
+        }
 
         //移動入力があるか
         if (m_inputMoveDir.magnitude > 0)
@@ -152,28 +173,169 @@ public class Player : MonoBehaviour
         {
             m_tf.rotation = Quaternion.LookRotation(Vector3.ProjectOnPlane(m_tf.forward, Vector3.up), Vector3.up);
         }
+
     }
+    private void GroundMove()
+    {
+        m_rb.AddForce(Vector3.ProjectOnPlane(m_moveVec, m_normal) * m_moveSpeed, ForceMode.Force);
+    }
+    /// <summary>
+    /// 空中でロープを掴んでいる状態の移動処理
+    /// </summary>
+    private void MoveOnRopeGrabbingOnAir()
+    {
+        m_hookShot.RopeChangeLength();
+        m_anim.SetFloat("SpeedY", m_moveDir.z);
 
+        //フックショットからロープが当たっているオブジェクトへの方向
+        Vector3 ToAttachPointDir =
+            (m_hookShot.GetCurrentAttachPos -
+            m_hookShotTf.position
+            ).normalized;
 
+        Vector3 Dir;
+        //3D
+        if (CameraChanger.ms_instance.m_is3DCamera)
+        {
+            //移動入力がある時
+            if (m_moveDir.magnitude > 0)
+            {
+                //Dir = Vector3.Scale(m_CameraTf.forward, new Vector3(1, 0, 1)).normalized;
+                Dir = m_moveDir;
+            }
+            //移動入力がない時
+            else
+            {
+                Dir = Vector3.Scale(m_CameraTf.forward, new Vector3(1, 0, 1)).normalized;
+            }
+        }
+        //2D
+        else
+        {
+            if (m_moveDir.magnitude > 0)
+            {
+                Dir = m_moveDir;
+            }
+            else
+            {
+                Dir = m_tf.forward;
+            }
+        }
+
+        //ロープの向きを基準に回転する
+        m_tf.rotation =
+            Quaternion.RotateTowards(
+            m_tf.rotation,
+            Quaternion.FromToRotation(
+                Vector3.up, ToAttachPointDir) *
+                Quaternion.LookRotation(Dir),
+            m_rotateSpeed);
+        //ターザン中は下降中のみプレイヤーの前方に力を与える
+        //上昇中や入力がないときは力を与えない
+        if (m_moveDir.magnitude > 0 &&
+            m_rb.velocity.y < 0)
+        {
+            m_rb.AddForce(m_tf.forward * m_moveSpeed, ForceMode.Force);
+        }
+       
+    }
+    private void Tarzan()
+    {
+        //ターザン中は下降中のみプレイヤーの前方に力を与える
+        //上昇中や入力がないときは力を与えない
+        if (m_moveDir.magnitude > 0 &&
+            m_rb.velocity.y < 0)
+        {
+            //下降中
+            m_moveVec = m_moveDir;
+        }
+        else
+        {
+            m_moveVec = Vector3.zero;
+        }
+    }
+    private void Jump()
+    {
+        if (m_currentBaseState.fullPathHash == MoveState && !m_anim.IsInTransition(0))
+        {
+            m_anim.SetBool("Jump", true);
+        }
+    }
+    public void AddJumpPow()
+    {
+        m_rb.AddForce(Vector3.up * m_jumpPower, ForceMode.Impulse);
+        m_anim.SetBool("Jump", false);
+        Debug.Log("Jump");
+        if (m_JumpCor != null)
+        {
+            StopCoroutine(JumpCor());
+        }
+        m_JumpCor = StartCoroutine(JumpCor());
+    }
+    private void RopeJump()
+    {
+        if (m_hookShot.GetCurrentAttachRb.isKinematic)
+        {
+            Debug.Log("Jump");
+            m_rb.AddForce(m_tf.forward * m_jumpPower, ForceMode.Impulse);
+            Release();
+            Detach();
+        }
+    }
     #endregion
 
+    #region ロープ関係
+    /// <summary>
+    /// ロープ発射
+    /// </summary>
     private void Launch()
     {
         m_hookShot.LaunchHook();
+
     }
-    public void GrabPointSetUp()
+    /// <summary>
+    /// ロープ解除
+    /// </summary>
+    private void Detach()
     {
-        m_grabPoint.SetUp();
-        SetIKWeight(1);
-        m_grabPoint.SetParent(m_tf);
-        Debug.Log("ロープを掴みました");
-        m_isGrabbing = true;
+        m_hookShot.DetachHook();
+
+        //プレイヤーのIKをリセット
+        m_grabbable.SetParent(null);
+        SetArmIKWeight(0);
+        m_isGrabbing = false;
+        m_hookShot.transform.position = m_grabPoint.position;
+        //m_grabbable.SetParent(m_tf);
+
+    }
+    public void Release()
+    {
+        //    m_hookShot.SetGrabMesh(false);
+        //    m_hookShot.ConnectCurrentObjToOtherObj(m_grabPoint.GetObiCol);
+        //    //IKを解除し物理演算を開始
+        //    SetIKWeight(0);
+        //    m_grabPoint.SetParent(null);
+        //    m_grabPoint.EnablePhysics();
+
+
+        //    m_isGrabbing = false;
+        //    Debug.Log("ロープを離しました");
     }
 
-    private bool FootCollider()
+    
+    /// <summary>
+    /// 地上でロープを掴んでいる状態の処理
+    /// </summary>
+    private void RopeGrabbingOnGround()
     {
-        return (Physics.SphereCast(m_tf.position + m_capsuleCol.center, m_capsuleCol.radius, -m_tf.up, out m_groundHit, m_capsuleCol.height / 1.5f, 1 << LayerMask.NameToLayer("Ground")));
+        m_hookShot.RopeChangeLength();
     }
+    
+
+    /// <summary>
+    /// 地上と空中状態が変化した瞬間に行う処理
+    /// </summary>
+    /// <param name="IsGround"></param>
     private void LandingAndJumpSetUp(bool IsGround)
     {
         if (IsGround)
@@ -192,51 +354,148 @@ public class Player : MonoBehaviour
             m_physicMaterial.staticFriction = 0;
             //重力を有効化
             m_rb.useGravity = true;
+
+        }
+
+    }
+    /// <summary>
+    /// ロープを掴んだ状態で地上と空中状態が変化した瞬間に行う処理
+    /// </summary>
+    /// <param name="isGround"></param>
+    public void StateChangeSetupOnRopeGrab(bool isGround)
+    {
+        //m_grabbable.SetParent(null);
+
+        SetHookShotPos(isGround);
+
+        m_grabbable.SetArmIKTarget(ref m_fullBodyBipedIK);
+
+        //プレイヤーのIKをセット
+        SetArmIKWeight(1);
+
+        m_isGrabbing = true;
+        Debug.Log("a");
+        m_hookShot.ConnectToPlayer(m_obiCollider, m_tf.InverseTransformPoint(m_hookShotTf.position));
+
+    }
+
+    private void SetHookShotPos(bool isGround)
+    {
+        if (isGround)
+        {
+            //手元
+            m_hookShotTf.position = m_grabPoint.position;
+        }
+        else
+        {
+            m_hookShotTf.localPosition = m_orgVectColCenter * 2;
         }
     }
-    public void Jump()
-    {
-        m_rb.AddForce(Vector3.up * m_jumpPower, ForceMode.Impulse);
-        Debug.Log("Jump");
-    }
-    public bool LerpGrabPoint()
-    {
-        //
-        m_lerpTGrabPoint += Time.deltaTime / m_grabTotalTime;
 
-        m_grabPoint.transform.position = Vector3.Lerp(m_grabPoint.transform.position, m_hookShot.transform.position, m_lerpTGrabPoint);
-
-        m_ikTarget.Move(m_grabPoint.transform.position);
-        return m_lerpTGrabPoint >= 1;
-    }
-    public void SetIKWeight(float weight)
+    private void EnablePhysics()
     {
-        m_ikArmWeight = weight;
-        m_fullBodyBipedIK.solver.leftHandEffector.positionWeight = m_ikArmWeight;
-        m_fullBodyBipedIK.solver.leftHandEffector.rotationWeight = m_ikArmWeight;
-        m_fullBodyBipedIK.solver.rightHandEffector.positionWeight = m_ikArmWeight;
-        m_fullBodyBipedIK.solver.rightHandEffector.rotationWeight = m_ikArmWeight;
-    }
-    public IEnumerator Grab()
-    {
-        m_isGrabbing = true;
-        Debug.Log("ロープを掴みました");
-        m_grabPoint.DisableCollider();
-        m_lerpTGrabPoint = 0f;
-        //m_hookShot.DisabledCollition();
-        SetIKWeight(1);
-        m_hookShot.SetGrabMesh(true);
-        yield return new WaitUntil(() => LerpGrabPoint());
-        m_hookShot.PlayerGrabs();
-        m_grabPoint.SetParent(m_tf);
-        //m_hookShot.GrabRope();
+        m_hookShot.SetIsKinematic = true;
+        m_hookShot.ConnectToSelf(m_hookShot.GetCurrentAttachObiCol);
     }
 
+    #endregion
+
+    #region その他
+    /// <summary>
+    /// 腕のIKのWeightを設定
+    /// </summary>
+    /// <param name="weight"></param>
+    private void SetArmIKWeight(float weight)
+    {
+        m_fullBodyBipedIK.solver.leftHandEffector.positionWeight = weight;
+        m_fullBodyBipedIK.solver.leftHandEffector.rotationWeight = weight;
+        m_fullBodyBipedIK.solver.rightHandEffector.positionWeight = weight;
+        m_fullBodyBipedIK.solver.rightHandEffector.rotationWeight = weight;
+
+        //Weightが0の時に飾りのロープの描画をしない
+        if (weight <= 0)
+        {
+            m_hookShot.SetGrabRopeMesh = false;
+        }
+        else
+        {
+            m_hookShot.SetGrabRopeMesh = true;
+        }
+    }
+    private void SetLegIKWeight(float weight)
+    {
+        m_grounderFBBIK.weight = weight;
+    }
+    private IEnumerator JumpCor()
+    {
+        // ジャンプ開始して一定時間で
+        // IK処理のウェイトを1から0に変更して、
+        // IK処理の影響を徐々に受けないようにする
+        float elapsed = 0f;
+        float time = 0.25f;
+        while (elapsed < time)
+        {
+            float alpha = elapsed / time;
+            m_grounderFBBIK.weight = 1f - alpha;
+            yield return null;
+
+            elapsed += Time.deltaTime;
+        }
+        m_grounderFBBIK.weight = 0;
+        // ジャンプによる上昇中か、
+        // 地面に接地していない間は、地面とのIK処理を切ったままにする
+        while (m_rb.velocity.y > 0f || !m_isGround)
+        {
+            yield return null;
+        }
+        // 一定時間で地面とのIK処理のウェイトを元に戻す
+        elapsed = 0;
+        time = 0.25f;
+
+        while (elapsed < time)
+        {
+            float alpha = elapsed / time;
+            m_grounderFBBIK.weight = alpha;
+            yield return null;
+
+            elapsed += Time.deltaTime;
+        }
+        m_grounderFBBIK.weight = 1f;
+        //コルーチンの終了
+        m_JumpCor = null;
+    }
+    private bool FootCollider()
+    {
+        return (Physics.SphereCast(m_tf.position + m_capsuleCol.center, m_capsuleCol.radius, -m_tf.up, out m_groundHit, m_capsuleCol.height / 1.5f, 1 << LayerMask.NameToLayer("Ground")));
+    }
+    int frameCount = 0;
+    float prevTime = 0.0f;
+
+    void ViewFPS()
+    {
+        float fps = 0;
+        frameCount++;
+        float time = Time.realtimeSinceStartup - prevTime;
+
+        if (time >= 0.5f)
+        {
+            fps = frameCount / time;
+
+            frameCount = 0;
+            prevTime = Time.realtimeSinceStartup;
+        }
+        DebugPrint.Print(string.Format("FPS:{0}", fps));
+    }
+    #endregion
     private void Awake()
     {
+        //Application.targetFrameRate = 30;
+
+
         m_capsuleCol = GetComponent<CapsuleCollider>();
         m_orgColHight = m_capsuleCol.height;
         m_orgVectColCenter = m_capsuleCol.center;
+        m_obiCollider = GetComponent<ObiColliderBase>();
 
         m_rb = GetComponent<Rigidbody>();
         m_physicMaterial = new PhysicMaterial();
@@ -247,38 +506,57 @@ public class Player : MonoBehaviour
 
         m_CameraTf = Camera.main.transform;
         m_anim = GetComponentInChildren<Animator>();
-        m_hookShot = GetComponentInChildren<HookShot>();
-        m_ikTarget = GetComponentInChildren<IKTarget>();
+        //m_hookShot = GetComponentInChildren<HookShot2>();
         m_fullBodyBipedIK = GetComponentInChildren<FullBodyBipedIK>();
+        m_grounderFBBIK = GetComponentInChildren<GrounderFBBIK>();
+        m_obiSolver = FindObjectOfType<ObiSolver>();
+
+        //var HookObj = Instantiate(m_hookShot, m_tf);
+        m_hookShot = GetComponentInChildren<HookShot2>();
+        m_hookShotTf = m_hookShot.transform;
+        m_hookShotTf.position = m_grabPoint.position;
+        m_grabbable = GetComponentInChildren<Grabbable>();
+        m_hookShotTf.position = m_grabPoint.position;
+
+        m_grabbable.SetUp();
+        //疑似的な親子関係を結ぶ
+        //m_grabbable.SetParent(m_tf);
+
+
 
         stateMachine = new ImtStateMachine<Player, StateEvent>(this);
 
         stateMachine.AddTransition<GroundState, AirState>(StateEvent.Air);
-        stateMachine.AddTransition<AirState, GroundState>(StateEvent.Ground);
+        stateMachine.AddTransition<GroundState, GrabbingRopeOnGround>(StateEvent.GrabbingRopeOnGround);
 
+        stateMachine.AddTransition<AirState, GroundState>(StateEvent.Ground);
+        stateMachine.AddTransition<AirState, GrabbingRopeOnAir>(StateEvent.GrabbingRopeOnAir);
+
+        stateMachine.AddTransition<GrabbingRopeOnGround, GroundState>(StateEvent.Ground);
+        stateMachine.AddTransition<GrabbingRopeOnGround, GrabbingRopeOnAir>(StateEvent.GrabbingRopeOnAir);
+
+        stateMachine.AddTransition<GrabbingRopeOnAir, AirState>(StateEvent.Air);
+        stateMachine.AddTransition<GrabbingRopeOnAir, GrabbingRopeOnGround>(StateEvent.GrabbingRopeOnGround);
 
         stateMachine.SetStartState<GroundState>();
     }
 
-    // Start is called before the first frame update
     void Start()
     {
         m_currentBaseState = m_anim.GetCurrentAnimatorStateInfo(0);
-
-
-
-
-
-
-
     }
 
-    // Update is called once per frame
     void Update()
     {
-        m_isGround = FootCollider();
+        if (stateMachine.CurrentStateName != "GrabbingRopeOnAir")
+        {
+            m_isGround = FootCollider();
+        }
         SetMoveDir();
 
+        DebugPrint.Print(string.Format("{0}", m_moveVec));
+        DebugPrint.Print(string.Format("{0}", m_moveSpeed));
+        ViewFPS();
         m_anim.SetBool("Ground", m_isGround);
 
         //m_hookShot.HookShooting();
@@ -287,12 +565,16 @@ public class Player : MonoBehaviour
     }
     private void FixedUpdate()
     {
-        //if (m_isGround != m_oldIsGround)
-        //{
-        //    LandingAndJumpSetUp(m_isGround);
-        //}
-        m_rb.AddForce(Vector3.ProjectOnPlane(m_moveVec, m_normal) * m_forwardSpeed, ForceMode.Acceleration);
+        @fixed();
+        
+        if (!CameraChanger.ms_instance.m_is3DCamera)
+        {
+            Vector3 Pos2D = m_tf.position;
+            Pos2D.z = 0;
+            m_tf.position = Pos2D;
+        }
     }
+    #region ステートマシン
     private class GroundState : MyState
     {
         protected internal override void Enter()
@@ -300,6 +582,11 @@ public class Player : MonoBehaviour
             base.Enter();
             Debug.Log(stateMachine.CurrentStateName);
             Context.LandingAndJumpSetUp(true);
+
+            Context.@fixed = Context.GroundMove;
+            Context.SetArmIKWeight(0);
+            Context.m_moveSpeed = Context.m_walkSpeed;
+
             Context.m_anim.SetBool("Jump", false);
         }
         protected internal override void Update()
@@ -313,40 +600,38 @@ public class Player : MonoBehaviour
 
             if (Context.m_isGrabbing)
             {
-                stateMachine.SendEvent(StateEvent.RopeLaunchOnGround);
+                stateMachine.SendEvent(StateEvent.GrabbingRopeOnGround);
             }
 
-            DebugPrint.Print(string.Format("Test"));
+            //DebugPrint.Print(string.Format("Test"));
 
             //移動処理
-            Context.MoveOnGround();
+            Context.GroundLocomotion();
 
-            //手の位置の制御
-            if (Context.m_grabPoint != null)
-            {
-                float dist = Vector3.Distance(Context.m_tf.position, Context.m_grabPoint.transform.position);
-                float length = 2f;
-                if (Input.GetKeyDown(KeyCode.V) && dist <= length)
-                {
-                    Context.StartCoroutine(Context.Grab());
-                }
-            }
-
+            //ロープ発射
             if (Input.GetMouseButtonDown(1))
             {
                 Context.Launch();
             }
-
-            //ジャンプ
-            if (Input.GetButtonDown("Jump"))
+            if (MPFT_NTD_MMControlSystem.ms_instance != null && MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.MM_TR)
             {
-                if (Context.m_currentBaseState.fullPathHash == MoveState && !Context.m_anim.IsInTransition(0))
-                {
-                    Context.m_anim.SetBool("Jump", true);
-                }
+                Context.Launch();
             }
 
+            //if()
 
+            //ジャンプ
+            if (MPFT_NTD_MMControlSystem.ms_instance != null)
+            {
+                if (MPFT_NTD_MMControlSystem.ms_instance.npadState.GetButtonDown(NpadButton.A))
+                {
+                    Context.Jump();
+                }
+            }
+            else if (Input.GetButtonDown("Jump"))
+            {
+                Context.Jump();
+            }
         }
 
 
@@ -358,7 +643,6 @@ public class Player : MonoBehaviour
             base.Enter();
             Debug.Log(stateMachine.CurrentStateName);
             Context.LandingAndJumpSetUp(false);
-
         }
         protected internal override void Update()
         {
@@ -367,45 +651,160 @@ public class Player : MonoBehaviour
             {
                 stateMachine.SendEvent(StateEvent.Ground);
             }
+            if (Context.m_isGrabbing)
+            {
+                stateMachine.SendEvent(StateEvent.GrabbingRopeOnAir);
+            }
 
+
+
+            Context.GroundLocomotion();
+            if (Input.GetMouseButtonDown(1))
+            {
+                Context.Launch();
+            }
+            if (MPFT_NTD_MMControlSystem.ms_instance != null && MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.MM_TR)
+            {
+                Context.Launch();
+            }
         }
         protected internal override void Exit()
         {
             base.Exit();
         }
     }
-    private class RopeLaunchOnGround : MyState
+    private class GrabbingRopeOnGround : MyState
     {
         protected internal override void Enter()
         {
             base.Enter();
 
             Debug.Log(stateMachine.CurrentStateName);
+            Context.LandingAndJumpSetUp(true);
+            Context.@fixed = Context.GroundMove;
+            //Context.m_anim.SetBool("RopeGrab", true);
+            //Context.StartCoroutine(Context.StateChangeSetup(true));
+
+            Context.m_moveSpeed = Context.m_walkSpeed;
         }
         protected internal override void Update()
         {
             base.Update();
+            if (!Context.m_isGround)
+            {
+                stateMachine.SendEvent(StateEvent.GrabbingRopeOnAir);
+                Context.SetHookShotPos(false);
+                Context.m_hookShot.ConnectToPlayer(Context.m_obiCollider, Context.m_tf.InverseTransformPoint(Context.m_hookShotTf.position));
+            }
+            if (!Context.m_isGrabbing)
+            {
+                stateMachine.SendEvent(StateEvent.Ground);
+            }
+            Context.GroundLocomotion();
+            Context.RopeGrabbingOnGround();
 
-            Context.MoveOnGround();
+            //ジャンプ
+            if (Input.GetButtonDown("Jump"))
+            {
+                Context.Jump();
+            }
+            if (MPFT_NTD_MMControlSystem.ms_instance != null)
+            {
+                if (MPFT_NTD_MMControlSystem.ms_instance.npadState.GetButtonDown(NpadButton.A))
+                {
+                    Context.Jump();
+                }
+            }
+            //ロープを離す
+            if (Input.GetKeyDown(KeyCode.V))
+            {
+                Context.Release();
+            }
+            if (MPFT_NTD_MMControlSystem.ms_instance != null && MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.B)
+            {
+                Context.Jump();
+            }
+            else if (Input.GetButtonDown("Jump"))
+            {
+                Context.Jump();
+            }
+            //ロープを解除
+            if (Input.GetMouseButtonDown(1))
+            {
+                Context.Detach();
+            }
+            if (MPFT_NTD_MMControlSystem.ms_instance != null && MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.MM_TR)
+            {
+                Context.Detach();
+            }
         }
         protected internal override void Exit()
         {
             base.Exit();
+            //Context.m_anim.SetBool("RopeGrab", false);
+
         }
     }
-    private class RopeLaunchOnAir : MyState
+    private class GrabbingRopeOnAir : MyState
     {
         protected internal override void Enter()
         {
             base.Enter();
+            Debug.Log(stateMachine.CurrentStateName);
+            Context.LandingAndJumpSetUp(false);
+            Context.m_anim.SetBool("RopeGrab", true);
+            Context.@fixed = Context.MoveOnRopeGrabbingOnAir;
+            //Context.StartCoroutine(Context.StateChangeSetup(false));
+            Context.SetLegIKWeight(0);
+            Context.m_moveSpeed = Context.m_tarzanSpeed;
         }
         protected internal override void Update()
         {
             base.Update();
+            if (Context.m_isGround)
+            {
+
+                //Context.StartCoroutine(Context.StateChangeSetupOnRopeGrab(true));
+                stateMachine.SendEvent(StateEvent.GrabbingRopeOnGround);
+                Context.SetHookShotPos(true);
+                Context.m_hookShot.ConnectToPlayer(Context.m_obiCollider, Context.m_tf.InverseTransformPoint(Context.m_hookShotTf.position));
+            }
+            if (!Context.m_isGrabbing)
+            {
+                stateMachine.SendEvent(StateEvent.Air);
+            }
+            //Context.Tarzan();
+            //Context.MoveOnRopeGrabbingOnAir();
+
+            if (Input.GetButtonDown("Jump"))
+            {
+                Context.RopeJump();
+            }
+            if (MPFT_NTD_MMControlSystem.ms_instance != null)
+            {
+                if (MPFT_NTD_MMControlSystem.ms_instance.npadState.GetButtonDown(NpadButton.A))
+                {
+                    Context.RopeJump();
+                }
+            }
+
+            if (Input.GetMouseButtonDown(1))
+            {
+                Context.Detach();
+            }
+            if (MPFT_NTD_MMControlSystem.ms_instance != null && MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.MM_TR)
+            {
+                Context.Detach();
+            }
         }
         protected internal override void Exit()
         {
             base.Exit();
+            Context.m_anim.SetBool("RopeGrab", false);
+
+            Context.SetLegIKWeight(1);
+            //Context.EnablePhysics();
         }
     }
+    #endregion
 }
