@@ -102,6 +102,17 @@
                 },
                 {
                     "name": "",
+                    "id": "a1d70c25-623f-432f-9559-20cff259edc5",
+                    "path": "<HID::iBUFFALO BSGP1204 Series>/stick",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Move",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "46165da5-9ed1-4dc0-a419-3595d518af82",
                     "path": "<Gamepad>/buttonSouth",
                     "interactions": "",
@@ -124,6 +135,17 @@
                 },
                 {
                     "name": "",
+                    "id": "61708a6a-60da-4d40-bbfb-a65b1fd58e23",
+                    "path": "<HID::iBUFFALO BSGP1204 Series>/button2",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Jump",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "1570a8b5-dada-4405-8734-4952a1e810bc",
                     "path": "<Gamepad>/rightTrigger",
                     "interactions": "",
@@ -137,6 +159,17 @@
                     "name": "",
                     "id": "f587f56d-bd4a-4ab1-a3c3-350198d5aa96",
                     "path": "<Mouse>/rightButton",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "RopeAttach",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "e3b91210-ee33-4077-9be6-49170f74dc12",
+                    "path": "<HID::iBUFFALO BSGP1204 Series>/button8",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
@@ -176,6 +209,17 @@
                     "name": "",
                     "id": "5026888c-1610-4a81-a513-d65c3ad54cd7",
                     "path": "<Mouse>/position",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "Move",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "b27e3298-2ecf-4ebc-9f70-80398983ef8f",
+                    "path": "<HID::iBUFFALO BSGP1204 Series>/stick",
                     "interactions": "",
                     "processors": "",
                     "groups": "",
