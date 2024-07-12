@@ -8,21 +8,21 @@ public class ReStart : MonoBehaviour
 {
     //初期座標
     [SerializeField] private Vector3 SRPosition;
-    [SerializeField] private GameObject player;
+    [SerializeField] private Transform Player;
     void Start()
     {
         //プレイヤーの初期座標取得
-        SRPosition = player.transform.position;
+        SRPosition = Player.position;
     }
     private void OnCollisionEnter(Collision collision)
     {
         //タグ検索
-        if (collision.gameObject.tag == "Player")
+        if (collision.collider.GetComponent<Player>()!=null)
         {
-             
+
             //SceneManager.LoadScene(m_sceneName);
-            player.transform.position = SRPosition;
-        }else{
+            Player.position = SRPosition;
+        }else if(collision.collider.GetComponent<fallObject>()){
 
             Destroy(collision.gameObject);
             
