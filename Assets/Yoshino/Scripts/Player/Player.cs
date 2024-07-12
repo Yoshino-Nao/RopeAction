@@ -2,7 +2,9 @@ using IceMilkTea.StateMachine;
 using Obi;
 using RootMotion.FinalIK;
 using System.Collections;
+using Unity.VisualScripting;
 using UnityEngine;
+using UnityEngine.InputSystem;
 using VInspector;
 using VInspector.Libs;
 public class Player : MonoBehaviour
@@ -49,8 +51,13 @@ public class Player : MonoBehaviour
     private FullBodyBipedIK m_fullBodyBipedIK;
     private GrounderFBBIK m_grounderFBBIK;
 
+    //InputSystem
+    GameInput m_inputs;
+
+
     //アニメーション関係
-    private Animator m_anim;
+    private Animator m_animator;
+    private Vector2 m_blendTreeValue;
     private AnimatorStateInfo m_currentBaseState;
     static int idleState = Animator.StringToHash("Base Layer.Idle");
     static int MoveState = Animator.StringToHash("Base Layer.Blend Tree");
@@ -59,6 +66,9 @@ public class Player : MonoBehaviour
     static int restState = Animator.StringToHash("Base Layer.Rest");
 
     //移動に使用する
+    /// <summary>
+    /// 
+    /// </summary>
     private Vector3 m_moveDir;
     private Vector3 m_moveVec;
     private float m_moveSpeed;
@@ -109,13 +119,16 @@ public class Player : MonoBehaviour
     {
         float h;
         float v;
-        m_inputMoveDir = Vector2.zero;
 
         {
             h = Input.GetAxis("Horizontal");              // 入力デバイスの水平軸をhで定義
             v = Input.GetAxis("Vertical");                // 入力デバイスの垂直軸をvで定義
 
-            m_inputMoveDir = new Vector3(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
+            h = m_inputMoveDir.x;
+            v = m_inputMoveDir.y;
+
+
+            //m_inputMoveDir = new Vector3(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
         }
         //カメラが2Dか3Dか判定
         if (CameraChanger.ms_instance.m_is3DCamera)
@@ -136,12 +149,15 @@ public class Player : MonoBehaviour
     {
         //アニメーション
         Vector3 Vec = m_tf.InverseTransformDirection(m_moveDir);
+        m_blendTreeValue = Vector2.MoveTowards(m_blendTreeValue, new Vector2(Vec.x, Vec.z), m_animSpeed * Time.deltaTime);
         //DebugPrint.Print(string.Format("AnimVec{0}", Vec));
         // Animator側で設定している"Speed"パラメタを渡す
+
         if (m_isGround)
         {
-            m_anim.SetFloat("SpeedX", Vec.x);
-            m_anim.SetFloat("SpeedY", Vec.z);
+
+            m_animator.SetFloat("SpeedX", m_blendTreeValue.x);
+            m_animator.SetFloat("SpeedY", m_blendTreeValue.y);
         }
 
         //移動入力があるか
@@ -177,7 +193,7 @@ public class Player : MonoBehaviour
     private void MoveOnRopeGrabbingOnAir()
     {
         m_hookShot.RopeChangeLength();
-        m_anim.SetFloat("SpeedY", m_moveDir.z);
+        m_animator.SetFloat("SpeedY", m_moveDir.z);
 
         //フックショットからロープが当たっているオブジェクトへの方向
         Vector3 ToAttachPointDir =
@@ -229,7 +245,7 @@ public class Player : MonoBehaviour
         {
             m_rb.AddForce(m_tf.forward * m_moveSpeed, ForceMode.Force);
         }
-       
+
     }
     private void Tarzan()
     {
@@ -248,15 +264,15 @@ public class Player : MonoBehaviour
     }
     private void Jump()
     {
-        if (m_currentBaseState.fullPathHash == MoveState && !m_anim.IsInTransition(0))
+        if (m_currentBaseState.fullPathHash == MoveState && !m_animator.IsInTransition(0))
         {
-            m_anim.SetBool("Jump", true);
+            m_animator.SetBool("Jump", true);
         }
     }
     public void AddJumpPow()
     {
         m_rb.AddForce(Vector3.up * m_jumpPower, ForceMode.Impulse);
-        m_anim.SetBool("Jump", false);
+        m_animator.SetBool("Jump", false);
         Debug.Log("Jump");
         if (m_JumpCor != null)
         {
@@ -314,7 +330,7 @@ public class Player : MonoBehaviour
         //    Debug.Log("ロープを離しました");
     }
 
-    
+
     /// <summary>
     /// 地上でロープを掴んでいる状態の処理
     /// </summary>
@@ -322,7 +338,7 @@ public class Player : MonoBehaviour
     {
         m_hookShot.RopeChangeLength();
     }
-    
+
 
     /// <summary>
     /// 地上と空中状態が変化した瞬間に行う処理
@@ -388,6 +404,36 @@ public class Player : MonoBehaviour
     {
         m_hookShot.SetIsKinematic = true;
         m_hookShot.ConnectToSelf(m_hookShot.GetCurrentAttachObiCol);
+    }
+
+    #endregion
+
+    #region InputSystem
+
+    private void OnMove(InputAction.CallbackContext callbackContext)
+    {
+        m_inputMoveDir = callbackContext.ReadValue<Vector2>();
+        if (callbackContext.canceled)
+        {
+            m_inputMoveDir = Vector2.zero;
+        }
+        Debug.Log(m_inputMoveDir);
+    }
+    private void OnJump(InputAction.CallbackContext callbackContext)
+    {
+        Jump();
+    }
+    private void OnRopeAttach(InputAction.CallbackContext callbackContext)
+    {
+
+        if (m_hookShot.GetIsLoaded)
+        {
+            Detach();
+        }
+        else
+        {
+            Launch();
+        }
     }
 
     #endregion
@@ -497,7 +543,7 @@ public class Player : MonoBehaviour
         m_isGround = m_oldIsGround = true;
 
         m_CameraTf = Camera.main.transform;
-        m_anim = GetComponentInChildren<Animator>();
+        m_animator = GetComponentInChildren<Animator>();
         //m_hookShot = GetComponentInChildren<HookShot2>();
         m_fullBodyBipedIK = GetComponentInChildren<FullBodyBipedIK>();
         m_grounderFBBIK = GetComponentInChildren<GrounderFBBIK>();
@@ -535,7 +581,19 @@ public class Player : MonoBehaviour
 
     void Start()
     {
-        m_currentBaseState = m_anim.GetCurrentAnimatorStateInfo(0);
+        m_inputs = new GameInput();
+
+        m_inputs.Player.Move.started += OnMove;
+        m_inputs.Player.Move.performed += OnMove;
+        m_inputs.Player.Move.canceled += OnMove;
+
+        m_inputs.Player.Jump.started += OnJump;
+
+        m_inputs.Player.RopeAttach.started += OnRopeAttach;
+
+        m_inputs.Enable();
+
+        m_currentBaseState = m_animator.GetCurrentAnimatorStateInfo(0);
     }
 
     void Update()
@@ -549,7 +607,7 @@ public class Player : MonoBehaviour
         DebugPrint.Print(string.Format("{0}", m_moveVec));
         DebugPrint.Print(string.Format("{0}", m_moveSpeed));
         ViewFPS();
-        m_anim.SetBool("Ground", m_isGround);
+        m_animator.SetBool("Ground", m_isGround);
 
         //m_hookShot.HookShooting();
         DebugPrint.Print(string.Format("CurrentStateName:{0}", stateMachine.CurrentStateName));
@@ -558,7 +616,7 @@ public class Player : MonoBehaviour
     private void FixedUpdate()
     {
         @fixed();
-        
+
         if (!CameraChanger.ms_instance.m_is3DCamera)
         {
             Vector3 Pos2D = m_tf.position;
@@ -579,7 +637,7 @@ public class Player : MonoBehaviour
             Context.SetArmIKWeight(0);
             Context.m_moveSpeed = Context.m_walkSpeed;
 
-            Context.m_anim.SetBool("Jump", false);
+            Context.m_animator.SetBool("Jump", false);
         }
         protected internal override void Update()
         {
@@ -605,9 +663,9 @@ public class Player : MonoBehaviour
             {
                 Context.Launch();
             }
-            
 
-            
+
+
             //ジャンプ
             if (Input.GetButtonDown("Jump"))
             {
@@ -644,7 +702,7 @@ public class Player : MonoBehaviour
             {
                 Context.Launch();
             }
-            
+
         }
         protected internal override void Exit()
         {
@@ -686,7 +744,7 @@ public class Player : MonoBehaviour
             {
                 Context.Jump();
             }
-            
+
             //ロープを離す
             if (Input.GetKeyDown(KeyCode.V))
             {
@@ -716,7 +774,7 @@ public class Player : MonoBehaviour
             base.Enter();
             Debug.Log(stateMachine.CurrentStateName);
             Context.LandingAndJumpSetUp(false);
-            Context.m_anim.SetBool("RopeGrab", true);
+            Context.m_animator.SetBool("RopeGrab", true);
             Context.@fixed = Context.MoveOnRopeGrabbingOnAir;
             //Context.StartCoroutine(Context.StateChangeSetup(false));
             Context.SetLegIKWeight(0);
@@ -744,17 +802,17 @@ public class Player : MonoBehaviour
             {
                 Context.RopeJump();
             }
-            
+
             if (Input.GetMouseButtonDown(1))
             {
                 Context.Detach();
             }
-            
+
         }
         protected internal override void Exit()
         {
             base.Exit();
-            Context.m_anim.SetBool("RopeGrab", false);
+            Context.m_animator.SetBool("RopeGrab", false);
 
             Context.SetLegIKWeight(1);
             //Context.EnablePhysics();
