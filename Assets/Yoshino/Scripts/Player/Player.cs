@@ -200,6 +200,7 @@ public class Player : MonoBehaviour
             (m_hookShot.GetCurrentAttachPos -
             m_hookShotTf.position
             ).normalized;
+        Debug.DrawRay(m_hookShotTf.position, m_hookShot.GetCurrentAttachPos - m_hookShotTf.position);
 
         Vector3 Dir;
         //3D
@@ -373,7 +374,7 @@ public class Player : MonoBehaviour
     public void StateChangeSetupOnRopeGrab(bool isGround)
     {
         //m_grabbable.SetParent(null);
-
+        //return;
         SetHookShotPos(isGround);
 
         m_grabbable.SetArmIKTarget(ref m_fullBodyBipedIK);
@@ -382,7 +383,7 @@ public class Player : MonoBehaviour
         SetArmIKWeight(1);
 
         m_isGrabbing = true;
-        Debug.Log("a");
+        //Debug.LogError("Changed!");
         m_hookShot.ConnectToPlayer(m_obiCollider, m_tf.InverseTransformPoint(m_hookShotTf.position));
 
     }
@@ -417,25 +418,40 @@ public class Player : MonoBehaviour
         {
             m_inputMoveDir = Vector2.zero;
         }
-        Debug.Log(m_inputMoveDir);
+        //Debug.Log(m_inputMoveDir);
     }
     private void OnJump(InputAction.CallbackContext callbackContext)
     {
         Jump();
     }
+    bool m_ropeButton = false;
     private void OnRopeAttach(InputAction.CallbackContext callbackContext)
     {
-
         if (m_hookShot.GetIsLoaded)
         {
             Detach();
+            Debug.Log("ロープ解除");
         }
         else
         {
             Launch();
+            Debug.Log("ロープ発射");
         }
-    }
+        //if (callbackContext.started)
+        //{
+        //    m_ropeButton = true;
+        //}
+        //if (callbackContext.performed)
+        //{
+        //    m_ropeButton = false;
+        //}
+        //if (callbackContext.canceled)
+        //{
+        //    m_ropeButton = false;
+        //}
 
+
+    }
     #endregion
 
     #region その他
@@ -590,6 +606,8 @@ public class Player : MonoBehaviour
         m_inputs.Player.Jump.started += OnJump;
 
         m_inputs.Player.RopeAttach.started += OnRopeAttach;
+        //m_inputs.Player.RopeAttach.performed += OnRopeAttach;
+        //m_inputs.Player.RopeAttach.canceled += OnRopeAttach;
 
         m_inputs.Enable();
 
@@ -598,6 +616,7 @@ public class Player : MonoBehaviour
 
     void Update()
     {
+
         if (stateMachine.CurrentStateName != "GrabbingRopeOnAir")
         {
             m_isGround = FootCollider();
@@ -606,6 +625,7 @@ public class Player : MonoBehaviour
 
         DebugPrint.Print(string.Format("{0}", m_moveVec));
         DebugPrint.Print(string.Format("{0}", m_moveSpeed));
+        DebugPrint.Print(string.Format("Rope{0}", m_ropeButton));
         ViewFPS();
         m_animator.SetBool("Ground", m_isGround);
 
@@ -659,11 +679,14 @@ public class Player : MonoBehaviour
             Context.GroundLocomotion();
 
             //ロープ発射
-            if (Input.GetMouseButtonDown(1))
+            //if (Input.GetMouseButtonDown(1))
+            //{
+            //    Context.Launch();
+            //}
+            if (Context.m_ropeButton)
             {
                 Context.Launch();
             }
-
 
 
             //ジャンプ
@@ -698,11 +721,14 @@ public class Player : MonoBehaviour
 
 
             Context.GroundLocomotion();
-            if (Input.GetMouseButtonDown(1))
+            //if (Input.GetMouseButtonDown(1))
+            //{
+            //    Context.Launch();
+            //}
+            if (Context.m_ropeButton)
             {
                 Context.Launch();
             }
-
         }
         protected internal override void Exit()
         {
@@ -730,7 +756,7 @@ public class Player : MonoBehaviour
             {
                 stateMachine.SendEvent(StateEvent.GrabbingRopeOnAir);
                 Context.SetHookShotPos(false);
-                Context.m_hookShot.ConnectToPlayer(Context.m_obiCollider, Context.m_tf.InverseTransformPoint(Context.m_hookShotTf.position));
+                Context.m_hookShot.ConnectToPlayer(Context.m_obiCollider, Context.m_hookShotTf.localPosition);
             }
             if (!Context.m_isGrabbing)
             {
@@ -755,7 +781,11 @@ public class Player : MonoBehaviour
                 Context.Jump();
             }
             //ロープを解除
-            if (Input.GetMouseButtonDown(1))
+            //if (Input.GetMouseButtonDown(1))
+            //{
+            //    Context.Detach();
+            //}
+            if (Context.m_ropeButton)
             {
                 Context.Detach();
             }
@@ -789,7 +819,7 @@ public class Player : MonoBehaviour
                 //Context.StartCoroutine(Context.StateChangeSetupOnRopeGrab(true));
                 stateMachine.SendEvent(StateEvent.GrabbingRopeOnGround);
                 Context.SetHookShotPos(true);
-                Context.m_hookShot.ConnectToPlayer(Context.m_obiCollider, Context.m_tf.InverseTransformPoint(Context.m_hookShotTf.position));
+                Context.m_hookShot.ConnectToPlayer(Context.m_obiCollider, Context.m_hookShotTf.localPosition);
             }
             if (!Context.m_isGrabbing)
             {
@@ -803,11 +833,14 @@ public class Player : MonoBehaviour
                 Context.RopeJump();
             }
 
-            if (Input.GetMouseButtonDown(1))
+            //if (Input.GetMouseButtonDown(1))
+            //{
+            //    Context.Detach();
+            //}
+            if (Context.m_ropeButton)
             {
                 Context.Detach();
             }
-
         }
         protected internal override void Exit()
         {

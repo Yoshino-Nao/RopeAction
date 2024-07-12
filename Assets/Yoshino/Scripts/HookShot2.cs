@@ -4,12 +4,14 @@ using System.Collections.Generic;
 using UnityEngine;
 using VInspector;
 using System.Linq;
+using UnityEngine.InputSystem;
 public class HookShot2 : MonoBehaviour
 {
     [SerializeField] private ObiSolver solver;
     //ロープオブジェクト
     [SerializeField] private float m_length = 10f;
-
+    [SerializeField] private float m_max = 20f;
+    [SerializeField] private float m_min = 0.5f;
     [SerializeField] private ObiCollider character;
     [SerializeField] private Material material;
     [SerializeField] private ObiRopeSection section;
@@ -65,6 +67,8 @@ public class HookShot2 : MonoBehaviour
         get { return m_currentAttachObiCol; }
     }
     private Player m_player;
+
+    private GameInput m_inputs;
     [Button]
     void test()
     {
@@ -133,15 +137,49 @@ public class HookShot2 : MonoBehaviour
         //m_obiStitcher.enabled = false;
         //m_grabObj.transform.position = m_tf.position;
         //m_grabPoint.SetParent(m_tf);
+
+        m_inputs = new GameInput();
+
+        m_inputs.Player.RopeLengthen.performed += OnRopeLengthen;
+        m_inputs.Player.RopeLengthen.canceled += OnRopeLengthen;
+
+        m_inputs.Player.RopeShrink.performed += OnRopeShrink;
+        m_inputs.Player.RopeShrink.canceled += OnRopeShrink;
+
+        m_inputs.Enable();
     }
-   
+
 
     private void OnDestroy()
     {
         DestroyImmediate(blueprint);
     }
-
-
+    bool m_isPressedLengthen;
+    private void OnRopeLengthen(InputAction.CallbackContext callbackContext)
+    {
+        switch (callbackContext.phase)
+        {
+            case InputActionPhase.Performed:
+                m_isPressedLengthen = true;
+                break;
+            case InputActionPhase.Canceled:
+                m_isPressedLengthen = false;
+                break;
+        }
+    }
+    bool m_isPressedShrink;
+    private void OnRopeShrink(InputAction.CallbackContext callbackContext)
+    {
+        switch (callbackContext.phase)
+        {
+            case InputActionPhase.Performed:
+                m_isPressedShrink = true;
+                break;
+            case InputActionPhase.Canceled:
+                m_isPressedShrink = false;
+                break;
+        }
+    }
     public void LaunchHook()
     {
         if (m_attachmentTargetObj == null) return;
@@ -150,6 +188,9 @@ public class HookShot2 : MonoBehaviour
         //Vector3 vec = 
         m_currentAttachRb = m_attachmentTargetObj.GetComponent<Rigidbody>();
         m_currentAttachObiCol = m_attachmentTargetObj.GetComponent<ObiColliderBase>();
+        Debug.Log(m_currentAttachRb);
+        Debug.Log(m_currentAttachObiCol);
+
         // Raycast to see what we hit:
         if (Physics.Raycast(ray, out hookAttachment, float.MaxValue, 1 << LayerMask.NameToLayer("Ropeattach")))
         {
@@ -167,7 +208,7 @@ public class HookShot2 : MonoBehaviour
 
     private IEnumerator AttachHookForKinematic(ObiColliderBase Target)
     {
-        Transform TargetTf = Target.transform;
+        Transform TargetTf = m_currentAttachObiCol.transform;
         //1フレーム待つ
         yield return null;
 
@@ -246,6 +287,7 @@ public class HookShot2 : MonoBehaviour
         //ロープが配置された時点でシミュレーションが引き継がれるように質量を復元します。
         for (int i = 0; i < m_rope.activeParticleCount; ++i)
             solver.invMasses[m_rope.solverIndices[i]] = 10; // 1/0.1 = 10
+        //ConnectToPlayer(m_player.GetComponent<ObiColliderBase>(), m_tf.localPosition);
         m_player.StateChangeSetupOnRopeGrab(m_player.GetIsGround);
         //ConnectToSelf(Target);
         //m_rope.getP
@@ -258,7 +300,8 @@ public class HookShot2 : MonoBehaviour
     /// <param name="collider2">エンド</param>
     public void ConnectToOtherObj(ObiColliderBase collider1, ObiColliderBase collider2)
     {
-        if (m_currentAttachObiCol == null) return;
+        if (m_currentAttachObiCol == null)
+            return;
 
         pinConstraints = m_rope.GetConstraintsByType(Oni.ConstraintType.Pin) as ObiConstraints<ObiPinConstraintsBatch>;
         pinConstraints.Clear();
@@ -297,11 +340,11 @@ public class HookShot2 : MonoBehaviour
         batch.AddConstraint(
             m_rope.elements[m_rope.elements.Count - 1].particle2,
             m_currentAttachObiCol,
-            m_currentAttachObiCol.transform.InverseTransformPoint(m_currentAttachObiCol.transform.position),
+            Vector3.zero,
             Quaternion.identity,
             0, 0, float.PositiveInfinity
             );
-
+        //return;
         batch.activeConstraintCount = 2;
         pinConstraints.AddBatch(batch);
         m_rope.SetConstraintsDirty(Oni.ConstraintType.Pin);
@@ -331,7 +374,14 @@ public class HookShot2 : MonoBehaviour
         m_rope.SetConstraintsDirty(Oni.ConstraintType.Pin);
 
     }
-
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.green;
+        if (m_currentAttachObiCol != null)
+        {
+            Gizmos.DrawSphere(m_currentAttachObiCol.transform.InverseTransformPoint(m_currentAttachObiCol.transform.position), 0.5f);
+        }
+    }
     public void Setup()
     {
         m_tf.parent = solver.transform;
@@ -361,21 +411,23 @@ public class HookShot2 : MonoBehaviour
     }
     public void RopeChangeLength()
     {
-        if (!m_rope.isLoaded) return;
+        if (!m_rope.isLoaded)
+            return;
         float Wheel = Input.GetAxis("Mouse ScrollWheel");
         float max = 20f;
         float min = 0.5f;
         float Dist = Vector3.Distance(m_tf.position, m_currentAttachPos);
         float FinalMin = Mathf.Max(Dist, min);
 
-        
+
         //スペースキーで長さを縮小
-        if (Input.GetKey(KeyCode.Space))
+        if (m_isPressedShrink)
         {
             cursor.ChangeLength(Mathf.Clamp(m_rope.restLength - hookExtendRetractSpeed * Time.deltaTime, min, max));
         }
+
         //シフトキーで長さを延長
-        if (Input.GetKey(KeyCode.LeftShift))
+        if (m_isPressedLengthen)
         {
             cursor.ChangeLength(Mathf.Clamp(m_rope.restLength + hookExtendRetractSpeed * Time.deltaTime, min, max));
         }
