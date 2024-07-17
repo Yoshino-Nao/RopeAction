@@ -27,7 +27,7 @@ public class HookShot2 : MonoBehaviour
     {
         set { m_rb.isKinematic = value; }
     }
-    private UITest m_ui;
+    private UIRopeAttachTarget m_ui;
     private Camera m_mainCamera;
 
     private ObiRope m_rope;
@@ -100,7 +100,7 @@ public class HookShot2 : MonoBehaviour
         m_rb = GetComponent<Rigidbody>();
         m_mainCamera = Camera.main;
         m_player = FindObjectOfType<Player>();
-        m_ui = FindFirstObjectByType<UITest>();
+        m_ui = FindObjectOfType<UIRopeAttachTarget>();
         m_grabRopeMeshRenderer = GetComponent<MeshRenderer>();
 
 
@@ -421,13 +421,13 @@ public class HookShot2 : MonoBehaviour
 
 
         //スペースキーで長さを縮小
-        if (m_isPressedShrink)
+        if (m_inputs.Player.RopeShrink.IsPressed())
         {
             cursor.ChangeLength(Mathf.Clamp(m_rope.restLength - hookExtendRetractSpeed * Time.deltaTime, min, max));
         }
 
         //シフトキーで長さを延長
-        if (m_isPressedLengthen)
+        if (m_inputs.Player.RopeLengthen.IsPressed())
         {
             cursor.ChangeLength(Mathf.Clamp(m_rope.restLength + hookExtendRetractSpeed * Time.deltaTime, min, max));
         }

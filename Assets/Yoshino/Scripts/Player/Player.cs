@@ -6,7 +6,6 @@ using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using VInspector;
-using VInspector.Libs;
 public class Player : MonoBehaviour
 {
     private ImtStateMachine<Player, StateEvent> stateMachine;
@@ -635,7 +634,10 @@ public class Player : MonoBehaviour
     }
     private void FixedUpdate()
     {
-        @fixed();
+        if (@fixed != null)
+        {
+            @fixed();
+        }
 
         if (!CameraChanger.ms_instance.m_is3DCamera)
         {

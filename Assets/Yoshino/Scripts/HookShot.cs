@@ -22,7 +22,7 @@ public class HookShot : MonoBehaviour
 
     private Transform m_tf;
     private Camera m_mainCamera;
-    [SerializeField] private UITest m_ui;
+    [SerializeField] private UIRopeAttachTarget m_ui;
     private ObiRope m_rope;
     [SerializeField] private MeshRenderer m_grabMesh;
     private ObiRopeBlueprint blueprint;

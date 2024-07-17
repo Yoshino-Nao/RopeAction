@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: f4ab178e8e1c911419055ff3ac56fdea, type: 3}
+  m_Name: Manual Image Data
+  m_EditorClassIdentifier: 
+  m_dualSense:
+    Move: {fileID: 21300000, guid: c6c6816488e38b74485d51bff9baf7ac, type: 3}
+    Jump: {fileID: 21300000, guid: 83711fb272198704385d054eacfcd314, type: 3}
+    RopeAttach: {fileID: 21300000, guid: a4e66851d55f98746b64657da5a60c3d, type: 3}
+    RopeControl: {fileID: 21300000, guid: 170e2c81d00f25742952221869996a07, type: 3}
+  m_keyboardAndMouse:
+    Move: {fileID: 21300000, guid: 093417250a3615446977a602cb18d341, type: 3}
+    Jump: {fileID: 21300000, guid: 2fa99ef8337844142874c8e84169e8db, type: 3}
+    RopeAttach: {fileID: 21300000, guid: 1569fc7bda8a23e41afed11442157939, type: 3}
+    RopeControl: {fileID: 21300000, guid: 6d60ad6cad7882840a79d1f78cea6d2e, type: 3}
