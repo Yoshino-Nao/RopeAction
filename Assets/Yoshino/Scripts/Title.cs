@@ -22,8 +22,11 @@ public class Title : MonoBehaviour
             {
                 TitleCanvas.enabled = false;
             }
-            m_controller.StartTimeLine();
-            Debug.Log("Timeline Start");
+            if (m_controller != null)
+            {
+                m_controller.StartTimeLine();
+                Debug.Log("Timeline Start");
+            }
         }
         
     }

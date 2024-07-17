@@ -235,7 +235,8 @@ public class Player : MonoBehaviour
             Quaternion.RotateTowards(
             m_tf.rotation,
             Quaternion.FromToRotation(
-                Vector3.up, ToAttachPointDir) *
+                Vector3.up,
+                ToAttachPointDir) *
                 Quaternion.LookRotation(Dir),
             m_rotateSpeed);
         //ターザン中は下降中のみプレイヤーの前方に力を与える
