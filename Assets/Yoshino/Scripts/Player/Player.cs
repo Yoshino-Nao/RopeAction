@@ -2,7 +2,6 @@ using IceMilkTea.StateMachine;
 using Obi;
 using RootMotion.FinalIK;
 using System.Collections;
-using Unity.VisualScripting;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using VInspector;
@@ -142,13 +141,14 @@ public class Player : MonoBehaviour
             m_moveDir = (m_playerForwardOn2d * h);
 
         }
+
+        Vector3 Vec = m_tf.InverseTransformDirection(m_moveDir);
+        m_blendTreeValue = Vector2.MoveTowards(m_blendTreeValue, new Vector2(Vec.x, Vec.z), m_animSpeed * Time.deltaTime);
         DebugPrint.Print(string.Format("MoveVec{0}", m_moveDir));
     }
     private void GroundLocomotion()
     {
         //アニメーション
-        Vector3 Vec = m_tf.InverseTransformDirection(m_moveDir);
-        m_blendTreeValue = Vector2.MoveTowards(m_blendTreeValue, new Vector2(Vec.x, Vec.z), m_animSpeed * Time.deltaTime);
         //DebugPrint.Print(string.Format("AnimVec{0}", Vec));
         // Animator側で設定している"Speed"パラメタを渡す
 
@@ -192,14 +192,9 @@ public class Player : MonoBehaviour
     private void MoveOnRopeGrabbingOnAir()
     {
         m_hookShot.RopeChangeLength();
-        m_animator.SetFloat("SpeedY", m_moveDir.z);
+        m_animator.SetFloat("SpeedY", m_blendTreeValue.y);
 
-        //フックショットからロープが当たっているオブジェクトへの方向
-        Vector3 ToAttachPointDir =
-            (m_hookShot.GetCurrentAttachPos -
-            m_hookShotTf.position
-            ).normalized;
-        Debug.DrawRay(m_hookShotTf.position, m_hookShot.GetCurrentAttachPos - m_hookShotTf.position);
+
 
         Vector3 Dir;
         //3D
@@ -226,25 +221,37 @@ public class Player : MonoBehaviour
             }
             else
             {
-                Dir = m_tf.forward;
+                Dir = Vector3.Scale(m_CameraTf.right, new Vector3(1, 0, 1)).normalized;
             }
         }
+        //フックショットからロープが当たっているオブジェクトへの方向
+        Vector3 ToAttachPointDir =
+            (m_hookShot.GetCurrentAttachPos -
+            m_hookShotTf.position
+            ).normalized;
+        Debug.DrawRay(m_hookShotTf.position, m_hookShot.GetCurrentAttachPos - m_hookShotTf.position);
 
         //ロープの向きを基準に回転する
+
+        //m_tf.rotation = Quaternion.FromToRotation(
+        //        Vector3.up, ToAttachPointDir);
         m_tf.rotation =
             Quaternion.RotateTowards(
-            m_tf.rotation,
-            Quaternion.FromToRotation(
-                Vector3.up,
-                ToAttachPointDir) *
+            m_tf.rotation, Quaternion.FromToRotation(
+                Vector3.up, ToAttachPointDir) *
                 Quaternion.LookRotation(Dir),
-            m_rotateSpeed);
+            m_rotateSpeed * Time.deltaTime);
+
+        //m_tf.rotation=Quaternion.RotateTowards(
+        //    m_tf.rotation,Quaternion.LookRotation(Dir),
+        //    m_rotateSpeed * Time.deltaTime);
+
         //ターザン中は下降中のみプレイヤーの前方に力を与える
         //上昇中や入力がないときは力を与えない
         if (m_moveDir.magnitude > 0 &&
             m_rb.velocity.y < 0)
         {
-            m_rb.AddForce(m_tf.forward * m_moveSpeed, ForceMode.Force);
+            m_rb.AddForce(m_tf.forward * m_moveSpeed * m_moveDir.z, ForceMode.Force);
         }
 
     }
@@ -624,8 +631,6 @@ public class Player : MonoBehaviour
         SetMoveDir();
 
         DebugPrint.Print(string.Format("{0}", m_moveVec));
-        DebugPrint.Print(string.Format("{0}", m_moveSpeed));
-        DebugPrint.Print(string.Format("Rope{0}", m_ropeButton));
         ViewFPS();
         m_animator.SetBool("Ground", m_isGround);
 

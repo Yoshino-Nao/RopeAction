@@ -352,7 +352,7 @@ public class HookShot : MonoBehaviour
     }
     public void HookShooting()
     {
-        DebugPrint.Print(string.Format("AttachmentObj:{0}", m_attachmentTargetObj?.name));
+        //DebugPrint.Print(string.Format("AttachmentObj:{0}", m_attachmentTargetObj?.name));
         //右クリックで発射、解除
         if (Input.GetMouseButtonDown(1))
         {
@@ -381,7 +381,7 @@ public class HookShot : MonoBehaviour
         {
             cursor.ChangeLength(Mathf.Clamp(m_rope.restLength + hookExtendRetractSpeed * Time.deltaTime, min, max));
         }
-        DebugPrint.Print(string.Format("RopeLength{0}", m_rope.restLength));
+        //DebugPrint.Print(string.Format("RopeLength{0}", m_rope.restLength));
         //マウスホイールで長さを変更
         cursor.ChangeLength(Mathf.Clamp(m_rope.restLength - hookExtendRetractSpeed * Wheel * Time.deltaTime, min, max));
     }
@@ -458,7 +458,7 @@ public class HookShot : MonoBehaviour
         m_attachmentTargetObj = Explosion();
         if (m_currentAttachObiCol != null)
         {
-            DebugPrint.Print(string.Format("{0}", m_currentAttachObiCol.name));
+           // DebugPrint.Print(string.Format("{0}", m_currentAttachObiCol.name));
         }
         //  m_grabMesh.enabled = false;
         if (m_ui != null)

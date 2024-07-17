@@ -80,7 +80,6 @@ public class CameraController2D : MonoBehaviour
         Vector3 Value = new Vector3(h, v, 0);
 
         //DebugPrint.Print(string.Format("nullCheck{0}", MPFT_NTD_MMControlSystem.ms_instance != null));
-        DebugPrint.Print(string.Format("CameraInput{0}", Value.magnitude));
 
 
         //ƒJƒƒ‰‚ğ“®‚©‚·ˆ—

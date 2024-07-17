@@ -102,7 +102,7 @@ public class MoveTest : MonoBehaviour
     {
         m_anim.speed = m_animSpeed;                             // Animatorのモーション再生速度に animSpeedを設定する
         m_currentBaseState = m_anim.GetCurrentAnimatorStateInfo(0); // 参照用のステート変数にBase Layer (0)の現在のステートを設定する
-        DebugPrint.Print(string.Format("Ground{0}", m_isGround));
+        //DebugPrint.Print(string.Format("Ground{0}", m_isGround));
         m_anim.SetBool("Ground", m_isGround);
         SetMoveDir();
         //空中では歩行アニメーションをしないようにする処理
@@ -221,7 +221,7 @@ public class MoveTest : MonoBehaviour
         {
             m_rb.velocity = m_rb.velocity.normalized * m_maxSpeed;
         }
-        DebugPrint.Print(string.Format("Velocity{0}", m_rb.velocity.magnitude));
+        //DebugPrint.Print(string.Format("Velocity{0}", m_rb.velocity.magnitude));
         //
         if (!CameraChanger.ms_instance.m_is3DCamera)
         {
@@ -248,7 +248,7 @@ public class MoveTest : MonoBehaviour
 
         }
 
-        DebugPrint.Print(string.Format("MoveVec{0}", m_moveDir));
+       // DebugPrint.Print(string.Format("MoveVec{0}", m_moveDir));
     }
     public bool LerpGrabPoint()
     {

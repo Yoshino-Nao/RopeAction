@@ -431,7 +431,7 @@ public class HookShot2 : MonoBehaviour
         {
             cursor.ChangeLength(Mathf.Clamp(m_rope.restLength + hookExtendRetractSpeed * Time.deltaTime, min, max));
         }
-        DebugPrint.Print(string.Format("RopeLength{0}", m_rope.restLength));
+        //DebugPrint.Print(string.Format("RopeLength{0}", m_rope.restLength));
         //マウスホイールで長さを変更
         cursor.ChangeLength(Mathf.Clamp(m_rope.restLength - hookExtendRetractSpeed * Wheel * Time.deltaTime, min, max));
     }
