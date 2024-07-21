@@ -237,10 +237,12 @@ public class Player : MonoBehaviour
         //        Vector3.up, ToAttachPointDir);
         m_tf.rotation =
             Quaternion.RotateTowards(
-            m_tf.rotation, Quaternion.FromToRotation(
+            m_tf.rotation, 
+            Quaternion.FromToRotation(
                 Vector3.up, ToAttachPointDir) *
                 Quaternion.LookRotation(Dir),
             m_rotateSpeed * Time.deltaTime);
+       
 
         //m_tf.rotation=Quaternion.RotateTowards(
         //    m_tf.rotation,Quaternion.LookRotation(Dir),
@@ -251,7 +253,9 @@ public class Player : MonoBehaviour
         if (m_moveDir.magnitude > 0 &&
             m_rb.velocity.y < 0)
         {
-            m_rb.AddForce(m_tf.forward * m_moveSpeed * m_moveDir.z, ForceMode.Force);
+            //m_rb.AddForce(m_tf.forward * m_moveSpeed * m_moveDir.z, ForceMode.Force);
+            m_rb.AddForce(m_tf.forward * m_moveSpeed, ForceMode.Force);
+            Debug.DrawRay(m_tf.position, m_rb.velocity);
         }
 
     }
@@ -272,6 +276,11 @@ public class Player : MonoBehaviour
     }
     private void Jump()
     {
+        if (m_animator == null)
+        {
+            Destroy(this);
+        }
+
         if (m_currentBaseState.fullPathHash == MoveState && !m_animator.IsInTransition(0))
         {
             m_animator.SetBool("Jump", true);
@@ -600,10 +609,7 @@ public class Player : MonoBehaviour
         stateMachine.AddTransition<GrabbingRopeOnAir, GrabbingRopeOnGround>(StateEvent.GrabbingRopeOnGround);
 
         stateMachine.SetStartState<GroundState>();
-    }
-
-    void Start()
-    {
+        
         m_inputs = new GameInput();
 
         m_inputs.Player.Move.started += OnMove;
@@ -620,7 +626,6 @@ public class Player : MonoBehaviour
 
         m_currentBaseState = m_animator.GetCurrentAnimatorStateInfo(0);
     }
-
     void Update()
     {
 

@@ -30,7 +30,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1378640060110036352}
   serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
@@ -58,7 +58,7 @@ MonoBehaviour:
   m_walkSpeed: 350
   m_tarzanSpeed: 700
   m_maxSpeed: 20
-  m_rotateSpeed: 10
+  m_rotateSpeed: 300
   m_jumpPower: 280
   m_playerForwardOn2d: {x: 1, y: 0, z: 0}
   m_grabTotalTime: 1
@@ -158,7 +158,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: d687f278a45eb5344a069837a317dbbf, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  m_defaultMode: 0
+  m_defaultMode: 1
   virtualCamera2D: {fileID: 0}
   virtualCamera3D: {fileID: 0}
   m_is3DCamera: 1

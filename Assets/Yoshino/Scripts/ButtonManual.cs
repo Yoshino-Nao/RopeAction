@@ -20,7 +20,7 @@ public class ButtonManual : MonoBehaviour
 #if UNITY_EDITOR
         m_imageData = AssetDatabase.LoadAssetAtPath<ManualSpritesData>(m_path);
 #else
-        m_imageData = Resources.Load<ManualImageData>(m_resourcesPath);
+        m_imageData = Resources.Load<ManualSpritesData>(m_resourcesPath);
 #endif
 
     }
