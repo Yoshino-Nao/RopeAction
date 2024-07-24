@@ -8,4 +8,10 @@ EditorBuildSettings:
   - enabled: 1
     path: Assets/Yoshino/Scenes/BackGround.unity
     guid: 2ad95ccd36e63414c83e717aacd035c7
+  - enabled: 1
+    path: Assets/Itihara/Scene/main2.unity
+    guid: eaeed1d22bb210c49a47e2405cab36f2
+  - enabled: 1
+    path: Assets/Nakata/Scenes/3DStage.unity
+    guid: 91ccfe8214b41e94dacda4daad913b58
   m_configObjects: {}

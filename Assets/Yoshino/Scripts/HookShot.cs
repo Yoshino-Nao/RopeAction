@@ -22,7 +22,7 @@ public class HookShot : MonoBehaviour
 
     private Transform m_tf;
     private Camera m_mainCamera;
-    [SerializeField] private UITest m_ui;
+    [SerializeField] private UIRopeAttachTarget m_ui;
     private ObiRope m_rope;
     [SerializeField] private MeshRenderer m_grabMesh;
     private ObiRopeBlueprint blueprint;
@@ -352,7 +352,7 @@ public class HookShot : MonoBehaviour
     }
     public void HookShooting()
     {
-        DebugPrint.Print(string.Format("AttachmentObj:{0}", m_attachmentTargetObj?.name));
+        //DebugPrint.Print(string.Format("AttachmentObj:{0}", m_attachmentTargetObj?.name));
         //右クリックで発射、解除
         if (Input.GetMouseButtonDown(1))
         {
@@ -375,23 +375,13 @@ public class HookShot : MonoBehaviour
         {
             cursor.ChangeLength(Mathf.Clamp(m_rope.restLength - hookExtendRetractSpeed * Time.deltaTime, min, max));
         }
-        if(MPFT_NTD_MMControlSystem.ms_instance != null) 
-        {
-            if (MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.Up)
-            {
-                cursor.ChangeLength(Mathf.Clamp(m_rope.restLength - hookExtendRetractSpeed * Time.deltaTime, min, max));
-            }
-            else if (MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.Down)
-            {
-                cursor.ChangeLength(Mathf.Clamp(m_rope.restLength + hookExtendRetractSpeed * Time.deltaTime, min, max));
-            }
-        }
+        
         //シフトキーで長さを延長
         if (Input.GetKey(KeyCode.LeftShift))
         {
             cursor.ChangeLength(Mathf.Clamp(m_rope.restLength + hookExtendRetractSpeed * Time.deltaTime, min, max));
         }
-        DebugPrint.Print(string.Format("RopeLength{0}", m_rope.restLength));
+        //DebugPrint.Print(string.Format("RopeLength{0}", m_rope.restLength));
         //マウスホイールで長さを変更
         cursor.ChangeLength(Mathf.Clamp(m_rope.restLength - hookExtendRetractSpeed * Wheel * Time.deltaTime, min, max));
     }
@@ -468,7 +458,7 @@ public class HookShot : MonoBehaviour
         m_attachmentTargetObj = Explosion();
         if (m_currentAttachObiCol != null)
         {
-            DebugPrint.Print(string.Format("{0}", m_currentAttachObiCol.name));
+           // DebugPrint.Print(string.Format("{0}", m_currentAttachObiCol.name));
         }
         //  m_grabMesh.enabled = false;
         if (m_ui != null)

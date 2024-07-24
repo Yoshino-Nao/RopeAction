@@ -1,5 +1,6 @@
 using UnityEngine;
 using Cinemachine;
+using UnityEngine.InputSystem;
 
 public class CameraController2D : MonoBehaviour
 {
@@ -22,7 +23,17 @@ public class CameraController2D : MonoBehaviour
     [SerializeField] bool m_isOnlyRotation = false;
     //操作していない場合、カメラの位置をデフォルトに戻そうとする
     [SerializeField] bool m_isMoveDefault = true;
-    // Start is called before the first frame update
+
+    GameInput m_inputs;
+
+    private Vector2 m_cameraInputValue;
+    void OnCamera(InputAction.CallbackContext callbackContext)
+    {
+        m_cameraInputValue = callbackContext.ReadValue<Vector2>();
+    }
+
+
+
     void Start()
     {
         m_virtualCamera = GetComponent<CinemachineVirtualCamera>();
@@ -38,6 +49,14 @@ public class CameraController2D : MonoBehaviour
         m_pov.m_VerticalAxis.m_InputAxisName = "";
 
         m_pov.m_HorizontalAxis.m_AccelTime = m_pov.m_VerticalAxis.m_AccelTime = m_camRotateAccelTime;
+
+        //入力
+        m_inputs = new GameInput();
+
+        m_inputs.Player.Camera.performed += OnCamera;
+        m_inputs.Player.Camera.canceled += OnCamera;
+
+        m_inputs.Enable();
     }
 
     // Update is called once per frame
@@ -45,12 +64,7 @@ public class CameraController2D : MonoBehaviour
     {
         float h;
         float v;
-        if (MPFT_NTD_MMControlSystem.ms_instance != null)
-        {
-            h = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.R_Analog_X;
-            v = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.R_Analog_Y;
-        }
-        else if (m_mode == eInputMode.Mouse)
+        if (m_mode == eInputMode.Mouse)
         {
             h = Input.GetAxis("Mouse X");
             v = Input.GetAxis("Mouse Y");
@@ -60,11 +74,12 @@ public class CameraController2D : MonoBehaviour
             h = Input.GetAxis("HorizontalArrow");
             v = Input.GetAxis("VerticalArrow");
         }
+        h = m_cameraInputValue.x;
+        v = m_cameraInputValue.y;
 
         Vector3 Value = new Vector3(h, v, 0);
 
         //DebugPrint.Print(string.Format("nullCheck{0}", MPFT_NTD_MMControlSystem.ms_instance != null));
-        DebugPrint.Print(string.Format("CameraInput{0}", Value));
 
 
         //カメラを動かす処理
@@ -83,7 +98,7 @@ public class CameraController2D : MonoBehaviour
         }
 
         //入力がない場合は初期位置に補間する
-        if (m_isMoveDefault && Value.magnitude <= 0)
+        if (m_isMoveDefault && Value.magnitude <= 0.1)
         {
             m_transposer.m_FollowOffset = Vector3.MoveTowards(m_transposer.m_FollowOffset, m_defOffset, m_moveToDefSpeed);
             m_pov.m_HorizontalAxis.Value = Mathf.MoveTowards(m_pov.m_HorizontalAxis.Value, 0f, m_moveToDefSpeed * 10);

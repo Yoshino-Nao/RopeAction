@@ -102,7 +102,7 @@ public class MoveTest : MonoBehaviour
     {
         m_anim.speed = m_animSpeed;                             // Animatorのモーション再生速度に animSpeedを設定する
         m_currentBaseState = m_anim.GetCurrentAnimatorStateInfo(0); // 参照用のステート変数にBase Layer (0)の現在のステートを設定する
-        DebugPrint.Print(string.Format("Ground{0}", m_isGround));
+        //DebugPrint.Print(string.Format("Ground{0}", m_isGround));
         m_anim.SetBool("Ground", m_isGround);
         SetMoveDir();
         //空中では歩行アニメーションをしないようにする処理
@@ -130,10 +130,7 @@ public class MoveTest : MonoBehaviour
 
             }
         }
-        if (MPFT_NTD_MMControlSystem.ms_instance != null && MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.B)
-        {
-            m_isInputJump = true;
-        }
+        
         if (m_currentBaseState.fullPathHash == jumpState)
         {
             if (!m_anim.IsInTransition(0))
@@ -224,7 +221,7 @@ public class MoveTest : MonoBehaviour
         {
             m_rb.velocity = m_rb.velocity.normalized * m_maxSpeed;
         }
-        DebugPrint.Print(string.Format("Velocity{0}", m_rb.velocity.magnitude));
+        //DebugPrint.Print(string.Format("Velocity{0}", m_rb.velocity.magnitude));
         //
         if (!CameraChanger.ms_instance.m_is3DCamera)
         {
@@ -237,12 +234,7 @@ public class MoveTest : MonoBehaviour
     {
         float h = Input.GetAxis("Horizontal");              // 入力デバイスの水平軸をhで定義
         float v = Input.GetAxis("Vertical");                // 入力デバイスの垂直軸をvで定義
-        if (MPFT_NTD_MMControlSystem.ms_instance != null)
-        {
-            h = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.L_Analog_X;
-            v = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.L_Analog_Y;
-        }
-
+        
         if (CameraChanger.ms_instance.m_is3DCamera)
         {
             //3Dの場合はカメラに依存する
@@ -256,7 +248,7 @@ public class MoveTest : MonoBehaviour
 
         }
 
-        DebugPrint.Print(string.Format("MoveVec{0}", m_moveDir));
+       // DebugPrint.Print(string.Format("MoveVec{0}", m_moveDir));
     }
     public bool LerpGrabPoint()
     {
@@ -366,20 +358,13 @@ public class MoveTest : MonoBehaviour
         {
             Release();
         }
-        if (MPFT_NTD_MMControlSystem.ms_instance != null && MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.MM_TR)
-        {
-            Release();
-        }
+        
         if (Input.GetKeyDown(KeyCode.E))
         {
             Release();
             m_hookShot.ConnectCurrentObjToOtherObj(m_hookShot.GetAttachmentTargetObiCol);
         }
-        if (MPFT_NTD_MMControlSystem.ms_instance != null && MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.MM_TL)
-        {
-            Release();
-            m_hookShot.ConnectCurrentObjToOtherObj(m_hookShot.GetAttachmentTargetObiCol);
-        }
+        
         //ロープジャンプ処理
         if (m_isInputJump && m_isGrabbing)
         {

@@ -53,6 +53,33 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
                     ""processors"": """",
                     ""interactions"": """",
                     ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""Camera"",
+                    ""type"": ""Value"",
+                    ""id"": ""9f897528-385e-42d8-acaf-f67bfd5d3ad5"",
+                    ""expectedControlType"": ""Vector2"",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": true
+                },
+                {
+                    ""name"": ""RopeLengthen"",
+                    ""type"": ""PassThrough"",
+                    ""id"": ""dcc373ed-9080-41d2-8f22-dfbf9325ed8b"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
+                },
+                {
+                    ""name"": ""RopeShrink"",
+                    ""type"": ""PassThrough"",
+                    ""id"": ""876a060c-683b-4c59-a626-27a5d242c3d9"",
+                    ""expectedControlType"": """",
+                    ""processors"": """",
+                    ""interactions"": """",
+                    ""initialStateCheck"": false
                 }
             ],
             ""bindings"": [
@@ -124,17 +151,6 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""a1d70c25-623f-432f-9559-20cff259edc5"",
-                    ""path"": ""<HID::iBUFFALO BSGP1204 Series>/stick"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Move"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
                     ""id"": ""46165da5-9ed1-4dc0-a419-3595d518af82"",
                     ""path"": ""<Gamepad>/buttonSouth"",
                     ""interactions"": """",
@@ -157,19 +173,8 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""61708a6a-60da-4d40-bbfb-a65b1fd58e23"",
-                    ""path"": ""<HID::iBUFFALO BSGP1204 Series>/button2"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Jump"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
                     ""id"": ""1570a8b5-dada-4405-8734-4952a1e810bc"",
-                    ""path"": ""<Gamepad>/rightTrigger"",
+                    ""path"": ""<Gamepad>/rightShoulder"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -179,8 +184,8 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""f587f56d-bd4a-4ab1-a3c3-350198d5aa96"",
-                    ""path"": ""<Mouse>/rightButton"",
+                    ""id"": ""9f89017d-be0d-4ef1-821f-7065921e8cc0"",
+                    ""path"": ""<Keyboard>/e"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -190,12 +195,111 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
                 },
                 {
                     ""name"": """",
-                    ""id"": ""e3b91210-ee33-4077-9be6-49170f74dc12"",
-                    ""path"": ""<HID::iBUFFALO BSGP1204 Series>/button8"",
+                    ""id"": ""e53d9dad-60ec-4484-8154-2895cd537649"",
+                    ""path"": ""<Gamepad>/rightStick"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
-                    ""action"": ""RopeAttach"",
+                    ""action"": ""Camera"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""2D Vector"",
+                    ""id"": ""331f48d5-8a64-4e43-973f-a0641ea00fdf"",
+                    ""path"": ""2DVector"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Camera"",
+                    ""isComposite"": true,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": ""up"",
+                    ""id"": ""9d5becd7-f947-4a6b-b60b-18f314405ba5"",
+                    ""path"": ""<Keyboard>/upArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Camera"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""down"",
+                    ""id"": ""8d345180-0d8e-400e-9c7b-433b245bffd2"",
+                    ""path"": ""<Keyboard>/downArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Camera"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""left"",
+                    ""id"": ""cabf5517-c8da-441b-9594-36a3898160ab"",
+                    ""path"": ""<Keyboard>/leftArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Camera"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": ""right"",
+                    ""id"": ""5e62a93b-0a77-4095-bb3b-1facdeb76268"",
+                    ""path"": ""<Keyboard>/rightArrow"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""Camera"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": true
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""ecb21abd-20dc-4f19-b4e2-c154b324f9d4"",
+                    ""path"": ""<Gamepad>/dpad/down"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""RopeLengthen"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""4888655d-7811-41dc-a905-7c2207356ce6"",
+                    ""path"": ""<Keyboard>/x"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""RopeLengthen"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""a94d9e45-f0df-4189-9e22-1a84b5a136ab"",
+                    ""path"": ""<Gamepad>/dpad/up"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""RopeShrink"",
+                    ""isComposite"": false,
+                    ""isPartOfComposite"": false
+                },
+                {
+                    ""name"": """",
+                    ""id"": ""f7f755dd-eaa8-472d-a6b8-03d724de9e81"",
+                    ""path"": ""<Keyboard>/z"",
+                    ""interactions"": """",
+                    ""processors"": """",
+                    ""groups"": """",
+                    ""action"": ""RopeShrink"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
                 }
@@ -219,7 +323,7 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
                 {
                     ""name"": """",
                     ""id"": ""09d93c26-b00d-4852-a065-b19665f7d07b"",
-                    ""path"": ""<Gamepad>/dpad"",
+                    ""path"": ""<Gamepad>/rightStick"",
                     ""interactions"": """",
                     ""processors"": """",
                     ""groups"": """",
@@ -237,17 +341,6 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
                     ""action"": ""Move"",
                     ""isComposite"": false,
                     ""isPartOfComposite"": false
-                },
-                {
-                    ""name"": """",
-                    ""id"": ""b27e3298-2ecf-4ebc-9f70-80398983ef8f"",
-                    ""path"": ""<HID::iBUFFALO BSGP1204 Series>/stick"",
-                    ""interactions"": """",
-                    ""processors"": """",
-                    ""groups"": """",
-                    ""action"": ""Move"",
-                    ""isComposite"": false,
-                    ""isPartOfComposite"": false
                 }
             ]
         }
@@ -259,6 +352,9 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
         m_Player_Move = m_Player.FindAction("Move", throwIfNotFound: true);
         m_Player_Jump = m_Player.FindAction("Jump", throwIfNotFound: true);
         m_Player_RopeAttach = m_Player.FindAction("RopeAttach", throwIfNotFound: true);
+        m_Player_Camera = m_Player.FindAction("Camera", throwIfNotFound: true);
+        m_Player_RopeLengthen = m_Player.FindAction("RopeLengthen", throwIfNotFound: true);
+        m_Player_RopeShrink = m_Player.FindAction("RopeShrink", throwIfNotFound: true);
         // Camera
         m_Camera = asset.FindActionMap("Camera", throwIfNotFound: true);
         m_Camera_Move = m_Camera.FindAction("Move", throwIfNotFound: true);
@@ -326,6 +422,9 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
     private readonly InputAction m_Player_Move;
     private readonly InputAction m_Player_Jump;
     private readonly InputAction m_Player_RopeAttach;
+    private readonly InputAction m_Player_Camera;
+    private readonly InputAction m_Player_RopeLengthen;
+    private readonly InputAction m_Player_RopeShrink;
     public struct PlayerActions
     {
         private @GameInput m_Wrapper;
@@ -333,6 +432,9 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
         public InputAction @Move => m_Wrapper.m_Player_Move;
         public InputAction @Jump => m_Wrapper.m_Player_Jump;
         public InputAction @RopeAttach => m_Wrapper.m_Player_RopeAttach;
+        public InputAction @Camera => m_Wrapper.m_Player_Camera;
+        public InputAction @RopeLengthen => m_Wrapper.m_Player_RopeLengthen;
+        public InputAction @RopeShrink => m_Wrapper.m_Player_RopeShrink;
         public InputActionMap Get() { return m_Wrapper.m_Player; }
         public void Enable() { Get().Enable(); }
         public void Disable() { Get().Disable(); }
@@ -351,6 +453,15 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
             @RopeAttach.started += instance.OnRopeAttach;
             @RopeAttach.performed += instance.OnRopeAttach;
             @RopeAttach.canceled += instance.OnRopeAttach;
+            @Camera.started += instance.OnCamera;
+            @Camera.performed += instance.OnCamera;
+            @Camera.canceled += instance.OnCamera;
+            @RopeLengthen.started += instance.OnRopeLengthen;
+            @RopeLengthen.performed += instance.OnRopeLengthen;
+            @RopeLengthen.canceled += instance.OnRopeLengthen;
+            @RopeShrink.started += instance.OnRopeShrink;
+            @RopeShrink.performed += instance.OnRopeShrink;
+            @RopeShrink.canceled += instance.OnRopeShrink;
         }
 
         private void UnregisterCallbacks(IPlayerActions instance)
@@ -364,6 +475,15 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
             @RopeAttach.started -= instance.OnRopeAttach;
             @RopeAttach.performed -= instance.OnRopeAttach;
             @RopeAttach.canceled -= instance.OnRopeAttach;
+            @Camera.started -= instance.OnCamera;
+            @Camera.performed -= instance.OnCamera;
+            @Camera.canceled -= instance.OnCamera;
+            @RopeLengthen.started -= instance.OnRopeLengthen;
+            @RopeLengthen.performed -= instance.OnRopeLengthen;
+            @RopeLengthen.canceled -= instance.OnRopeLengthen;
+            @RopeShrink.started -= instance.OnRopeShrink;
+            @RopeShrink.performed -= instance.OnRopeShrink;
+            @RopeShrink.canceled -= instance.OnRopeShrink;
         }
 
         public void RemoveCallbacks(IPlayerActions instance)
@@ -432,6 +552,9 @@ public partial class @GameInput: IInputActionCollection2, IDisposable
         void OnMove(InputAction.CallbackContext context);
         void OnJump(InputAction.CallbackContext context);
         void OnRopeAttach(InputAction.CallbackContext context);
+        void OnCamera(InputAction.CallbackContext context);
+        void OnRopeLengthen(InputAction.CallbackContext context);
+        void OnRopeShrink(InputAction.CallbackContext context);
     }
     public interface ICameraActions
     {

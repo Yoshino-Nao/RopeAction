@@ -7,13 +7,18 @@ using UnityEngine;
 public class SetChildOnHit : MonoBehaviour
 {
     private ObiSolver m_obiSolver;
+
+    private Transform m_tf => transform;
+    private BoxCollider m_col;
+
     private VirtualChildBehaviour m_virtualChildBehaviour;
     private MoveTest m_player;
     private void Start()
     {
         m_obiSolver = GetComponentInParent<ObiSolver>();
+        m_col = GetComponent<BoxCollider>();
     }
-
+    
     private void OnCollisionEnter(Collision collision)
     {
         if (collision.collider.tag == "Player")

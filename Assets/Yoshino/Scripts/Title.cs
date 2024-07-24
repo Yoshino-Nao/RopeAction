@@ -16,23 +16,18 @@ public class Title : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        if (Input.GetMouseButtonDown(1))
+        if (Input.anyKeyDown)
         {
             if (TitleCanvas.enabled == true)
             {
                 TitleCanvas.enabled = false;
             }
-            m_controller.StartTimeLine();
-            Debug.Log("Timeline Start");
-        }
-        if(MPFT_NTD_MMControlSystem.ms_instance != null && MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.Plus)
-        {
-            if (TitleCanvas.enabled == true)
+            if (m_controller != null)
             {
-                TitleCanvas.enabled = false;
+                m_controller.StartTimeLine();
+                Debug.Log("Timeline Start");
             }
-            m_controller.StartTimeLine();
-            Debug.Log("Timeline Start");
         }
+        
     }
 }

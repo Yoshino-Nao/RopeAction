@@ -167,7 +167,7 @@ public class ExtendableGrapplingHook : MonoBehaviour
         // restore masses so that the simulation takes over now that the rope is in place:
         for (int i = 0; i < rope.activeParticleCount; ++i)
             solver.invMasses[rope.solverIndices[i]] = 10; // 1/0.1 = 10
-
+        
         // Pin both ends of the rope (this enables two-way interaction between character and rope):
         var batch = new ObiPinConstraintsBatch();
         batch.AddConstraint(rope.elements[0].particle1, character, transform.localPosition, Quaternion.identity, 0, 0, float.PositiveInfinity);
