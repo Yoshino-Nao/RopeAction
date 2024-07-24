@@ -16,7 +16,7 @@ public class InputDeviceManager : MonoBehaviour
     {
         KeyBoard,
         DualSense,
-
+        NintendoSwitch
     }
     //直近に操作された入力デバイスタイプ
     public eDeviceType m_CurrentDeviceType { get; private set; } = eDeviceType.KeyBoard;
@@ -29,7 +29,7 @@ public class InputDeviceManager : MonoBehaviour
     private InputAction m_dualSenseAnyKey = new InputAction(
         type: InputActionType.PassThrough, binding: "<DualSenseGamepadHID>/*", interactions: "Press");
     private InputAction m_switchAnyKey = new InputAction(
-        type: InputActionType.PassThrough, binding: "<>", interactions: "Press");
+        type: InputActionType.PassThrough, binding: "<Gamepad>/*", interactions: "Press");
 
 
     //入力デバイスタイプ変更イベント
@@ -98,7 +98,10 @@ public class InputDeviceManager : MonoBehaviour
         {
             m_CurrentDeviceType = eDeviceType.DualSense;
         }
-
+        if (m_switchAnyKey.triggered)
+        {
+            m_CurrentDeviceType = eDeviceType.NintendoSwitch;
+        }
         if (m_keyboardAnyKey.triggered || m_mouseAnyKey.triggered)
         {
             m_CurrentDeviceType = eDeviceType.KeyBoard;
