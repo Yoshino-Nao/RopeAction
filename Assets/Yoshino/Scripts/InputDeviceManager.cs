@@ -28,6 +28,9 @@ public class InputDeviceManager : MonoBehaviour
         type: InputActionType.PassThrough, binding: "<Mouse>/*", interactions: "Press");
     private InputAction m_dualSenseAnyKey = new InputAction(
         type: InputActionType.PassThrough, binding: "<DualSenseGamepadHID>/*", interactions: "Press");
+    private InputAction m_switchAnyKey = new InputAction(
+        type: InputActionType.PassThrough, binding: "<>", interactions: "Press");
+
 
     //入力デバイスタイプ変更イベント
     public UnityEvent OnChangeDeviceType { get; private set; } = new();
@@ -59,6 +62,13 @@ public class InputDeviceManager : MonoBehaviour
     {
         // 検知の更新処理
         UpdateDeviceTypesDetection();
+
+        // デバイス一覧を取得
+        foreach (var device in InputSystem.devices)
+        {
+            // デバイス名をログ出力
+            Debug.LogError(device.name);
+        }
     }
     private void OnSceneLoad(Scene scene,LoadSceneMode mode)
     {
