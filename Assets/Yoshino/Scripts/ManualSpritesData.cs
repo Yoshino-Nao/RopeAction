@@ -21,4 +21,14 @@ public class ManualSpritesData : ScriptableObject
         public Sprite RopeControl;
     }
     public ButtonSpritesKeyBoardAndMouse m_keyboardAndMouse;
+
+    [Serializable]
+    public struct ButtonSpritesKeyNintendoSwitchJoyCon
+    {
+        public Sprite Move;
+        public Sprite Jump;
+        public Sprite RopeAttach;
+        public Sprite RopeControl;
+    }
+    public ButtonSpritesKeyNintendoSwitchJoyCon m_nintendoSwitchJoyCon;
 }

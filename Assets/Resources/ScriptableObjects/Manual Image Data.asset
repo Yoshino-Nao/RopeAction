@@ -22,3 +22,8 @@ MonoBehaviour:
     Jump: {fileID: 21300000, guid: 2fa99ef8337844142874c8e84169e8db, type: 3}
     RopeAttach: {fileID: 21300000, guid: 1569fc7bda8a23e41afed11442157939, type: 3}
     RopeControl: {fileID: 21300000, guid: 6d60ad6cad7882840a79d1f78cea6d2e, type: 3}
+  m_nintendoSwitchJoyCon:
+    Move: {fileID: 21300000, guid: fb8a428c5887f3e489434e5276cbb041, type: 3}
+    Jump: {fileID: 21300000, guid: a2c0fe393b0e99042a6a5d7a68b662db, type: 3}
+    RopeAttach: {fileID: 21300000, guid: f868996a191bb8f4cbce178bb8f5d9f3, type: 3}
+    RopeControl: {fileID: 21300000, guid: 8be7c1b6f0792e14a90ecff7b04939c4, type: 3}

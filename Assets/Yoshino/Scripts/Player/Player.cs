@@ -141,7 +141,7 @@ public class Player : MonoBehaviour
             m_moveDir = (m_playerForwardOn2d * h);
 
         }
-
+        
         Vector3 Vec = m_tf.InverseTransformDirection(m_moveDir);
         m_blendTreeValue = Vector2.MoveTowards(m_blendTreeValue, new Vector2(Vec.x, Vec.z), m_animSpeed * Time.deltaTime);
         DebugPrint.Print(string.Format("MoveVec{0}", m_moveDir));
