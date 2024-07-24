@@ -66,8 +66,8 @@ public class InputDeviceManager : MonoBehaviour
         // デバイス一覧を取得
         foreach (var device in InputSystem.devices)
         {
-            // デバイス名をログ出力
-            Debug.LogError(device.name);
+            // デバイスのパスをログ出力
+            Debug.LogError(device.path);
         }
     }
     private void OnSceneLoad(Scene scene,LoadSceneMode mode)
