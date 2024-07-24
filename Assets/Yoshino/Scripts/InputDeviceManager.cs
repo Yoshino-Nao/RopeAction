@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using UnityEngine.InputSystem;
+using UnityEngine.SceneManagement;
 
 public class InputDeviceManager : MonoBehaviour
 {
@@ -49,8 +50,9 @@ public class InputDeviceManager : MonoBehaviour
     }
     private void Start()
     {
-        // 初回のみ、必ず入力デバイスの種別検知を行ってコールバック発火
+        // 初回、またシーンが読み込まれたとき、必ず入力デバイスの種別検知を行ってコールバック発火
         StartCoroutine(InitializeDetection());
+        SceneManager.sceneLoaded += OnSceneLoad;
     }
     // Update is called once per frame
     void Update()
@@ -58,7 +60,10 @@ public class InputDeviceManager : MonoBehaviour
         // 検知の更新処理
         UpdateDeviceTypesDetection();
     }
-
+    private void OnSceneLoad(Scene scene,LoadSceneMode mode)
+    {
+        StartCoroutine(InitializeDetection());
+    }
     /// <summary>
     /// 入力デバイスの種別検知を初期化する
     /// </summary>
