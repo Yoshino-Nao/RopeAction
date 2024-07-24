@@ -117,7 +117,12 @@ public class Player : MonoBehaviour
     {
         float h;
         float v;
-
+        if (MPFT_NTD_MMControlSystem.ms_instance != null)
+        {
+            h = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.L_Analog_Y;
+            v = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.L_Analog_X;
+        }
+        else
         {
             h = Input.GetAxis("Horizontal");              // 入力デバイスの水平軸をhで定義
             v = Input.GetAxis("Vertical");                // 入力デバイスの垂直軸をvで定義
@@ -141,7 +146,7 @@ public class Player : MonoBehaviour
             m_moveDir = (m_playerForwardOn2d * h);
 
         }
-        
+
         Vector3 Vec = m_tf.InverseTransformDirection(m_moveDir);
         m_blendTreeValue = Vector2.MoveTowards(m_blendTreeValue, new Vector2(Vec.x, Vec.z), m_animSpeed * Time.deltaTime);
         DebugPrint.Print(string.Format("MoveVec{0}", m_moveDir));
@@ -237,12 +242,12 @@ public class Player : MonoBehaviour
         //        Vector3.up, ToAttachPointDir);
         m_tf.rotation =
             Quaternion.RotateTowards(
-            m_tf.rotation, 
+            m_tf.rotation,
             Quaternion.FromToRotation(
                 Vector3.up, ToAttachPointDir) *
                 Quaternion.LookRotation(Dir),
             m_rotateSpeed * Time.deltaTime);
-       
+
 
         //m_tf.rotation=Quaternion.RotateTowards(
         //    m_tf.rotation,Quaternion.LookRotation(Dir),
@@ -440,7 +445,7 @@ public class Player : MonoBehaviour
     {
         Jump();
     }
-    bool m_ropeButton = false;
+    private bool m_ropeButton = false;
     private void OnRopeAttach(InputAction.CallbackContext callbackContext)
     {
         if (m_hookShot.GetIsLoaded)
@@ -609,7 +614,7 @@ public class Player : MonoBehaviour
         stateMachine.AddTransition<GrabbingRopeOnAir, GrabbingRopeOnGround>(StateEvent.GrabbingRopeOnGround);
 
         stateMachine.SetStartState<GroundState>();
-        
+
         m_inputs = new GameInput();
 
         m_inputs.Player.Move.started += OnMove;
@@ -696,14 +701,18 @@ public class Player : MonoBehaviour
             //{
             //    Context.Launch();
             //}
-            if (Context.m_ropeButton)
+            if (MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.MM_TR) 
             {
                 Context.Launch();
             }
 
 
             //ジャンプ
-            if (Input.GetButtonDown("Jump"))
+            //if (Input.GetButtonDown("Jump"))
+            //{
+            //    Context.Jump();
+            //}
+            if (MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.B)
             {
                 Context.Jump();
             }
@@ -738,7 +747,7 @@ public class Player : MonoBehaviour
             //{
             //    Context.Launch();
             //}
-            if (Context.m_ropeButton)
+            if (MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.MM_TR)
             {
                 Context.Launch();
             }
@@ -779,26 +788,24 @@ public class Player : MonoBehaviour
             Context.RopeGrabbingOnGround();
 
             //ジャンプ
-            if (Input.GetButtonDown("Jump"))
+            if (MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.B)
             {
                 Context.Jump();
             }
-
+            
             //ロープを離す
             if (Input.GetKeyDown(KeyCode.V))
             {
                 Context.Release();
             }
-            if (Input.GetButtonDown("Jump"))
-            {
-                Context.Jump();
-            }
+
+           
             //ロープを解除
             //if (Input.GetMouseButtonDown(1))
             //{
             //    Context.Detach();
             //}
-            if (Context.m_ropeButton)
+            if (MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.MM_TR)
             {
                 Context.Detach();
             }
@@ -841,7 +848,7 @@ public class Player : MonoBehaviour
             //Context.Tarzan();
             //Context.MoveOnRopeGrabbingOnAir();
 
-            if (Input.GetButtonDown("Jump"))
+            if (MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.B)
             {
                 Context.RopeJump();
             }
@@ -850,7 +857,7 @@ public class Player : MonoBehaviour
             //{
             //    Context.Detach();
             //}
-            if (Context.m_ropeButton)
+            if (MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.MM_TR)
             {
                 Context.Detach();
             }
