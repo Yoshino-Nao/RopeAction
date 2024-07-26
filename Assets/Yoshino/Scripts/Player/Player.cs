@@ -51,7 +51,7 @@ public class Player : MonoBehaviour
 
     //InputSystem
     GameInput m_inputs;
-
+    [SerializeField] MPFT_NTD_MMControlSystem m_nintendoInputManager;
 
     //アニメーション関係
     private Animator m_animator;
@@ -565,7 +565,7 @@ public class Player : MonoBehaviour
     private void Awake()
     {
         //Application.targetFrameRate = 30;
-
+        Instantiate(m_nintendoInputManager.gameObject);
 
         m_capsuleCol = GetComponent<CapsuleCollider>();
         m_orgColHight = m_capsuleCol.height;
