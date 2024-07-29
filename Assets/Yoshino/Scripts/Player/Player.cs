@@ -119,22 +119,24 @@ public class Player : MonoBehaviour
         float v;
         if (MPFT_NTD_MMControlSystem.ms_instance != null)
         {
-            h = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.L_Analog_Y;
-            v = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.L_Analog_X;
-            DebugPrint.Print(string.Format("InputX:{0} Y:{1}", h, v));
+            h = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.L_Analog_X;
+            v = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.L_Analog_Y;
+            m_inputMoveDir.x = h;
+            m_inputMoveDir.y = v;
+
         }
         else
         {
             h = Input.GetAxis("Horizontal");              // 入力デバイスの水平軸をhで定義
             v = Input.GetAxis("Vertical");                // 入力デバイスの垂直軸をvで定義
+            h = m_inputMoveDir.x;
+            v = m_inputMoveDir.y;
 
 
 
 
             //m_inputMoveDir = new Vector3(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
         }
-        h = m_inputMoveDir.x;
-        v = m_inputMoveDir.y;
         //カメラが2Dか3Dか判定
         if (CameraChanger.ms_instance.m_is3DCamera)
         {
@@ -149,6 +151,7 @@ public class Player : MonoBehaviour
 
         }
 
+        DebugPrint.Print(string.Format("InputX:{0} Y:{1}", h, v));
         Vector3 Vec = m_tf.InverseTransformDirection(m_moveDir);
         m_blendTreeValue = Vector2.MoveTowards(m_blendTreeValue, new Vector2(Vec.x, Vec.z), m_animSpeed * Time.deltaTime);
         DebugPrint.Print(string.Format("MoveVec{0}", m_moveDir));

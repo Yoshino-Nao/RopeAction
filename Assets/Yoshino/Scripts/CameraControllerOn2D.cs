@@ -74,9 +74,14 @@ public class CameraController2D : MonoBehaviour
             h = Input.GetAxis("HorizontalArrow");
             v = Input.GetAxis("VerticalArrow");
         }
+
         h = m_cameraInputValue.x;
         v = m_cameraInputValue.y;
-
+        if (MPFT_NTD_MMControlSystem.ms_instance != null)
+        {
+            h = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.R_Analog_X;
+            v = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.R_Analog_Y;
+        }
         Vector3 Value = new Vector3(h, v, 0);
 
         //DebugPrint.Print(string.Format("nullCheck{0}", MPFT_NTD_MMControlSystem.ms_instance != null));
