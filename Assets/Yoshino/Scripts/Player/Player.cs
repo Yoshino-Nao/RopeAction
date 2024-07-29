@@ -128,12 +128,13 @@ public class Player : MonoBehaviour
             h = Input.GetAxis("Horizontal");              // 入力デバイスの水平軸をhで定義
             v = Input.GetAxis("Vertical");                // 入力デバイスの垂直軸をvで定義
 
-            h = m_inputMoveDir.x;
-            v = m_inputMoveDir.y;
+
 
 
             //m_inputMoveDir = new Vector3(Input.GetAxisRaw("Horizontal"), Input.GetAxisRaw("Vertical"));
         }
+        h = m_inputMoveDir.x;
+        v = m_inputMoveDir.y;
         //カメラが2Dか3Dか判定
         if (CameraChanger.ms_instance.m_is3DCamera)
         {
@@ -327,7 +328,7 @@ public class Player : MonoBehaviour
     /// <summary>
     /// ロープ解除
     /// </summary>
-    private void Detach()
+    public void Detach()
     {
         m_hookShot.DetachHook();
 
@@ -566,8 +567,8 @@ public class Player : MonoBehaviour
     private void Awake()
     {
         //Application.targetFrameRate = 30;
-        Instantiate(m_nintendoInputManager.gameObject);
-        
+        //Instantiate(m_nintendoInputManager.gameObject);
+
         m_capsuleCol = GetComponent<CapsuleCollider>();
         m_orgColHight = m_capsuleCol.height;
         m_orgVectColCenter = m_capsuleCol.center;
@@ -702,7 +703,7 @@ public class Player : MonoBehaviour
             //{
             //    Context.Launch();
             //}
-            if (MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.MM_TR) 
+            if (MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.MM_TR)
             {
                 Context.Launch();
             }
@@ -793,14 +794,14 @@ public class Player : MonoBehaviour
             {
                 Context.Jump();
             }
-            
+
             //ロープを離す
             if (Input.GetKeyDown(KeyCode.V))
             {
                 Context.Release();
             }
 
-           
+
             //ロープを解除
             //if (Input.GetMouseButtonDown(1))
             //{
