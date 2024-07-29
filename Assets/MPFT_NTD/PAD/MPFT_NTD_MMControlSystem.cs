@@ -17,6 +17,17 @@ public class MPFT_NTD_MMControlSystem : MonoBehaviour
             Destroy(gameObject);
         }
     }
+    private void OnEnable()
+    {
+        if (ms_instance == null)
+        {
+            ms_instance = this;
+        }
+    }
+    private void OnDisable()
+    {
+        ms_instance = null;
+    }
     public Text DebugText;
     public string DebugMes;
 

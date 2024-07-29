@@ -62,6 +62,7 @@ MonoBehaviour:
   m_jumpPower: 280
   m_playerForwardOn2d: {x: 1, y: 0, z: 0}
   m_grabTotalTime: 1
+  m_nintendoInputManager: {fileID: 3910363493570864208, guid: f78141fc39f5aed46aea6df33181c1bc, type: 3}
   m_hookShot: {fileID: 6120042638037030704, guid: 84bad8bc5bed30143862588472f8d262, type: 3}
   m_grabbable: {fileID: 0}
   m_isGrabbing: 0

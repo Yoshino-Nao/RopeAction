@@ -121,6 +121,7 @@ public class Player : MonoBehaviour
         {
             h = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.L_Analog_Y;
             v = MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.L_Analog_X;
+            DebugPrint.Print(string.Format("InputX:{0} Y:{1}", h, v));
         }
         else
         {
@@ -566,7 +567,7 @@ public class Player : MonoBehaviour
     {
         //Application.targetFrameRate = 30;
         Instantiate(m_nintendoInputManager.gameObject);
-
+        
         m_capsuleCol = GetComponent<CapsuleCollider>();
         m_orgColHight = m_capsuleCol.height;
         m_orgVectColCenter = m_capsuleCol.center;

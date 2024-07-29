@@ -64,11 +64,11 @@ public class InputDeviceManager : MonoBehaviour
         UpdateDeviceTypesDetection();
 
         // デバイス一覧を取得
-        foreach (var device in InputSystem.devices)
-        {
-            // デバイスのパスをログ出力
-            Debug.LogError(device.path);
-        }
+        //foreach (var device in InputSystem.devices)
+        //{
+        //    // デバイスのパスをログ出力
+        //    Debug.LogError(device.path);
+        //}
     }
     private void OnSceneLoad(Scene scene,LoadSceneMode mode)
     {
