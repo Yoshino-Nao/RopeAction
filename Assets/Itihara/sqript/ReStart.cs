@@ -7,10 +7,12 @@ using UnityEngine.SceneManagement;
 public class ReStart : MonoBehaviour
 {
     //初期座標
-    [SerializeField] private Vector3 SRPosition;
+     private Vector3 SRPosition;
     [SerializeField] private Transform Player;
+    Player player;
     void Start()
     {
+        player = FindObjectOfType<Player>();
         //プレイヤーの初期座標取得
         SRPosition = Player.position;
     }
@@ -22,6 +24,7 @@ public class ReStart : MonoBehaviour
 
             //SceneManager.LoadScene(m_sceneName);
             Player.position = SRPosition;
+            player.Detach();
         }else if(collision.collider.GetComponent<fallObject>()){
 
             Destroy(collision.gameObject);
