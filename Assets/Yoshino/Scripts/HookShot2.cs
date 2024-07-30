@@ -421,23 +421,38 @@ public class HookShot2 : MonoBehaviour
 
 
         //スペースキーで長さを縮小
-        if (m_inputs.Player.RopeShrink.IsPressed())
+
+        if (MPFT_NTD_MMControlSystem.ms_instance != null)
         {
-            cursor.ChangeLength(Mathf.Clamp(m_rope.restLength - hookExtendRetractSpeed * Time.deltaTime, min, max));
+            if (MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.Up)
+            {
+                cursor.ChangeLength(Mathf.Clamp(m_rope.restLength - hookExtendRetractSpeed * Time.deltaTime, min, max));
+            }
         }
-        if (MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.Up)
+        else
         {
-            cursor.ChangeLength(Mathf.Clamp(m_rope.restLength - hookExtendRetractSpeed * Time.deltaTime, min, max));
+            if (m_inputs.Player.RopeShrink.IsPressed())
+            {
+                cursor.ChangeLength(Mathf.Clamp(m_rope.restLength - hookExtendRetractSpeed * Time.deltaTime, min, max));
+            }
         }
         //シフトキーで長さを延長
-        if (m_inputs.Player.RopeLengthen.IsPressed())
+
+        if (MPFT_NTD_MMControlSystem.ms_instance != null)
         {
-            cursor.ChangeLength(Mathf.Clamp(m_rope.restLength + hookExtendRetractSpeed * Time.deltaTime, min, max));
+            if (MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.Down)
+            {
+                cursor.ChangeLength(Mathf.Clamp(m_rope.restLength + hookExtendRetractSpeed * Time.deltaTime, min, max));
+            }
         }
-        if (MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.Down)
+        else
         {
-            cursor.ChangeLength(Mathf.Clamp(m_rope.restLength + hookExtendRetractSpeed * Time.deltaTime, min, max));
+            if (m_inputs.Player.RopeLengthen.IsPressed())
+            {
+                cursor.ChangeLength(Mathf.Clamp(m_rope.restLength + hookExtendRetractSpeed * Time.deltaTime, min, max));
+            }
         }
+
         //DebugPrint.Print(string.Format("RopeLength{0}", m_rope.restLength));
         //マウスホイールで長さを変更
         cursor.ChangeLength(Mathf.Clamp(m_rope.restLength - hookExtendRetractSpeed * Wheel * Time.deltaTime, min, max));

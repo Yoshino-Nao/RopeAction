@@ -706,7 +706,7 @@ public class Player : MonoBehaviour
             //{
             //    Context.Launch();
             //}
-            if (MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.MM_TR)
+            if (MPFT_NTD_MMControlSystem.ms_instance.npadState.GetButtonDown(nn.hid.NpadButton.ZR))
             {
                 Context.Launch();
             }
@@ -752,7 +752,7 @@ public class Player : MonoBehaviour
             //{
             //    Context.Launch();
             //}
-            if (MPFT_NTD_MMControlSystem.ms_instance.SGGamePad.MM_TR)
+            if (MPFT_NTD_MMControlSystem.ms_instance.npadState.GetButtonDown(nn.hid.NpadButton.ZR))
             {
                 Context.Launch();
             }

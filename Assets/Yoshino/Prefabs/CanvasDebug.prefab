@@ -288,6 +288,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: ButtonManual
       objectReference: {fileID: 0}
+    - target: {fileID: 4824134307985958978, guid: b5f5dfbaca96ee546937c5b84358536e, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: fb8a428c5887f3e489434e5276cbb041, type: 3}
     - target: {fileID: 6038640307923284141, guid: b5f5dfbaca96ee546937c5b84358536e, type: 3}
       propertyPath: m_Pivot.x
       value: 0.5
@@ -368,6 +372,18 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6988055370460836212, guid: b5f5dfbaca96ee546937c5b84358536e, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 289e92991b930fb43bd1a72b390c22cb, type: 3}
+    - target: {fileID: 8931014461614785101, guid: b5f5dfbaca96ee546937c5b84358536e, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: a2c0fe393b0e99042a6a5d7a68b662db, type: 3}
+    - target: {fileID: 9009413611183363338, guid: b5f5dfbaca96ee546937c5b84358536e, type: 3}
+      propertyPath: m_Sprite
+      value: 
+      objectReference: {fileID: 21300000, guid: 8be7c1b6f0792e14a90ecff7b04939c4, type: 3}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
